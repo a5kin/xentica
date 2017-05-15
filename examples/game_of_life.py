@@ -1,5 +1,5 @@
 from hecate import core
-from hecate.init import patterns
+from hecate import seeds
 import moire
 
 
@@ -14,26 +14,26 @@ class GameOfLife(core.CellularAutomaton):
 
     def emit(self):
         for i in range(len(self.buffers)):
-            self.buffers_out[i] = self.state
+            self.buffers[i].state = self.main.state
 
     def absorb(self):
         neighbors_alive = core.IntegerVariable()
         for i in range(len(self.buffers)):
-            neighbors_alive += self.buffers_in[i]
+            neighbors_alive += self.neighbors[i].buffer.state
         is_born = (8 >> neighbors_alive) & 1
         is_sustain = (12 >> neighbors_alive) & 1
-        self.state = is_born | is_sustain
+        self.main.state = is_born | is_sustain
 
 
 class GOLExperiment(core.Experiment):
     """ Particular experiment, to be loaded at runtime in future """
-    seed = "HECATE FIRST EXPERIMENT"
-    dim = (960, 540)
-    init = patterns.BigBang(
+    word = "HECATE FIRST EXPERIMENT"
+    size = (960, 540)
+    seed = seeds.patterns.BigBang(
         pos=(320, 180),
         size=(100, 100),
         vals={
-            "state": patterns.RandInt(0, 1),
+            "state": seeds.random.RandInt(0, 1),
         }
     )
 
