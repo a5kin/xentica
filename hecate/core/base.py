@@ -1,3 +1,5 @@
+import numpy as np
+
 class BSCA(type):
     """
     Meta-class for CellularAutomaton.
@@ -14,4 +16,16 @@ class CellularAutomaton(metaclass=BSCA):
 
     """
     def __init__(self, experiment_class):
-        pass
+        self.viewport_buf = np.zeros((3, ), dtype=np.uint8)
+
+    def set_viewport(self, size):
+        w, h = size
+        self.viewport_buf = np.zeros((w * h * 3,), dtype=np.uint8)
+
+    def step(self):
+        self.viewport_buf = np.random.randint(0, 255,
+                                              self.viewport_buf.shape,
+                                              dtype=np.uint8)
+
+    def render(self):
+        return self.viewport_buf
