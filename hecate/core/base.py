@@ -16,6 +16,54 @@ class BSCA(type):
     and compiles it for future use.
 
     """
+    def __init__(cls, name, bases, namespace, **kwds1):
+        # hardcoded stuff
+        cls.dtype = np.uint8
+        cls.buffers = [0] * 9
+        cls.cuda_source = """
+            #define w {w}
+            #define h {h}
+            #define n {n}
+
+            __global__ void emit(unsigned char *fld) {
+
+                unsigned tid = threadIdx.x;
+                unsigned total_threads = gridDim.x * blockDim.x;
+                unsigned cta_start = blockDim.x * blockIdx.x;
+                unsigned i;
+
+                for (i = cta_start + tid; i < n; i += total_threads) {
+
+                    fld[i + n] = fld[i];
+
+                }
+
+            }
+
+            __global__ void absorb(unsigned char *fld) {
+
+                unsigned tid = threadIdx.x;
+                unsigned total_threads = gridDim.x * blockDim.x;
+                unsigned cta_start = blockDim.x * blockIdx.x;
+                unsigned i;
+
+                for (i = cta_start + tid; i < n; i += total_threads) {
+
+                    int x = i / h;
+                    int y = i % h;
+                    int xm1 = x - 1; if (xm1 < 0) xm1 = w + xm1;
+                    int xp1 = x + 1; if (xp1 >= w) xp1 = xp1 - w;
+                    int ym1 = y - 1; if (ym1 < 0) ym1 = h + ym1;
+                    int yp1 = y + 1; if (yp1 >= h) yp1 = yp1 - h;
+                    unsigned char s = fld[xm1 * h + ym1 + n] + fld[x * h + ym1 + n] + fld[xp1 * h + ym1 + n] +
+                                      fld[xm1 * h + y + n] + fld[xp1 * h + y + n] +
+                                      fld[xm1 * h + yp1 + n] + fld[x * h + yp1 + n] + fld[xp1 * h + yp1 + n];
+                    fld[i] = ((8 >> s) & 1) | ((12 >> s) & 1);
+
+                }
+
+            }
+        """
 
 
 class CellularAutomaton(metaclass=BSCA):
@@ -24,13 +72,17 @@ class CellularAutomaton(metaclass=BSCA):
 
     """
     def __init__(self, experiment_class):
-        self.dtype = np.uint8  # HARDCODED
-        self.buffers = [0] * 9  # HARDCODED
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
         self.size = experiment_class.size
         cells_total = functools.reduce(operator.mul, self.size)
         cells_total *= len(self.buffers) + 1
         self.cells_gpu = gpuarray.zeros((cells_total,), dtype=self.dtype)
+        source = self.cuda_source.replace("{n}", str(cells_total))
+        source = source.replace("{w}", str(self.size[0]))
+        source = source.replace("{h}", str(self.size[1]))
+        cuda_module = SourceModule(source)
+        self.emit_gpu = cuda_module.get_function("emit")
+        self.absorb_gpu = cuda_module.get_function("absorb")
 
     def set_viewport(self, size):
         self.width, self.height = w, h = size
@@ -38,6 +90,12 @@ class CellularAutomaton(metaclass=BSCA):
         self.img_gpu = gpuarray.to_gpu(self.frame_buf)
 
     def step(self):
+        self.emit_gpu(self.cells_gpu,
+                      block=self.cells_gpu._block,
+                      grid=self.cells_gpu._grid)
+        self.absorb_gpu(self.cells_gpu,
+                      block=self.cells_gpu._block,
+                      grid=self.cells_gpu._grid)
         self.frame_buf = np.random.randint(0, 255,
                                            self.frame_buf.shape,
                                            dtype=np.uint8)
