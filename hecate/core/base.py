@@ -8,6 +8,7 @@ import pycuda.driver as drv
 from pycuda.compiler import SourceModule
 import pycuda.gpuarray as gpuarray
 
+
 class BSCA(type):
     """
     Meta-class for CellularAutomaton.
@@ -58,7 +59,7 @@ class BSCA(type):
                     unsigned char s = fld[xm1 * h + ym1 + n] + fld[x * h + ym1 + n] + fld[xp1 * h + ym1 + n] +
                                       fld[xm1 * h + y + n] + fld[xp1 * h + y + n] +
                                       fld[xm1 * h + yp1 + n] + fld[x * h + yp1 + n] + fld[xp1 * h + yp1 + n];
-                    fld[i] = ((8 >> s) & 1) | ((12 >> s) & 1);
+                    fld[i] = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i];
 
                 }
 
@@ -76,7 +77,8 @@ class CellularAutomaton(metaclass=BSCA):
         self.size = experiment_class.size
         cells_total = functools.reduce(operator.mul, self.size)
         cells_total *= len(self.buffers) + 1
-        self.cells_gpu = gpuarray.zeros((cells_total,), dtype=self.dtype)
+        init_cells = np.random.randint(2, size=cells_total, dtype=self.dtype)
+        self.cells_gpu = gpuarray.to_gpu(init_cells)
         source = self.cuda_source.replace("{n}", str(cells_total))
         source = source.replace("{w}", str(self.size[0]))
         source = source.replace("{h}", str(self.size[1]))
@@ -86,19 +88,16 @@ class CellularAutomaton(metaclass=BSCA):
 
     def set_viewport(self, size):
         self.width, self.height = w, h = size
-        self.frame_buf = np.zeros((w * h * 3,), dtype=np.uint8)
-        self.img_gpu = gpuarray.to_gpu(self.frame_buf)
+        frame_buf = np.zeros((w * h * 3,), dtype=np.uint8)
+        self.img_gpu = gpuarray.to_gpu(frame_buf)
 
     def step(self):
-        self.emit_gpu(self.cells_gpu,
-                      block=self.cells_gpu._block,
-                      grid=self.cells_gpu._grid)
-        self.absorb_gpu(self.cells_gpu,
-                      block=self.cells_gpu._block,
-                      grid=self.cells_gpu._grid)
-        self.frame_buf = np.random.randint(0, 255,
-                                           self.frame_buf.shape,
-                                           dtype=np.uint8)
+        block, grid = self.cells_gpu._block, self.cells_gpu._grid
+        self.emit_gpu(self.cells_gpu, block=block, grid=grid)
+        self.absorb_gpu(self.cells_gpu, self.img_gpu, block=block, grid=grid)
 
     def render(self):
-        return self.frame_buf
+        frame = np.outer(self.cells_gpu.get(), np.asarray([255, 255, 255],
+                                                          dtype=np.uint8))
+        frame = frame.reshape((frame.shape[0] * 3,))
+        return frame
