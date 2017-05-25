@@ -22,13 +22,13 @@ class GameOfLife(core.CellularAutomaton):
             neighbors_alive += self.neighbors[i].buffer.state
         is_born = (8 >> neighbors_alive) & 1
         is_sustain = (12 >> neighbors_alive) & 1
-        self.main.state = is_born | is_sustain
+        self.main.state = is_born | is_sustain & self.main_state
 
 
 class GOLExperiment(core.Experiment):
     """ Particular experiment, to be loaded at runtime in future """
     word = "HECATE FIRST EXPERIMENT"
-    size = (960, 540)
+    size = (1920, 1080, )
     seed = seeds.patterns.BigBang(
         pos=(320, 180),
         size=(100, 100),
