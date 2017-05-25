@@ -50,15 +50,20 @@ class BSCA(type):
 
                 for (i = cta_start + tid; i < n; i += total_threads) {
 
-                    int x = i / h;
-                    int y = i % h;
+                    int x = i % w;
+                    int y = i / w;
                     int xm1 = x - 1; if (xm1 < 0) xm1 = w + xm1;
                     int xp1 = x + 1; if (xp1 >= w) xp1 = xp1 - w;
                     int ym1 = y - 1; if (ym1 < 0) ym1 = h + ym1;
                     int yp1 = y + 1; if (yp1 >= h) yp1 = yp1 - h;
-                    unsigned char s = fld[xm1 * h + ym1 + n] + fld[x * h + ym1 + n] + fld[xp1 * h + ym1 + n] +
-                                      fld[xm1 * h + y + n] + fld[xp1 * h + y + n] +
-                                      fld[xm1 * h + yp1 + n] + fld[x * h + yp1 + n] + fld[xp1 * h + yp1 + n];
+                    unsigned char s = fld[xm1 + ym1 * w + n] +
+                                      fld[x + ym1 * w + n] +
+                                      fld[xp1 + ym1 * w + n] +
+                                      fld[xm1 + y * w + n] +
+                                      fld[xp1 + y * w + n] +
+                                      fld[xm1 + yp1 * w + n] +
+                                      fld[x + yp1 * w + n] +
+                                      fld[xp1 + yp1 * w + n];
                     fld[i] = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i];
 
                 }
@@ -76,15 +81,15 @@ class CellularAutomaton(metaclass=BSCA):
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
         self.size = experiment_class.size
         cells_total = functools.reduce(operator.mul, self.size)
-        cells_total *= len(self.buffers) + 1
-        init_cells = np.random.randint(2, size=cells_total, dtype=self.dtype)
-        self.cells_gpu = gpuarray.to_gpu(init_cells)
         source = self.cuda_source.replace("{n}", str(cells_total))
         source = source.replace("{w}", str(self.size[0]))
         source = source.replace("{h}", str(self.size[1]))
         cuda_module = SourceModule(source)
         self.emit_gpu = cuda_module.get_function("emit")
         self.absorb_gpu = cuda_module.get_function("absorb")
+        cells_total *= len(self.buffers) + 1
+        init_cells = np.random.randint(2, size=cells_total, dtype=self.dtype)
+        self.cells_gpu = gpuarray.to_gpu(init_cells)
 
     def set_viewport(self, size):
         self.width, self.height = w, h = size
@@ -97,7 +102,4 @@ class CellularAutomaton(metaclass=BSCA):
         self.absorb_gpu(self.cells_gpu, self.img_gpu, block=block, grid=grid)
 
     def render(self):
-        frame = np.outer(self.cells_gpu.get(), np.asarray([255, 255, 255],
-                                                          dtype=np.uint8))
-        frame = frame.reshape((frame.shape[0] * 3,))
-        return frame
+        return self.cells_gpu.get() * 255
