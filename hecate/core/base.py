@@ -47,7 +47,7 @@ class BSCA(type):
 
             }
 
-            __global__ void absorb(unsigned char *fld, int *col) {
+            __global__ void absorb(unsigned char *fld, int3 *col) {
 
                 unsigned tid = threadIdx.x;
                 unsigned total_threads = gridDim.x * blockDim.x;
@@ -77,12 +77,29 @@ class BSCA(type):
                     int new_r = state * 255 * SMOOTH_FACTOR;
                     int new_g = state * 255 * SMOOTH_FACTOR;
                     int new_b = state * 255 * SMOOTH_FACTOR;
-                    int old_r = col[i * 3];
-                    int old_g = col[i * 3 + 1];
-                    int old_b = col[i * 3 + 2];
-                    col[i * 3] = max(min(new_r, old_r + FADE_IN), old_r - FADE_OUT);
-                    col[i * 3 + 1] = max(min(new_g, old_g + FADE_IN), old_g - FADE_OUT);
-                    col[i * 3 + 2] = max(min(new_b, old_b + FADE_IN), old_b - FADE_OUT);
+                    int3 old_col = col[i];
+                    new_r = max(min(new_r, old_col.x + FADE_IN), old_col.x - FADE_OUT);
+                    new_g = max(min(new_g, old_col.y + FADE_IN), old_col.y - FADE_OUT);
+                    new_b = max(min(new_b, old_col.z + FADE_IN), old_col.z - FADE_OUT);
+                    col[i] = make_int3(new_r, new_g, new_b);
+
+                }
+
+            }
+
+            __global__ void render(int3 *col, int *img) {
+
+                unsigned tid = threadIdx.x;
+                unsigned total_threads = gridDim.x * blockDim.x;
+                unsigned cta_start = blockDim.x * blockIdx.x;
+                unsigned i;
+
+                for (i = cta_start + tid; i < n; i += total_threads) {
+
+                    int3 c = col[i];
+                    img[i * 3] = c.x / SMOOTH_FACTOR;
+                    img[i * 3 + 1] = c.y / SMOOTH_FACTOR;
+                    img[i * 3 + 2] = c.z / SMOOTH_FACTOR;
 
                 }
 
@@ -108,7 +125,8 @@ class CellularAutomaton(metaclass=BSCA):
         cuda_module = SourceModule(source)
         self.emit_gpu = cuda_module.get_function("emit")
         self.absorb_gpu = cuda_module.get_function("absorb")
-        init_colors = np.zeros((cells_total * 3, ), dtype=np.uint32)
+        self.render_gpu = cuda_module.get_function("render")
+        init_colors = np.zeros((cells_total * 3, ), dtype=np.int32)
         self.colors_gpu = gpuarray.to_gpu(init_colors)
         cells_total *= len(self.buffers) + 1
         init_cells = np.random.randint(2, size=cells_total, dtype=self.dtype)
@@ -116,8 +134,7 @@ class CellularAutomaton(metaclass=BSCA):
 
     def set_viewport(self, size):
         self.width, self.height = w, h = size
-        # frame_buf = np.zeros((w * h * 3,), dtype=np.uint8)
-        # self.img_gpu = gpuarray.to_gpu(frame_buf)
+        self.img_gpu = gpuarray.zeros((w * h * 3), dtype=np.int32)
 
     def step(self):
         block, grid = self.cells_gpu._block, self.cells_gpu._grid
@@ -126,4 +143,6 @@ class CellularAutomaton(metaclass=BSCA):
                         block=block, grid=grid)
 
     def render(self):
-        return (self.colors_gpu.get() // self.smooth_factor).astype(np.uint8)
+        block, grid = self.img_gpu._block, self.img_gpu._grid
+        self.render_gpu(self.colors_gpu, self.img_gpu, block=block, grid=grid)
+        return self.img_gpu.get().astype(np.int8)
