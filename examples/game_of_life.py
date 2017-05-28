@@ -28,7 +28,10 @@ class GameOfLife(core.CellularAutomaton):
 class GOLExperiment(core.Experiment):
     """ Particular experiment, to be loaded at runtime in future """
     word = "HECATE FIRST EXPERIMENT"
-    size = (1920, 1080, )
+    size = (640, 360, )
+    zoom = 3
+    dx = 0
+    dy = 0
     seed = seeds.patterns.BigBang(
         pos=(320, 180),
         size=(100, 100),
