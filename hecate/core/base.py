@@ -78,25 +78,38 @@ class BSCA(type):
                     int new_g = state * 255 * SMOOTH_FACTOR;
                     int new_b = state * 255 * SMOOTH_FACTOR;
                     int3 old_col = col[i];
-                    new_r = max(min(new_r, old_col.x + FADE_IN), old_col.x - FADE_OUT);
-                    new_g = max(min(new_g, old_col.y + FADE_IN), old_col.y - FADE_OUT);
-                    new_b = max(min(new_b, old_col.z + FADE_IN), old_col.z - FADE_OUT);
+                    new_r = max(min(new_r, old_col.x + FADE_IN),
+                                old_col.x - FADE_OUT);
+                    new_g = max(min(new_g, old_col.y + FADE_IN),
+                                old_col.y - FADE_OUT);
+                    new_b = max(min(new_b, old_col.z + FADE_IN),
+                                old_col.z - FADE_OUT);
                     col[i] = make_int3(new_r, new_g, new_b);
 
                 }
 
             }
 
-            __global__ void render(int3 *col, int *img) {
+            __global__ void render(int3 *col, int *img, int zoom,
+                                   int dx, int dy, int width, int height) {
 
                 unsigned tid = threadIdx.x;
                 unsigned total_threads = gridDim.x * blockDim.x;
                 unsigned cta_start = blockDim.x * blockIdx.x;
                 unsigned i;
+                int nn = width * height;
 
-                for (i = cta_start + tid; i < n; i += total_threads) {
+                for (i = cta_start + tid; i < nn; i += total_threads) {
 
-                    int3 c = col[i];
+                    int x = (int) (((float) (i % width + dx)) / (float) zoom);
+                    int y = (int) (((float) (i / width + dy)) / (float) zoom);
+                    if (x < 0) x = w - (-x % w);
+                    if (x >= w) x = x % w;
+                    if (y < 0) y = h - (-y % h);
+                    if (y >= h) y = y % h;
+                    int ii = x + y * w;
+
+                    int3 c = col[ii];
                     img[i * 3] = c.x / SMOOTH_FACTOR;
                     img[i * 3 + 1] = c.y / SMOOTH_FACTOR;
                     img[i * 3 + 2] = c.z / SMOOTH_FACTOR;
@@ -115,6 +128,9 @@ class CellularAutomaton(metaclass=BSCA):
     def __init__(self, experiment_class):
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
         self.size = experiment_class.size
+        self.zoom = experiment_class.zoom
+        self.dx = experiment_class.dx
+        self.dy = experiment_class.dy
         cells_total = functools.reduce(operator.mul, self.size)
         source = self.cuda_source.replace("{n}", str(cells_total))
         source = source.replace("{w}", str(self.size[0]))
@@ -144,5 +160,9 @@ class CellularAutomaton(metaclass=BSCA):
 
     def render(self):
         block, grid = self.img_gpu._block, self.img_gpu._grid
-        self.render_gpu(self.colors_gpu, self.img_gpu, block=block, grid=grid)
+        self.render_gpu(self.colors_gpu, self.img_gpu,
+                        np.int32(self.zoom),
+                        np.int32(self.dx), np.int32(self.dy),
+                        np.int32(self.width), np.int32(self.height),
+                        block=block, grid=grid)
         return self.img_gpu.get().astype(np.int8)
