@@ -24,6 +24,12 @@ class GameOfLife(core.CellularAutomaton):
         is_sustain = (12 >> neighbors_alive) & 1
         self.main.state = is_born | is_sustain & self.main_state
 
+    def render(self):
+        r = self.main.state * 255
+        g = self.main.state * 255
+        b = self.main.state * 255
+        return (r, g, b)
+
 
 class GOLExperiment(core.Experiment):
     """ Particular experiment, to be loaded at runtime in future """
