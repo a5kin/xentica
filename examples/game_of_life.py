@@ -36,8 +36,7 @@ class GOLExperiment(core.Experiment):
     word = "HECATE FIRST EXPERIMENT"
     size = (640, 360, )
     zoom = 3
-    dx = 0
-    dy = 0
+    pos = [0, 0]
     seed = seeds.patterns.BigBang(
         pos=(320, 180),
         size=(100, 100),
