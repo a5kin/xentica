@@ -103,8 +103,8 @@ class BSCA(type):
 
                 for (i = cta_start + tid; i < nn; i += total_threads) {
 
-                    int x = (int) (((float) (i % width + dx)) / (float) zoom);
-                    int y = (int) (((float) (i / width + dy)) / (float) zoom);
+                    int x = (int) (((float) (i % width)) / (float) zoom) + dx;
+                    int y = (int) (((float) (i / width)) / (float) zoom) + dy;
                     if (x < 0) x = w - (-x % w);
                     if (x >= w) x = x % w;
                     if (y < 0) y = h - (-y % h);
@@ -132,8 +132,7 @@ class CellularAutomaton(metaclass=BSCA):
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
         self.size = experiment_class.size
         self.zoom = experiment_class.zoom
-        self.dx = experiment_class.dx
-        self.dy = experiment_class.dy
+        self.pos = experiment_class.pos
         # CUDA kernel
         cells_total = functools.reduce(operator.mul, self.size)
         source = self.cuda_source.replace("{n}", str(cells_total))
@@ -155,6 +154,11 @@ class CellularAutomaton(metaclass=BSCA):
         # bridge
         self.bridge = MoireBridge
 
+    def scroll(self, *args):
+        for i in range(len(args)):
+            delta = args[i]
+            self.pos[i] = (self.pos[i] + delta) % self.size[i]
+
     def set_viewport(self, size):
         self.width, self.height = w, h = size
         self.img_gpu = gpuarray.zeros((w * h * 3), dtype=np.int32)
@@ -169,7 +173,7 @@ class CellularAutomaton(metaclass=BSCA):
         block, grid = self.img_gpu._block, self.img_gpu._grid
         self.render_gpu(self.colors_gpu, self.img_gpu,
                         np.int32(self.zoom),
-                        np.int32(self.dx), np.int32(self.dy),
+                        np.int32(self.pos[0]), np.int32(self.pos[1]),
                         np.int32(self.width), np.int32(self.height),
                         block=block, grid=grid)
         return self.img_gpu.get().astype(np.int8)

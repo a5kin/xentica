@@ -7,3 +7,19 @@ class Bridge:
     @staticmethod
     def exit_app(ca, gui):
         gui.exit_app()
+
+    @staticmethod
+    def scroll_up(ca, gui):
+        ca.scroll(0, 1)
+
+    @staticmethod
+    def scroll_down(ca, gui):
+        ca.scroll(0, -1)
+
+    @staticmethod
+    def scroll_left(ca, gui):
+        ca.scroll(-1, 0)
+
+    @staticmethod
+    def scroll_right(ca, gui):
+        ca.scroll(1, 0)
