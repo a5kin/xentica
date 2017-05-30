@@ -23,3 +23,11 @@ class Bridge:
     @staticmethod
     def scroll_right(ca, gui):
         ca.scroll(1, 0)
+
+    @staticmethod
+    def zoom_in(ca, gui):
+        ca.zoomed(1)
+
+    @staticmethod
+    def zoom_out(ca, gui):
+        ca.zoomed(-1)

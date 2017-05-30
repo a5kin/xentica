@@ -159,6 +159,9 @@ class CellularAutomaton(metaclass=BSCA):
             delta = args[i]
             self.pos[i] = (self.pos[i] + delta) % self.size[i]
 
+    def zoomed(self, dval):
+        self.zoom = max(1, (self.zoom + dval))
+
     def set_viewport(self, size):
         self.width, self.height = w, h = size
         self.img_gpu = gpuarray.zeros((w * h * 3), dtype=np.int32)
