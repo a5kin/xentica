@@ -8,6 +8,8 @@ import pycuda.driver as drv
 from pycuda.compiler import SourceModule
 import pycuda.gpuarray as gpuarray
 
+from hecate.bridge import MoireBridge
+
 
 class BSCA(type):
     """
@@ -126,11 +128,13 @@ class CellularAutomaton(metaclass=BSCA):
 
     """
     def __init__(self, experiment_class):
+        # visuals
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
         self.size = experiment_class.size
         self.zoom = experiment_class.zoom
         self.dx = experiment_class.dx
         self.dy = experiment_class.dy
+        # CUDA kernel
         cells_total = functools.reduce(operator.mul, self.size)
         source = self.cuda_source.replace("{n}", str(cells_total))
         source = source.replace("{w}", str(self.size[0]))
@@ -139,6 +143,7 @@ class CellularAutomaton(metaclass=BSCA):
         source = source.replace("{fadeout}", str(self.fade_out))
         source = source.replace("{smooth}", str(self.smooth_factor))
         cuda_module = SourceModule(source)
+        # GPU arrays
         self.emit_gpu = cuda_module.get_function("emit")
         self.absorb_gpu = cuda_module.get_function("absorb")
         self.render_gpu = cuda_module.get_function("render")
@@ -147,6 +152,8 @@ class CellularAutomaton(metaclass=BSCA):
         cells_total *= len(self.buffers) + 1
         init_cells = np.random.randint(2, size=cells_total, dtype=self.dtype)
         self.cells_gpu = gpuarray.to_gpu(init_cells)
+        # bridge
+        self.bridge = MoireBridge
 
     def set_viewport(self, size):
         self.width, self.height = w, h = size
