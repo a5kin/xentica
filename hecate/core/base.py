@@ -133,6 +133,8 @@ class CellularAutomaton(metaclass=BSCA):
         self.size = experiment_class.size
         self.zoom = experiment_class.zoom
         self.pos = experiment_class.pos
+        self.speed = 1
+        self.paused = False
         # CUDA kernel
         cells_total = functools.reduce(operator.mul, self.size)
         source = self.cuda_source.replace("{n}", str(cells_total))
@@ -154,13 +156,16 @@ class CellularAutomaton(metaclass=BSCA):
         # bridge
         self.bridge = MoireBridge
 
-    def scroll(self, *args):
+    def move(self, *args):
         for i in range(len(args)):
             delta = args[i]
             self.pos[i] = (self.pos[i] + delta) % self.size[i]
 
-    def zoomed(self, dval):
+    def apply_zoom(self, dval):
         self.zoom = max(1, (self.zoom + dval))
+
+    def apply_speed(self, dval):
+        self.speed = max(1, (self.speed + dval))
 
     def set_viewport(self, size):
         self.width, self.height = w, h = size
