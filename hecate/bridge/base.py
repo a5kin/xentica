@@ -34,8 +34,12 @@ class Bridge:
 
     @staticmethod
     def speed_down(ca, gui):
-        ca.apply_speed(1)
+        ca.apply_speed(-1)
 
     @staticmethod
     def speed_up(ca, gui):
-        ca.apply_speed(-1)
+        ca.apply_speed(1)
+
+    @staticmethod
+    def toggle_pause(ca, gui):
+        ca.toggle_pause()

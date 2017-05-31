@@ -12,5 +12,6 @@ class MoireBridge:
         "-": Bridge.zoom_out,
         "[": Bridge.speed_down,
         "]": Bridge.speed_up,
+        "spacebar": Bridge.toggle_pause,
         "escape": Bridge.exit_app,
     }

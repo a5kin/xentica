@@ -135,6 +135,7 @@ class CellularAutomaton(metaclass=BSCA):
         self.pos = experiment_class.pos
         self.speed = 1
         self.paused = False
+        self.timestep = 0
         # CUDA kernel
         cells_total = functools.reduce(operator.mul, self.size)
         source = self.cuda_source.replace("{n}", str(cells_total))
@@ -167,15 +168,21 @@ class CellularAutomaton(metaclass=BSCA):
     def apply_speed(self, dval):
         self.speed = max(1, (self.speed + dval))
 
+    def toggle_pause(self):
+        self.paused = not self.paused
+
     def set_viewport(self, size):
         self.width, self.height = w, h = size
         self.img_gpu = gpuarray.zeros((w * h * 3), dtype=np.int32)
 
     def step(self):
+        if self.paused:
+            return
         block, grid = self.cells_gpu._block, self.cells_gpu._grid
         self.emit_gpu(self.cells_gpu, block=block, grid=grid)
         self.absorb_gpu(self.cells_gpu, self.colors_gpu,
                         block=block, grid=grid)
+        self.timestep += 1
 
     def render(self):
         block, grid = self.img_gpu._block, self.img_gpu._grid
