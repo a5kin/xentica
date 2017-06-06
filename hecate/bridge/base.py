@@ -43,3 +43,7 @@ class Bridge:
     @staticmethod
     def toggle_pause(ca, gui):
         ca.toggle_pause()
+
+    @staticmethod
+    def toggle_sysinfo(ca, gui):
+        gui.sysinfo.toggle()

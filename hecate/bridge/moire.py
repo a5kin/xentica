@@ -13,5 +13,6 @@ class MoireBridge:
         "[": Bridge.speed_down,
         "]": Bridge.speed_up,
         "spacebar": Bridge.toggle_pause,
+        "f12": Bridge.toggle_sysinfo,
         "escape": Bridge.exit_app,
     }
