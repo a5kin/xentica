@@ -1,4 +1,12 @@
 import random
+import numpy
+
+
+class LocalRandom:
+
+    def __init__(self, seed=None):
+        self.std = random.Random(seed)
+        self.np = numpy.random.RandomState(self.std.getrandbits(32))
 
 
 class RandInt:

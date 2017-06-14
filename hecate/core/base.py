@@ -9,6 +9,7 @@ from pycuda.compiler import SourceModule
 import pycuda.gpuarray as gpuarray
 
 from hecate.bridge import MoireBridge
+from hecate.seeds.random import LocalRandom
 
 
 class BSCA(type):
@@ -152,7 +153,10 @@ class CellularAutomaton(metaclass=BSCA):
         init_colors = np.zeros((cells_total * 3, ), dtype=np.int32)
         self.colors_gpu = gpuarray.to_gpu(init_colors)
         cells_total *= len(self.buffers) + 1
-        init_cells = np.random.randint(2, size=cells_total, dtype=self.dtype)
+        self.random = LocalRandom(experiment_class.word)
+        experiment_class.seed.random = self.random
+        init_cells = np.zeros((cells_total, ), dtype=self.dtype)
+        experiment_class.seed.generate(init_cells, self.size)
         self.cells_gpu = gpuarray.to_gpu(init_cells)
         # bridge
         self.bridge = MoireBridge
