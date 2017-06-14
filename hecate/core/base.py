@@ -74,7 +74,7 @@ class BSCA(type):
                                       fld[x + yp1 * w + n] +
                                       fld[xp1 + yp1 * w + n];
                     unsigned char state;
-                    state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i];
+                    state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
                     fld[i] = state;
 
                     int new_r = state * 255 * SMOOTH_FACTOR;

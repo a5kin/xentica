@@ -6,7 +6,8 @@ class LocalRandom:
 
     def __init__(self, seed=None):
         self.std = random.Random(seed)
-        self.np = numpy.random.RandomState(self.std.getrandbits(32))
+        np_seed = self.std.getrandbits(32)
+        self.np = numpy.random.RandomState(np_seed)
 
 
 class RandInt:

@@ -1,4 +1,4 @@
-import hecate.seeds.random
-import hecate.seeds.patterns
+from hecate.seeds import random
+from hecate.seeds import patterns
 
 __all__ = ['random', 'patterns', ]
