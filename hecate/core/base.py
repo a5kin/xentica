@@ -1,5 +1,6 @@
 import functools
 import operator
+import threading
 
 import numpy as np
 
@@ -25,7 +26,7 @@ class BSCA(type):
         cls.dtype = np.uint8
         cls.buffers = [0] * 9
         cls.fade_in = 255
-        cls.fade_out = 10
+        cls.fade_out = 255
         cls.smooth_factor = 1
         cls.cuda_source = """
             #define w {w}
@@ -35,7 +36,7 @@ class BSCA(type):
             #define FADE_OUT {fadeout}
             #define SMOOTH_FACTOR {smooth}
 
-            __global__ void emit(uchar1 *fld) {
+            __global__ void emit(unsigned char *fld) {
 
                 unsigned tid = threadIdx.x;
                 unsigned total_threads = gridDim.x * blockDim.x;
@@ -134,7 +135,7 @@ class CellularAutomaton(metaclass=BSCA):
         self.size = experiment_class.size
         self.zoom = experiment_class.zoom
         self.pos = experiment_class.pos
-        self.speed = 1
+        self.speed = 100
         self.paused = False
         self.timestep = 0
         # CUDA kernel
@@ -160,6 +161,8 @@ class CellularAutomaton(metaclass=BSCA):
         self.cells_gpu = gpuarray.to_gpu(init_cells)
         # bridge
         self.bridge = MoireBridge
+        # lock
+        self.lock = threading.Lock()
 
     def move(self, *args):
         for i in range(len(args)):
@@ -183,10 +186,11 @@ class CellularAutomaton(metaclass=BSCA):
         if self.paused:
             return
         block, grid = self.cells_gpu._block, self.cells_gpu._grid
-        self.emit_gpu(self.cells_gpu, block=block, grid=grid)
-        self.absorb_gpu(self.cells_gpu, self.colors_gpu,
-                        block=block, grid=grid)
-        self.timestep += 1
+        with self.lock:
+            self.emit_gpu(self.cells_gpu, block=block, grid=grid)
+            self.absorb_gpu(self.cells_gpu, self.colors_gpu,
+                            block=block, grid=grid)
+            self.timestep += 1
 
     def render(self):
         block, grid = self.img_gpu._block, self.img_gpu._grid
