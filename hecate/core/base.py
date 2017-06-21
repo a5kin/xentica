@@ -4,8 +4,7 @@ import threading
 
 import numpy as np
 
-import pycuda.autoinit
-import pycuda.driver as drv
+from pycuda.autoinit import context
 from pycuda.compiler import SourceModule
 import pycuda.gpuarray as gpuarray
 
@@ -60,12 +59,12 @@ class BSCA(type):
 
                 for (i = cta_start + tid; i < n; i += total_threads) {
 
-                    unsigned x = i % w;
-                    unsigned y = i / w;
-                    unsigned xm1 = x - 1; if (xm1 < 0) xm1 = w + xm1;
-                    unsigned xp1 = x + 1; if (xp1 >= w) xp1 = xp1 - w;
-                    unsigned ym1 = y - 1; if (ym1 < 0) ym1 = h + ym1;
-                    unsigned yp1 = y + 1; if (yp1 >= h) yp1 = yp1 - h;
+                    int x = i % w;
+                    int y = i / w;
+                    int xm1 = x - 1; if (xm1 < 0) xm1 = w + xm1;
+                    int xp1 = x + 1; if (xp1 >= w) xp1 = xp1 - w;
+                    int ym1 = y - 1; if (ym1 < 0) ym1 = h + ym1;
+                    int yp1 = y + 1; if (yp1 >= h) yp1 = yp1 - h;
                     unsigned char s = fld[xm1 + ym1 * w + n] +
                                       fld[x + ym1 * w + n] +
                                       fld[xp1 + ym1 * w + n] +
