@@ -3,6 +3,23 @@ import numpy as np
 from .random import LocalRandom
 
 
+class ValDict():
+    """
+    Wrapper over Python dictionary, to keep descriptors
+    along with regular values.
+
+    """
+    def __init__(self, d):
+        for k, v in d.items():
+            setattr(self.__class__, k, v)
+        self.__class__.random = LocalRandom()  # TODO: get RNG from owner
+
+    def items(self):
+        for k, v in self.__class__.__dict__.items():
+            v = getattr(self.__class__, k)
+            yield k, v
+
+
 class BigBang:
     """
     One of random init patterns described in The Concept.
@@ -13,8 +30,8 @@ class BigBang:
     def __init__(self, vals, pos=None, size=None):
         self.pos = np.asarray(pos)
         self.size = np.asarray(size)
-        self.vals = vals
         self.random = LocalRandom()
+        self.vals = ValDict(vals)
 
     def generate(self, cells, cells_num, index_to_coord, pack_state):
         for i in range(cells_num):

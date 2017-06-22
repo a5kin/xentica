@@ -16,5 +16,5 @@ class RandInt:
         self.min_val = min_val
         self.max_val = max_val
 
-    def __get__(self, obj, objtype):
-        return random.randint(self.min_val, self.max_val)
+    def __get__(self, instance, owner):
+        return owner.random.std.randint(self.min_val, self.max_val)
