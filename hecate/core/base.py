@@ -122,6 +122,10 @@ class BSCA(type):
             }
         """
 
+        def index_to_coord(self, i):
+            return (i % self.size[0], i // self.size[0])
+        cls.index_to_coord = index_to_coord
+
 
 class CellularAutomaton(metaclass=BSCA):
     """
@@ -134,12 +138,12 @@ class CellularAutomaton(metaclass=BSCA):
         self.size = experiment_class.size
         self.zoom = experiment_class.zoom
         self.pos = experiment_class.pos
-        self.speed = 100
+        self.speed = 1
         self.paused = False
         self.timestep = 0
         # CUDA kernel
-        cells_total = functools.reduce(operator.mul, self.size)
-        source = self.cuda_source.replace("{n}", str(cells_total))
+        cells_num = functools.reduce(operator.mul, self.size)
+        source = self.cuda_source.replace("{n}", str(cells_num))
         source = source.replace("{w}", str(self.size[0]))
         source = source.replace("{h}", str(self.size[1]))
         source = source.replace("{fadein}", str(self.fade_in))
@@ -150,13 +154,14 @@ class CellularAutomaton(metaclass=BSCA):
         self.emit_gpu = cuda_module.get_function("emit")
         self.absorb_gpu = cuda_module.get_function("absorb")
         self.render_gpu = cuda_module.get_function("render")
-        init_colors = np.zeros((cells_total * 3, ), dtype=np.int32)
+        init_colors = np.zeros((cells_num * 3, ), dtype=np.int32)
         self.colors_gpu = gpuarray.to_gpu(init_colors)
-        cells_total *= len(self.buffers) + 1
+        cells_total = cells_num * len(self.buffers) + 1
         self.random = LocalRandom(experiment_class.word)
         experiment_class.seed.random = self.random
         init_cells = np.zeros((cells_total, ), dtype=self.dtype)
-        experiment_class.seed.generate(init_cells, self.size)
+        experiment_class.seed.generate(init_cells, cells_num,
+                                       self.index_to_coord)
         self.cells_gpu = gpuarray.to_gpu(init_cells)
         # bridge
         self.bridge = MoireBridge

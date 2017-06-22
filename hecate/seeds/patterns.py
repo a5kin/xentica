@@ -1,3 +1,5 @@
+import numpy as np
+
 from .random import LocalRandom
 
 
@@ -8,11 +10,14 @@ class BigBang:
     It's unclear yet, should we inherit it from some base pattern class.
 
     """
-    def __init__(self, pos, size, vals):
-        self.pos = pos
-        self.size = size
+    def __init__(self, vals, pos=None, size=None):
+        self.pos = np.asarray(pos)
+        self.size = np.asarray(size)
         self.vals = vals
         self.random = LocalRandom()
 
-    def generate(self, cells, field_size):
-        cells += self.random.np.randint(2, size=cells.shape, dtype=cells.dtype)
+    def generate(self, cells, cells_num, index_to_coord):
+        for i in range(cells_num):
+            coord = np.asarray(index_to_coord(i))
+            if all(coord >= self.pos) and all(coord < self.pos + self.size):
+                cells[i] = 1
