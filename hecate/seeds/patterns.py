@@ -16,8 +16,11 @@ class BigBang:
         self.vals = vals
         self.random = LocalRandom()
 
-    def generate(self, cells, cells_num, index_to_coord):
+    def generate(self, cells, cells_num, index_to_coord, pack_state):
         for i in range(cells_num):
             coord = np.asarray(index_to_coord(i))
             if all(coord >= self.pos) and all(coord < self.pos + self.size):
-                cells[i] = 1
+                state = {}
+                for name, val in self.vals.items():
+                    state[name] = val
+                cells[i] = pack_state(state)

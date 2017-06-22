@@ -126,6 +126,10 @@ class BSCA(type):
             return (i % self.size[0], i // self.size[0])
         cls.index_to_coord = index_to_coord
 
+        def pack_state(self, state):
+            return state['state']
+        cls.pack_state = pack_state
+
 
 class CellularAutomaton(metaclass=BSCA):
     """
