@@ -3,10 +3,14 @@ import numpy as np
 from .random import LocalRandom
 
 
-class ValDict():
+class ValDictMeta(type):
+    pass
+
+
+class ValDict(metaclass=ValDictMeta):
     """
     Wrapper over Python dictionary, to keep descriptors
-    along with regular values.
+    along with regular values. READONLY.
 
     """
     def __init__(self, d):
@@ -18,6 +22,12 @@ class ValDict():
         for k, v in self.__class__.__dict__.items():
             v = getattr(self.__class__, k)
             yield k, v
+
+    def __getitem__(self, key):
+        return getattr(self.__class__, key)
+
+    def __setitem__(self, key, val):
+        raise NotImplementedError
 
 
 class BigBang:
