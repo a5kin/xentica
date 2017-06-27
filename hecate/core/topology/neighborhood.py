@@ -7,4 +7,3 @@ class Neighborhood:
 
 class MooreNeighborhood(Neighborhood):
     pass
-

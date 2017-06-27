@@ -7,4 +7,3 @@ class Border:
 
 class TorusBorder(Border):
     pass
-
