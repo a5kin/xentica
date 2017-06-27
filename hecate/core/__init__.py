@@ -17,6 +17,7 @@ __all__ = [
     'CellularAutomaton',
     'IntegerProperty',
     'OrthogonalLattice',
+    'MooreNeighborhood',
     'TorusBorder',
     'Experiment',
 ]
