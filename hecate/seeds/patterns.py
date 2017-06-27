@@ -13,18 +13,24 @@ class ValDict(metaclass=ValDictMeta):
     along with regular values. READONLY.
 
     """
-    def __init__(self, d):
-        for k, v in d.items():
-            setattr(self.__class__, k, v)
-        self.__class__.random = LocalRandom()  # TODO: get RNG from owner
+    def __init__(self, d, parent=None):
+        self._d = d
+        self.parent = parent
+        if parent is None:
+            self.parent = self
+            self.random = LocalRandom()
 
     def items(self):
-        for k, v in self.__class__.__dict__.items():
-            v = getattr(self.__class__, k)
+        for k in self._d.keys():
+            v = self[k]
             yield k, v
 
     def __getitem__(self, key):
-        return getattr(self.__class__, key)
+        if key in self._d:
+            if hasattr(self._d[key], '__get__'):
+                return self._d[key].__get__(self.parent, self.parent.__class__)
+            return self._d[key]
+        raise KeyError(key)
 
     def __setitem__(self, key, val):
         raise NotImplementedError
@@ -41,7 +47,7 @@ class BigBang:
         self.pos = np.asarray(pos)
         self.size = np.asarray(size)
         self.random = LocalRandom()
-        self.vals = ValDict(vals)
+        self.vals = ValDict(vals, self)
 
     def generate(self, cells, cells_num, index_to_coord, pack_state):
         for i in range(cells_num):
