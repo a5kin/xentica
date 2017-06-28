@@ -1,6 +1,9 @@
 import unittest
 
+import numpy as np
+
 from hecate.seeds.patterns import ValDict
+from hecate.seeds.patterns import BigBang
 from hecate.seeds.random import RandInt
 
 
@@ -39,3 +42,41 @@ class TestValDict(unittest.TestCase):
         vd = ValDict({'s': 2})
         with self.assertRaises(KeyError):
             vd['a']
+
+    def test_items(self):
+        d = {'a': 2, 's': RandInt(11, 23), 'd': 3.3}
+        vd = ValDict(d)
+        for k, v in vd.items():
+            if k == 'a':
+                self.assertEqual(v, 2, "Wrong constant value.")
+            elif k == 'b':
+                self.assertGreaterEqual(v, 11, "Wrong random value.")
+                self.assertLessEqual(v, 23, "Wrong random value.")
+
+    def test_incorrect_access(self):
+        with self.assertRaises(NotImplementedError):
+            vd = ValDict({})
+            vd['a'] = 2
+
+
+class TestBigBang(unittest.TestCase):
+
+    def index_to_coord(self, i):
+        return (i % 100, i // 100)
+
+    def pack_state(self, state):
+        return state['s']
+
+    def test_2d(self):
+        pos = (32, 20)
+        size = (10, 10)
+        vals = {'s': RandInt(0, 1)}
+        bb = BigBang(pos=pos, size=size, vals=vals)
+        cells = np.zeros((10000, ), dtype=np.int32)
+        bb.generate(cells, 10000, self.index_to_coord, self.pack_state)
+        for i in np.where(cells == 1)[0]:
+            x, y = self.index_to_coord(i)
+            self.assertGreaterEqual(x, pos[0], "Wrong right bound.")
+            self.assertGreaterEqual(y, pos[1], "Wrong upper bound.")
+            self.assertLessEqual(x, size[0] + pos[0], "Wrong left bound.")
+            self.assertLessEqual(y, size[1] + pos[1], "Wrong lower bound.")
