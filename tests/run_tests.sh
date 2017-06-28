@@ -1,3 +1,5 @@
 #!/bin/bash
 cd ..
-python3 -m unittest discover -s tests
+coverage run --source hecate -m unittest discover -s tests
+echo ""
+coverage report -m
