@@ -80,3 +80,17 @@ class TestBigBang(unittest.TestCase):
             self.assertGreaterEqual(y, pos[1], "Wrong upper bound.")
             self.assertLessEqual(x, size[0] + pos[0], "Wrong left bound.")
             self.assertLessEqual(y, size[1] + pos[1], "Wrong lower bound.")
+
+    def test_random_size(self):
+        with self.assertRaises(NotImplementedError):
+            vals = {'s': RandInt(0, 1)}
+            bb = BigBang(pos=(10, 10), vals=vals)
+            cells = np.zeros((10000, ), dtype=np.int32)
+            bb.generate(cells, 10000, self.index_to_coord, self.pack_state)
+
+    def test_random_pos(self):
+        with self.assertRaises(NotImplementedError):
+            vals = {'s': RandInt(0, 1)}
+            bb = BigBang(size=(10, 10), vals=vals)
+            cells = np.zeros((10000, ), dtype=np.int32)
+            bb.generate(cells, 10000, self.index_to_coord, self.pack_state)

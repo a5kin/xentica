@@ -44,6 +44,10 @@ class BigBang:
 
     """
     def __init__(self, vals, pos=None, size=None):
+        if pos is None:
+            raise NotImplementedError
+        if size is None:
+            raise NotImplementedError
         self.pos = np.asarray(pos)
         self.size = np.asarray(size)
         self.random = LocalRandom()
