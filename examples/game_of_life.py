@@ -1,6 +1,5 @@
 from hecate import core
 from hecate import seeds
-import moire
 
 
 class GameOfLife(core.CellularAutomaton):
@@ -47,6 +46,7 @@ class GOLExperiment(core.Experiment):
 
 
 if __name__ == "__main__":
+    import moire
     ca = GameOfLife(GOLExperiment)
     gui = moire.GUI(runnable=ca)
     gui.run()
