@@ -73,7 +73,8 @@ class TestBigBang(unittest.TestCase):
         vals = {'s': RandInt(0, 1)}
         bb = BigBang(pos=pos, size=size, vals=vals)
         cells = np.zeros((10000, ), dtype=np.int32)
-        bb.generate(cells, 10000, self.index_to_coord, self.pack_state)
+        bb.generate(cells, 10000, (100, 100),
+                    self.index_to_coord, self.pack_state)
         for i in np.where(cells == 1)[0]:
             x, y = self.index_to_coord(i)
             self.assertGreaterEqual(x, pos[0], "Wrong right bound.")
@@ -82,15 +83,22 @@ class TestBigBang(unittest.TestCase):
             self.assertLessEqual(y, size[1] + pos[1], "Wrong lower bound.")
 
     def test_random_size(self):
-        with self.assertRaises(NotImplementedError):
-            vals = {'s': RandInt(0, 1)}
-            bb = BigBang(pos=(10, 10), vals=vals)
-            cells = np.zeros((10000, ), dtype=np.int32)
-            bb.generate(cells, 10000, self.index_to_coord, self.pack_state)
+        vals = {'s': RandInt(0, 1)}
+        bb = BigBang(pos=(10, 10), vals=vals)
+        cells = np.zeros((10000, ), dtype=np.int32)
+        bb.generate(cells, 10000, (100, 100),
+                    self.index_to_coord, self.pack_state)
 
     def test_random_pos(self):
-        with self.assertRaises(NotImplementedError):
-            vals = {'s': RandInt(0, 1)}
-            bb = BigBang(size=(10, 10), vals=vals)
-            cells = np.zeros((10000, ), dtype=np.int32)
-            bb.generate(cells, 10000, self.index_to_coord, self.pack_state)
+        vals = {'s': RandInt(0, 1)}
+        bb = BigBang(size=(10, 10), vals=vals)
+        cells = np.zeros((10000, ), dtype=np.int32)
+        bb.generate(cells, 10000, (100, 100),
+                    self.index_to_coord, self.pack_state)
+
+    def test_random_full(self):
+        vals = {'s': RandInt(0, 1)}
+        bb = BigBang(vals=vals)
+        cells = np.zeros((10000, ), dtype=np.int32)
+        bb.generate(cells, 10000, (100, 100),
+                    self.index_to_coord, self.pack_state)

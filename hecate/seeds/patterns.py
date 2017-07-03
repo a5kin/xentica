@@ -44,16 +44,21 @@ class BigBang:
 
     """
     def __init__(self, vals, pos=None, size=None):
-        if pos is None:
-            raise NotImplementedError
-        if size is None:
-            raise NotImplementedError
-        self.pos = np.asarray(pos)
-        self.size = np.asarray(size)
+        self.pos = np.asarray(pos) if pos else None
+        self.size = np.asarray(size) if size else None
         self.random = LocalRandom()
         self.vals = ValDict(vals, self)
 
-    def generate(self, cells, cells_num, index_to_coord, pack_state):
+    def generate(self, cells, cells_num, field_size,
+                 index_to_coord, pack_state):
+        if self.size is None:
+            # TODO: size / pos interdependence
+            self.size = np.asarray((self.random.std.randint(1, field_size[0]),
+                                    self.random.std.randint(1, field_size[1])))
+        if self.pos is None:
+            # TODO: size / pos interdependence
+            self.pos = np.asarray((self.random.std.randint(1, field_size[0]),
+                                   self.random.std.randint(1, field_size[1])))
         for i in range(cells_num):
             coord = np.asarray(index_to_coord(i))
             if all(coord >= self.pos) and all(coord < self.pos + self.size):
