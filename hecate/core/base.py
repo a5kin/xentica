@@ -209,4 +209,4 @@ class CellularAutomaton(metaclass=BSCA):
                             np.int32(self.pos[0]), np.int32(self.pos[1]),
                             np.int32(self.width), np.int32(self.height),
                             block=block, grid=grid)
-            return self.img_gpu.get().astype(np.int8)
+            return self.img_gpu.get().astype(np.uint8)

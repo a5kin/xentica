@@ -15,7 +15,7 @@ class TestCellularAutomaton(unittest.TestCase):
             ca = GameOfLife(GOLExperiment)
             for j in range(self.num_steps):
                 ca.step()
-            self.assertEqual(1172, np.sum(ca.cells_gpu.get()),
+            self.assertEqual(584, np.sum(ca.cells_gpu.get()[:ca.cells_num]),
                              "Wrong field checksum.")
 
     def test_multiple_ca(self):
@@ -24,7 +24,18 @@ class TestCellularAutomaton(unittest.TestCase):
         for j in range(self.num_steps):
             ca1.step()
             ca2.step()
-        self.assertEqual(1172, np.sum(ca1.cells_gpu.get()),
+        self.assertEqual(584, np.sum(ca1.cells_gpu.get()[:ca1.cells_num]),
                          "Wrong field checksum (CA #1).")
-        self.assertEqual(1172, np.sum(ca2.cells_gpu.get()),
+        self.assertEqual(584, np.sum(ca2.cells_gpu.get()[:ca2.cells_num]),
                          "Wrong field checksum (CA #2).")
+
+    def test_render(self):
+        experiment = GOLExperiment
+        experiment.zoom = 1
+        ca = GameOfLife(experiment)
+        ca.set_viewport(experiment.size)
+        for j in range(self.num_steps):
+            ca.step()
+        img = ca.render()
+        self.assertEqual(584 * 3, np.sum(img / 255),
+                         "Wrong image checksum.")
