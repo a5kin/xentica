@@ -39,3 +39,18 @@ class TestCellularAutomaton(unittest.TestCase):
         img = ca.render()
         self.assertEqual(584 * 3, np.sum(img / 255),
                          "Wrong image checksum.")
+
+    def test_pause(self):
+        ca = GameOfLife(GOLExperiment)
+        ca.paused = False
+        checksum_before = np.sum(ca.cells_gpu.get()[:ca.cells_num])
+        ca.step()
+        checksum_after = np.sum(ca.cells_gpu.get()[:ca.cells_num])
+        self.assertNotEqual(checksum_before, checksum_after,
+                            "CA is paused.")
+        ca.paused = True
+        checksum_before = checksum_after
+        ca.step()
+        checksum_after = np.sum(ca.cells_gpu.get()[:ca.cells_num])
+        self.assertEqual(checksum_before, checksum_after,
+                            "CA is not paused.")
