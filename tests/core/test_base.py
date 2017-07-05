@@ -53,4 +53,4 @@ class TestCellularAutomaton(unittest.TestCase):
         ca.step()
         checksum_after = np.sum(ca.cells_gpu.get()[:ca.cells_num])
         self.assertEqual(checksum_before, checksum_after,
-                            "CA is not paused.")
+                         "CA is not paused.")
