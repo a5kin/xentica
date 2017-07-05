@@ -2,7 +2,7 @@ class Bridge:
 
     @staticmethod
     def noop(ca, gui):
-        print("The action is not impelemented, passing by...")
+        pass
 
     @staticmethod
     def exit_app(ca, gui):
