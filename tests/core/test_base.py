@@ -68,3 +68,15 @@ class TestCellularAutomaton(unittest.TestCase):
         self.assertEqual(584, np.sum(ca2.cells_gpu.get()[:ca2.cells_num]),
                          "Wrong field checksum.")
         os.remove("test.ca")
+
+    def test_load_random(self):
+        ca1 = GameOfLife(GOLExperiment)
+        ca1.save("test.ca")
+        ca2 = GameOfLife(GOLExperiment)
+        ca2.load("test.ca")
+        self.assertEqual(ca1.random.std.randint(1, 1000),
+                         ca2.random.std.randint(1, 1000),
+                         "Wrong standard RNG state.")
+        self.assertEqual(ca1.random.np.randint(1, 1000),
+                         ca2.random.np.randint(1, 1000),
+                         "Wrong numpy RNG state.")

@@ -9,6 +9,10 @@ class LocalRandom:
         np_seed = self.std.getrandbits(32)
         self.np = numpy.random.RandomState(np_seed)
 
+    def load(self, rng):
+        self.std = rng.std
+        self.np = rng.np
+
 
 class RandInt:
 

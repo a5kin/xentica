@@ -226,4 +226,4 @@ class CellularAutomaton(metaclass=BSCA):
             ca_state = pickle.load(f)
             self.cells_gpu = gpuarray.to_gpu(ca_state['cells'])
             self.colors_gpu = gpuarray.to_gpu(ca_state['colors'])
-            self.random = ca_state['random']
+            self.random.load(ca_state['random'])
