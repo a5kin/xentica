@@ -80,3 +80,4 @@ class TestCellularAutomaton(unittest.TestCase):
         self.assertEqual(ca1.random.np.randint(1, 1000),
                          ca2.random.np.randint(1, 1000),
                          "Wrong numpy RNG state.")
+        os.remove("test.ca")
