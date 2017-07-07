@@ -1,6 +1,7 @@
 import functools
 import operator
 import threading
+import pickle
 
 import numpy as np
 
@@ -210,3 +211,19 @@ class CellularAutomaton(metaclass=BSCA):
                             np.int32(self.width), np.int32(self.height),
                             block=block, grid=grid)
             return self.img_gpu.get().astype(np.uint8)
+
+    def save(self, filename):
+        with open(filename, "wb") as f:
+            ca_state = {
+                "cells": self.cells_gpu.get(),
+                "colors": self.colors_gpu.get(),
+                "random": self.random,
+            }
+            pickle.dump(ca_state, f)
+
+    def load(self, filename):
+        with open(filename, "rb") as f:
+            ca_state = pickle.load(f)
+            self.cells_gpu = gpuarray.to_gpu(ca_state['cells'])
+            self.colors_gpu = gpuarray.to_gpu(ca_state['colors'])
+            self.random = ca_state['random']

@@ -1,4 +1,5 @@
 import unittest
+import os
 
 import numpy as np
 
@@ -54,3 +55,16 @@ class TestCellularAutomaton(unittest.TestCase):
         checksum_after = np.sum(ca.cells_gpu.get()[:ca.cells_num])
         self.assertEqual(checksum_before, checksum_after,
                          "CA is not paused.")
+
+    def test_save_load(self):
+        ca1 = GameOfLife(GOLExperiment)
+        for i in range(self.num_steps // 2):
+            ca1.step()
+        ca1.save("test.ca")
+        ca2 = GameOfLife(GOLExperiment)
+        ca2.load("test.ca")
+        for i in range(self.num_steps // 2):
+            ca2.step()
+        self.assertEqual(584, np.sum(ca2.cells_gpu.get()[:ca2.cells_num]),
+                         "Wrong field checksum.")
+        os.remove("test.ca")
