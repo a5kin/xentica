@@ -36,18 +36,25 @@ class ValDict(metaclass=ValDictMeta):
         raise NotImplementedError
 
 
-class BigBang:
+class RandomPattern:
     """
-    One of random init patterns described in The Concept.
+    Base class for random patterns.
 
-    It's unclear yet, should we inherit it from some base pattern class.
+    """
+    def __init__(self, vals):
+        self.random = LocalRandom()
+        self.vals = ValDict(vals, self)
+
+
+class BigBang(RandomPattern):
+    """
+    Init pattern : small area is initialized with random values.
 
     """
     def __init__(self, vals, pos=None, size=None):
         self.pos = np.asarray(pos) if pos else None
         self.size = np.asarray(size) if size else None
-        self.random = LocalRandom()
-        self.vals = ValDict(vals, self)
+        super(BigBang, self).__init__(vals)
 
     def generate(self, cells, cells_num, field_size,
                  index_to_coord, pack_state):
@@ -66,3 +73,17 @@ class BigBang:
                 for name, val in self.vals.items():
                     state[name] = val
                 cells[i] = pack_state(state)
+
+
+class PrimordialSoup(RandomPattern):
+    """
+    Init pattern : the entire field is initialized with random values.
+
+    """
+    def generate(self, cells, cells_num, field_size,
+                 index_to_coord, pack_state):
+        for i in range(cells_num):
+            state = {}
+            for name, val in self.vals.items():
+                state[name] = val
+            cells[i] = pack_state(state)
