@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 
 from hecate.seeds.patterns import ValDict
-from hecate.seeds.patterns import BigBang
-from hecate.seeds.random import RandInt
+from hecate.seeds.patterns import BigBang, PrimordialSoup
+from hecate.seeds.random import RandInt, LocalRandom
 
 
 class TestValDict(unittest.TestCase):
@@ -102,3 +102,22 @@ class TestBigBang(unittest.TestCase):
         cells = np.zeros((10000, ), dtype=np.int32)
         bb.generate(cells, 10000, (100, 100),
                     self.index_to_coord, self.pack_state)
+
+
+class TestPrimordialSoup(unittest.TestCase):
+
+    def index_to_coord(self, i):
+        return (i % 100, i // 100)
+
+    def pack_state(self, state):
+        return state['s']
+
+    def test_2d(self):
+        vals = {'s': RandInt(0, 1)}
+        seed = PrimordialSoup(vals=vals)
+        cells = np.zeros((10000, ), dtype=np.int32)
+        seed.random = LocalRandom("test")
+        seed.generate(cells, 10000, (100, 100),
+                      self.index_to_coord, self.pack_state)
+        self.assertEqual(np.sum(cells[:10000]), 5026,
+                         "Wrong field checksum.")
