@@ -45,6 +45,19 @@ class GOLExperiment(core.Experiment):
     )
 
 
+class GOLExperiment2(core.Experiment):
+    """ Experiment initialized with Primordial Soup pattern. """
+    word = "HECATE FIRST EXPERIMENT"
+    size = (640, 360, )
+    zoom = 3
+    pos = [0, 0]
+    seed = seeds.patterns.PrimordialSoup(
+        vals={
+            "state": seeds.random.RandInt(0, 1),
+        }
+    )
+
+
 if __name__ == "__main__":
     import moire
     ca = GameOfLife(GOLExperiment)
