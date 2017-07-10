@@ -59,13 +59,16 @@ class TestValDict(unittest.TestCase):
             vd['a'] = 2
 
 
-class TestBigBang(unittest.TestCase):
+class TestPatternBase(unittest.TestCase):
 
     def index_to_coord(self, i):
         return (i % 100, i // 100)
 
     def pack_state(self, state):
         return state['s']
+
+
+class TestBigBang(TestPatternBase):
 
     def test_2d(self):
         pos = (32, 20)
@@ -104,13 +107,7 @@ class TestBigBang(unittest.TestCase):
                     self.index_to_coord, self.pack_state)
 
 
-class TestPrimordialSoup(unittest.TestCase):
-
-    def index_to_coord(self, i):
-        return (i % 100, i // 100)
-
-    def pack_state(self, state):
-        return state['s']
+class TestPrimordialSoup(TestPatternBase):
 
     def test_2d(self):
         vals = {'s': RandInt(0, 1)}
