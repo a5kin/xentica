@@ -58,14 +58,13 @@ class BigBang(RandomPattern):
 
     def generate(self, cells, cells_num, field_size,
                  index_to_coord, pack_state):
+        dims = range(len(field_size))
         if self.size is None:
-            # TODO: size / pos interdependence
-            self.size = np.asarray((self.random.std.randint(1, field_size[0]),
-                                    self.random.std.randint(1, field_size[1])))
+            rnd_vec = [self.random.std.randint(1, field_size[i]) for i in dims]
+            self.size = np.asarray(rnd_vec)
         if self.pos is None:
-            # TODO: size / pos interdependence
-            self.pos = np.asarray((self.random.std.randint(1, field_size[0]),
-                                   self.random.std.randint(1, field_size[1])))
+            rnd_vec = [self.random.std.randint(0, field_size[i]) for i in dims]
+            self.pos = np.asarray(rnd_vec)
         for i in range(cells_num):
             coord = np.asarray(index_to_coord(i))
             if all(coord >= self.pos) and all(coord < self.pos + self.size):
