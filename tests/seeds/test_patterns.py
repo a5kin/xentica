@@ -1,4 +1,5 @@
 import unittest
+import binascii
 
 import numpy as np
 
@@ -116,5 +117,5 @@ class TestPrimordialSoup(TestPatternBase):
         seed.random = LocalRandom("test")
         seed.generate(cells, 10000, (100, 100),
                       self.index_to_coord, self.pack_state)
-        self.assertEqual(np.sum(cells[:10000]), 5026,
+        self.assertEqual(binascii.crc32(cells[:10000]), 2251764292,
                          "Wrong field checksum.")

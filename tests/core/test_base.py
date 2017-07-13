@@ -1,7 +1,6 @@
 import unittest
 import os
-
-import numpy as np
+import binascii
 
 from examples.game_of_life import GameOfLife, GOLExperiment
 
@@ -16,8 +15,8 @@ class TestCellularAutomaton(unittest.TestCase):
             ca = GameOfLife(GOLExperiment)
             for j in range(self.num_steps):
                 ca.step()
-            self.assertEqual(584, np.sum(ca.cells_gpu.get()[:ca.cells_num]),
-                             "Wrong field checksum.")
+            checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+            self.assertEqual(3395585361, checksum, "Wrong field checksum.")
 
     def test_multiple_ca(self):
         ca1 = GameOfLife(GOLExperiment)
@@ -25,10 +24,10 @@ class TestCellularAutomaton(unittest.TestCase):
         for j in range(self.num_steps):
             ca1.step()
             ca2.step()
-        self.assertEqual(584, np.sum(ca1.cells_gpu.get()[:ca1.cells_num]),
-                         "Wrong field checksum (CA #1).")
-        self.assertEqual(584, np.sum(ca2.cells_gpu.get()[:ca2.cells_num]),
-                         "Wrong field checksum (CA #2).")
+        checksum = binascii.crc32(ca1.cells_gpu.get()[:ca1.cells_num])
+        self.assertEqual(3395585361, checksum, "Wrong field checksum (CA #1).")
+        checksum = binascii.crc32(ca2.cells_gpu.get()[:ca2.cells_num])
+        self.assertEqual(3395585361, checksum, "Wrong field checksum (CA #2).")
 
     def test_render(self):
         experiment = GOLExperiment
@@ -38,21 +37,21 @@ class TestCellularAutomaton(unittest.TestCase):
         for j in range(self.num_steps):
             ca.step()
         img = ca.render()
-        self.assertEqual(584 * 3, np.sum(img / 255),
+        self.assertEqual(4150286101, binascii.crc32(img / 255),
                          "Wrong image checksum.")
 
     def test_pause(self):
         ca = GameOfLife(GOLExperiment)
         ca.paused = False
-        checksum_before = np.sum(ca.cells_gpu.get()[:ca.cells_num])
+        checksum_before = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
         ca.step()
-        checksum_after = np.sum(ca.cells_gpu.get()[:ca.cells_num])
+        checksum_after = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
         self.assertNotEqual(checksum_before, checksum_after,
                             "CA is paused.")
         ca.paused = True
         checksum_before = checksum_after
         ca.step()
-        checksum_after = np.sum(ca.cells_gpu.get()[:ca.cells_num])
+        checksum_after = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
         self.assertEqual(checksum_before, checksum_after,
                          "CA is not paused.")
 
@@ -65,8 +64,8 @@ class TestCellularAutomaton(unittest.TestCase):
         ca2.load("test.ca")
         for i in range(self.num_steps // 2):
             ca2.step()
-        self.assertEqual(584, np.sum(ca2.cells_gpu.get()[:ca2.cells_num]),
-                         "Wrong field checksum.")
+        checksum = binascii.crc32(ca2.cells_gpu.get()[:ca2.cells_num])
+        self.assertEqual(3395585361, checksum, "Wrong field checksum.")
         os.remove("test.ca")
 
     def test_load_random(self):
