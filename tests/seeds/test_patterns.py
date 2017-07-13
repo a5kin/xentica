@@ -107,6 +107,15 @@ class TestBigBang(TestPatternBase):
         bb.generate(cells, 10000, (100, 100),
                     self.index_to_coord, self.pack_state)
 
+    def test_wrong_pos(self):
+        vals = {'s': RandInt(0, 1)}
+        bb = BigBang(pos=(90, 90), size=(20, 20), vals=vals)
+        cells = np.zeros((10000, ), dtype=np.int32)
+        bb.generate(cells, 10000, (100, 100),
+                    self.index_to_coord, self.pack_state)
+        self.assertEqual(bb.pos[0], 80, "Wrong X position.")
+        self.assertEqual(bb.pos[1], 80, "Wrong Y position.")
+
 
 class TestPrimordialSoup(TestPatternBase):
 
