@@ -65,6 +65,11 @@ class BigBang(RandomPattern):
         if self.pos is None:
             rnd_vec = [self.random.std.randint(0, field_size[i]) for i in dims]
             self.pos = np.asarray(rnd_vec)
+        for i in range(len(self.pos)):
+            x, l, d = self.pos[i], self.size[i], field_size[i]
+            if x + l >= d:
+                self.pos[i] = d - l
+            self.pos[i] = max(0, self.pos[i])
         for i in range(cells_num):
             coord = np.asarray(index_to_coord(i))
             if all(coord >= self.pos) and all(coord < self.pos + self.size):
