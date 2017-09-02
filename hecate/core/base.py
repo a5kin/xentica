@@ -28,109 +28,112 @@ class BSCA(type):
         if not cls._parents:
             return cls._new_class
 
+        # build CUDA source
+        cls._new_class.cuda_source = cls._new_class._build_defines()
+        cls._new_class.cuda_source += cls._new_class._build_emit()
+        cls._new_class.cuda_source += cls._new_class._build_absorb()
+        cls._new_class.cuda_source += cls._new_class._build_render()
+        cls._new_class.index_to_coord = cls.index_to_coord
+        cls._new_class.pack_state = cls.pack_state
+
         # hardcoded stuff
         cls._new_class.dtype = np.uint8
         cls._new_class.buffers = [0] * 9
         cls._new_class.fade_in = 255
         cls._new_class.fade_out = 255
         cls._new_class.smooth_factor = 1
-        cls._new_class.cuda_source = """
+        return cls._new_class
+
+    def _elementwise_kernel(self, name, args, body):
+        kernel = """
+            __global__ void %s(%s, int n) {
+
+                unsigned tid = threadIdx.x;
+                unsigned total_threads = gridDim.x * blockDim.x;
+                unsigned cta_start = blockDim.x * blockIdx.x;
+
+                for (unsigned i = cta_start + tid; i < n; i += total_threads) {
+                    %s
+                }
+
+            }
+
+        """ % (name, args, body)
+        return kernel
+
+    def _build_defines(cls):
+        # hardcoded for now
+        defines = """
             #define w {w}
             #define h {h}
-            #define n {n}
             #define FADE_IN {fadein}
             #define FADE_OUT {fadeout}
             #define SMOOTH_FACTOR {smooth}
 
-            __global__ void emit(unsigned char *fld) {
-
-                unsigned tid = threadIdx.x;
-                unsigned total_threads = gridDim.x * blockDim.x;
-                unsigned cta_start = blockDim.x * blockIdx.x;
-                unsigned i;
-
-                for (i = cta_start + tid; i < n; i += total_threads) {
-
-                    fld[i + n] = fld[i];
-
-                }
-
-            }
-
-            __global__ void absorb(unsigned char *fld, int3 *col) {
-
-                unsigned tid = threadIdx.x;
-                unsigned total_threads = gridDim.x * blockDim.x;
-                unsigned cta_start = blockDim.x * blockIdx.x;
-                unsigned i;
-
-                for (i = cta_start + tid; i < n; i += total_threads) {
-
-                    int x = i % w;
-                    int y = i / w;
-                    int xm1 = x - 1; if (xm1 < 0) xm1 = w + xm1;
-                    int xp1 = x + 1; if (xp1 >= w) xp1 = xp1 - w;
-                    int ym1 = y - 1; if (ym1 < 0) ym1 = h + ym1;
-                    int yp1 = y + 1; if (yp1 >= h) yp1 = yp1 - h;
-                    unsigned char s = fld[xm1 + ym1 * w + n] +
-                                      fld[x + ym1 * w + n] +
-                                      fld[xp1 + ym1 * w + n] +
-                                      fld[xm1 + y * w + n] +
-                                      fld[xp1 + y * w + n] +
-                                      fld[xm1 + yp1 * w + n] +
-                                      fld[x + yp1 * w + n] +
-                                      fld[xp1 + yp1 * w + n];
-                    unsigned char state;
-                    state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
-                    fld[i] = state;
-
-                    int new_r = state * 255 * SMOOTH_FACTOR;
-                    int new_g = state * 255 * SMOOTH_FACTOR;
-                    int new_b = state * 255 * SMOOTH_FACTOR;
-                    int3 old_col = col[i];
-                    new_r = max(min(new_r, old_col.x + FADE_IN),
-                                old_col.x - FADE_OUT);
-                    new_g = max(min(new_g, old_col.y + FADE_IN),
-                                old_col.y - FADE_OUT);
-                    new_b = max(min(new_b, old_col.z + FADE_IN),
-                                old_col.z - FADE_OUT);
-                    col[i] = make_int3(new_r, new_g, new_b);
-
-                }
-
-            }
-
-            __global__ void render(int3 *col, int *img, int zoom,
-                                   int dx, int dy, int width, int height) {
-
-                unsigned tid = threadIdx.x;
-                unsigned total_threads = gridDim.x * blockDim.x;
-                unsigned cta_start = blockDim.x * blockIdx.x;
-                unsigned i;
-                int nn = width * height;
-
-                for (i = cta_start + tid; i < nn; i += total_threads) {
-
-                    int x = (int) (((float) (i % width)) / (float) zoom) + dx;
-                    int y = (int) (((float) (i / width)) / (float) zoom) + dy;
-                    if (x < 0) x = w - (-x % w);
-                    if (x >= w) x = x % w;
-                    if (y < 0) y = h - (-y % h);
-                    if (y >= h) y = y % h;
-                    int ii = x + y * w;
-
-                    int3 c = col[ii];
-                    img[i * 3] = c.x / SMOOTH_FACTOR;
-                    img[i * 3 + 1] = c.y / SMOOTH_FACTOR;
-                    img[i * 3 + 2] = c.z / SMOOTH_FACTOR;
-
-                }
-
-            }
         """
-        cls._new_class.index_to_coord = cls.index_to_coord
-        cls._new_class.pack_state = cls.pack_state
-        return cls._new_class
+        return defines
+
+    def _build_emit(cls):
+        args = "unsigned char *fld"
+        body = """
+            fld[i + n] = fld[i];
+        """
+        return cls._elementwise_kernel("emit", args, body)
+
+    def _build_absorb(cls):
+        args = "unsigned char *fld, int3 *col"
+        # hardcoded for now
+        body = """
+            int x = i % w;
+            int y = i / w;
+            int xm1 = x - 1; if (xm1 < 0) xm1 = w + xm1;
+            int xp1 = x + 1; if (xp1 >= w) xp1 = xp1 - w;
+            int ym1 = y - 1; if (ym1 < 0) ym1 = h + ym1;
+            int yp1 = y + 1; if (yp1 >= h) yp1 = yp1 - h;
+            unsigned char s = fld[xm1 + ym1 * w + n] +
+                              fld[x + ym1 * w + n] +
+                              fld[xp1 + ym1 * w + n] +
+                              fld[xm1 + y * w + n] +
+                              fld[xp1 + y * w + n] +
+                              fld[xm1 + yp1 * w + n] +
+                              fld[x + yp1 * w + n] +
+                              fld[xp1 + yp1 * w + n];
+            unsigned char state;
+            state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
+            fld[i] = state;
+
+            int new_r = state * 255 * SMOOTH_FACTOR;
+            int new_g = state * 255 * SMOOTH_FACTOR;
+            int new_b = state * 255 * SMOOTH_FACTOR;
+            int3 old_col = col[i];
+            new_r = max(min(new_r, old_col.x + FADE_IN),
+                        old_col.x - FADE_OUT);
+            new_g = max(min(new_g, old_col.y + FADE_IN),
+                        old_col.y - FADE_OUT);
+            new_b = max(min(new_b, old_col.z + FADE_IN),
+                        old_col.z - FADE_OUT);
+            col[i] = make_int3(new_r, new_g, new_b);
+        """
+        return cls._elementwise_kernel("absorb", args, body)
+
+    def _build_render(cls):
+        args = "int3 *col, int *img, int zoom, int dx, int dy, int width"
+        # hardcoded for now
+        body = """
+            int x = (int) (((float) (i % width)) / (float) zoom) + dx;
+            int y = (int) (((float) (i / width)) / (float) zoom) + dy;
+            if (x < 0) x = w - (-x % w);
+            if (x >= w) x = x % w;
+            if (y < 0) y = h - (-y % h);
+            if (y >= h) y = y % h;
+            int ii = x + y * w;
+
+            int3 c = col[ii];
+            img[i * 3] = c.x / SMOOTH_FACTOR;
+            img[i * 3 + 1] = c.y / SMOOTH_FACTOR;
+            img[i * 3 + 2] = c.z / SMOOTH_FACTOR;
+        """
+        return cls._elementwise_kernel("render", args, body)
 
     def index_to_coord(self, i):
         return (i % self.size[0], i // self.size[0])
@@ -155,7 +158,7 @@ class CellularAutomaton(metaclass=BSCA):
         self.timestep = 0
         # CUDA kernel
         self.cells_num = functools.reduce(operator.mul, self.size)
-        source = self.cuda_source.replace("{n}", str(self.cells_num))
+        source = self.cuda_source.replace("{n}", str())
         source = source.replace("{w}", str(self.size[0]))
         source = source.replace("{h}", str(self.size[1]))
         source = source.replace("{fadein}", str(self.fade_in))
@@ -204,8 +207,10 @@ class CellularAutomaton(metaclass=BSCA):
             return
         block, grid = self.cells_gpu._block, self.cells_gpu._grid
         with self.lock:
-            self.emit_gpu(self.cells_gpu, block=block, grid=grid)
+            self.emit_gpu(self.cells_gpu, np.int32(self.cells_num),
+                          block=block, grid=grid)
             self.absorb_gpu(self.cells_gpu, self.colors_gpu,
+                            np.int32(self.cells_num),
                             block=block, grid=grid)
             self.timestep += 1
 
@@ -215,7 +220,8 @@ class CellularAutomaton(metaclass=BSCA):
             self.render_gpu(self.colors_gpu, self.img_gpu,
                             np.int32(self.zoom),
                             np.int32(self.pos[0]), np.int32(self.pos[1]),
-                            np.int32(self.width), np.int32(self.height),
+                            np.int32(self.width),
+                            np.int32(self.width * self.height),
                             block=block, grid=grid)
             return self.img_gpu.get().astype(np.uint8)
 
