@@ -21,14 +21,20 @@ class BSCA(type):
     and compiles it for future use.
 
     """
-    def __init__(cls, name, bases, namespace, **kwds1):
+    def __new__(cls, name, bases, attrs):
+        # print(cls, name, bases, attrs)
+        cls._new_class = super().__new__(cls, name, bases, attrs)
+        cls._parents = [b for b in bases if isinstance(b, BSCA)]
+        if not cls._parents:
+            return cls._new_class
+
         # hardcoded stuff
-        cls.dtype = np.uint8
-        cls.buffers = [0] * 9
-        cls.fade_in = 255
-        cls.fade_out = 255
-        cls.smooth_factor = 1
-        cls.cuda_source = """
+        cls._new_class.dtype = np.uint8
+        cls._new_class.buffers = [0] * 9
+        cls._new_class.fade_in = 255
+        cls._new_class.fade_out = 255
+        cls._new_class.smooth_factor = 1
+        cls._new_class.cuda_source = """
             #define w {w}
             #define h {h}
             #define n {n}
@@ -122,14 +128,15 @@ class BSCA(type):
 
             }
         """
+        cls._new_class.index_to_coord = cls.index_to_coord
+        cls._new_class.pack_state = cls.pack_state
+        return cls._new_class
 
-        def index_to_coord(self, i):
-            return (i % self.size[0], i // self.size[0])
-        cls.index_to_coord = index_to_coord
+    def index_to_coord(self, i):
+        return (i % self.size[0], i // self.size[0])
 
-        def pack_state(self, state):
-            return state['state']
-        cls.pack_state = pack_state
+    def pack_state(self, state):
+        return state['state']
 
 
 class CellularAutomaton(metaclass=BSCA):
