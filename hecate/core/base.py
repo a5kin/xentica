@@ -15,6 +15,10 @@ from hecate.bridge import MoireBridge
 from hecate.seeds.random import LocalRandom
 
 
+class HecateException(Exception):
+    """ Basic Hecate framework exception """
+
+
 class BSCA(type):
     """
     Meta-class for CellularAutomaton.
@@ -29,6 +33,21 @@ class BSCA(type):
         cls._parents = [b for b in bases if isinstance(b, BSCA)]
         if not cls._parents:
             return cls._new_class
+
+        cls._topology = attrs.get('Topology', None)
+        if cls._topology is None:
+            raise HecateException("No Topology class declared.")
+
+        mandatory_fields = (
+            'dimensions', 'lattice', 'neighborhood', 'border',
+        )
+        for f in mandatory_fields:
+            if not hasattr(cls._topology, f):
+                raise HecateException("No %s declared in Topology class." % f)
+
+        cls._topology.lattice.set_dimensions(cls._topology.dimensions)
+        cls._topology.neighborhood.set_dimensions(cls._topology.dimensions)
+        cls._topology.border.set_dimensions(cls._topology.dimensions)
 
         # build CUDA source
         cls._new_class.cuda_source = cls._new_class._build_defines()
@@ -91,6 +110,7 @@ class BSCA(type):
 
     def _build_absorb(cls):
         args = "unsigned char *fld, int3 *col"
+
         # hardcoded for now
         body = """
             int x = i % w;
