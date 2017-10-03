@@ -7,7 +7,8 @@ class GameOfLife(core.CellularAutomaton):
     state = core.IntegerProperty(max_val=1)
 
     class Topology:
-        lattice = core.OrthogonalLattice(dimensions=2)
+        dimensions = 2
+        lattice = core.OrthogonalLattice()
         neighborhood = core.MooreNeighborhood()
         border = core.TorusBorder()
 
