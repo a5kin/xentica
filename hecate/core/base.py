@@ -2,6 +2,8 @@ import functools
 import operator
 import threading
 import pickle
+import inspect
+import ast
 
 import numpy as np
 
@@ -74,6 +76,13 @@ class BSCA(type):
         return defines
 
     def _build_emit(cls):
+        emit_code = inspect.getsource(cls.emit)
+        emit_code = "class Dummy:\n" + emit_code
+        for node in ast.walk(ast.parse(emit_code)):
+            # print(node)
+            for name, value in ast.iter_fields(node):
+                # print("  %s: %s" % (name, value))
+                pass
         args = "unsigned char *fld"
         body = """
             fld[i + n] = fld[i];
