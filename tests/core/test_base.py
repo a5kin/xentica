@@ -2,6 +2,7 @@ import unittest
 import os
 import binascii
 
+from hecate.core.base import HecateException, CellularAutomaton
 from examples.game_of_life import GameOfLife, GOLExperiment
 
 
@@ -80,3 +81,14 @@ class TestCellularAutomaton(unittest.TestCase):
                          ca2.random.np.randint(1, 1000),
                          "Wrong numpy RNG state.")
         os.remove("test.ca")
+
+    def test_no_topology(self):
+        with self.assertRaises(HecateException):
+            class NoTopologyCA(CellularAutomaton):
+                pass
+
+    def test_empty_topology(self):
+        with self.assertRaises(HecateException):
+            class NoLatticeCA(CellularAutomaton):
+                class Topology:
+                    pass
