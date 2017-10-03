@@ -1,4 +1,7 @@
-class Neighborhood:
+from hecate.core.topology.mixins import DimensionsMixin
+
+
+class Neighborhood(DimensionsMixin):
     """
     Base class for all types of neighborhood.
 
@@ -6,4 +9,4 @@ class Neighborhood:
 
 
 class MooreNeighborhood(Neighborhood):
-    pass
+    supported_dimensions = [2, ]

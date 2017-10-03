@@ -1,4 +1,7 @@
-class Border:
+from hecate.core.topology.mixins import DimensionsMixin
+
+
+class Border(DimensionsMixin):
     """
     Base class for all types of borders.
 
@@ -6,4 +9,4 @@ class Border:
 
 
 class TorusBorder(Border):
-    pass
+    supported_dimensions = [2, ]

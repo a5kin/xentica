@@ -1,4 +1,7 @@
-class Lattice:
+from hecate.core.topology.mixins import DimensionsMixin
+
+
+class Lattice(DimensionsMixin):
     """
     Base class for all lattices.
 
@@ -6,6 +9,4 @@ class Lattice:
 
 
 class OrthogonalLattice(Lattice):
-
-    def __init__(self, dimensions):
-        self.dimensions = dimensions
+    supported_dimensions = [2, ]
