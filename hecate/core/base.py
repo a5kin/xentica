@@ -28,7 +28,6 @@ class BSCA(type):
 
     """
     def __new__(cls, name, bases, attrs):
-        # print(cls, name, bases, attrs)
         cls._new_class = super().__new__(cls, name, bases, attrs)
         cls._parents = [b for b in bases if isinstance(b, BSCA)]
         if not cls._parents:
@@ -82,6 +81,34 @@ class BSCA(type):
         """ % (name, args, body)
         return kernel
 
+    def _translate_code(cls, func):
+        # hardcoded for now
+        if func.__name__ == 'emit':
+            return """
+                fld[i + n] = fld[i];
+            """
+        if func.__name__ == 'absorb':
+            return """
+                unsigned char s = fld[xm1 + ym1 * w + n] +
+                                  fld[x + ym1 * w + n] +
+                                  fld[xp1 + ym1 * w + n] +
+                                  fld[xm1 + y * w + n] +
+                                  fld[xp1 + y * w + n] +
+                                  fld[xm1 + yp1 * w + n] +
+                                  fld[x + yp1 * w + n] +
+                                  fld[xp1 + yp1 * w + n];
+                unsigned char state;
+                state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
+                fld[i] = state;
+            """
+        if func.__name__ == 'render':
+            return """
+                int new_r = state * 255 * SMOOTH_FACTOR;
+                int new_g = state * 255 * SMOOTH_FACTOR;
+                int new_b = state * 255 * SMOOTH_FACTOR;
+            """
+        return ""
+
     def _build_defines(cls):
         # hardcoded for now
         defines = """
@@ -95,13 +122,6 @@ class BSCA(type):
         return defines
 
     def _build_emit(cls):
-        emit_code = inspect.getsource(cls.emit)
-        emit_code = "class Dummy:\n" + emit_code
-        for node in ast.walk(ast.parse(emit_code)):
-            # print(node)
-            for name, value in ast.iter_fields(node):
-                # print("  %s: %s" % (name, value))
-                pass
         args = "unsigned char *fld"
         body = """
             fld[i + n] = fld[i];
@@ -110,6 +130,11 @@ class BSCA(type):
 
     def _build_absorb(cls):
         args = "unsigned char *fld, int3 *col"
+        custom_body = cls._translate_code(cls.absorb)
+        # body = cls._topology.lattice.generate_index_to_coord()
+        # body += cls._topology.neighborhood.generate_neighbor_coords()
+        # body += cls._topology.border.generate_wrapping()
+        # body += cls._topology.lattice.generate_neighbors()
 
         # hardcoded for now
         body = """
