@@ -44,9 +44,10 @@ class BSCA(type):
             if not hasattr(cls._topology, f):
                 raise HecateException("No %s declared in Topology class." % f)
 
-        cls._topology.lattice.set_dimensions(cls._topology.dimensions)
-        cls._topology.neighborhood.set_dimensions(cls._topology.dimensions)
-        cls._topology.border.set_dimensions(cls._topology.dimensions)
+        cls._topology.lattice.dimensions = cls._topology.dimensions
+        cls._topology.neighborhood.dimensions = cls._topology.dimensions
+        cls._topology.border.dimensions = cls._topology.dimensions
+        cls._topology.neighborhood.set_border(cls._topology.border)
 
         # build CUDA source
         cls._new_class.cuda_source = cls._new_class._build_defines()
@@ -130,12 +131,13 @@ class BSCA(type):
 
     def _build_absorb(cls):
         args = "unsigned char *fld, int3 *col"
-        custom_body = cls._translate_code(cls.absorb)
-        # body = cls._topology.lattice.generate_index_to_coord()
-        # body += cls._topology.neighborhood.generate_neighbor_coords()
-        # body += cls._topology.border.generate_wrapping()
-        # body += cls._topology.lattice.generate_neighbors()
-
+        body = cls._topology.lattice.generate_index_to_coord("i", "_x", "_w")
+        for i in range(len(cls._topology.neighborhood)):
+            body += cls._topology.neighborhood.neighbor_coords(i, "_x", "_nx")
+            body += cls._topology.neighborhood.neighbor_state(i, 0, "_nx",
+                                                              "_dcell%d" % i)
+        body += cls._translate_code(cls.absorb)
+        # print(body)
         # hardcoded for now
         body = """
             int x = i % w;
