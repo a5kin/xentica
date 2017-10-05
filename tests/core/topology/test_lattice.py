@@ -11,4 +11,4 @@ class TestOrthogonalLattice(unittest.TestCase):
     def test_incorrect_dimensions(self):
         lattice = OrthogonalLattice()
         with self.assertRaises(HecateException):
-            lattice.set_dimensions(0)
+            lattice.dimensions = 0

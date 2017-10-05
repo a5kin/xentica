@@ -11,4 +11,4 @@ class TestTorusBorder(unittest.TestCase):
     def test_incorrect_dimensions(self):
         border = TorusBorder()
         with self.assertRaises(HecateException):
-            border.set_dimensions(0)
+            border.dimensions = 0

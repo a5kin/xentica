@@ -11,4 +11,4 @@ class TestMooreNeighborhood(unittest.TestCase):
     def test_incorrect_dimensions(self):
         neighborhood = MooreNeighborhood()
         with self.assertRaises(HecateException):
-            neighborhood.set_dimensions(0)
+            neighborhood.dimensions = 0
