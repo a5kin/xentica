@@ -132,6 +132,8 @@ class BSCA(type):
     def _build_absorb(cls):
         args = "unsigned char *fld, int3 *col"
         body = cls._topology.lattice.generate_index_to_coord("i", "_x", "_w")
+        coord_vars = ["_nx%d" % i for i in range(cls._topology.dimensions)]
+        body += "int %s;\n" % ", ".join(coord_vars)
         for i in range(len(cls._topology.neighborhood)):
             body += cls._topology.neighborhood.neighbor_coords(i, "_x", "_nx")
             body += cls._topology.neighborhood.neighbor_state(i, 0, "_nx",
