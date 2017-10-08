@@ -48,6 +48,7 @@ class BSCA(type):
         cls._topology.neighborhood.dimensions = cls._topology.dimensions
         cls._topology.border.dimensions = cls._topology.dimensions
         cls._topology.neighborhood.topology = cls._topology
+        cls._topology.border.topology = cls._topology
 
         # build CUDA source
         cls._new_class.cuda_source = cls._new_class._build_defines()
@@ -133,11 +134,35 @@ class BSCA(type):
         args = "unsigned char *fld, int3 *col"
         body = cls._topology.lattice.index_to_coord_code("i", "_x")
         coord_vars = ["_nx%d" % i for i in range(cls._topology.dimensions)]
+        neighborhood = cls._topology.neighborhood
         body += "int %s;\n" % ", ".join(coord_vars)
         for i in range(len(cls._topology.neighborhood)):
-            body += cls._topology.neighborhood.neighbor_coords(i, "_x", "_nx")
-            body += cls._topology.neighborhood.neighbor_state(i, i, "_nx",
-                                                              "_dcell%d" % i)
+            body += neighborhood.neighbor_coords(i, "_x", "_nx")
+            state_code = neighborhood.neighbor_state(i, i, "_nx",
+                                                     "_dcell%d" % i)
+            is_cell_off_board = cls._topology.lattice.is_off_board_code("_nx")
+            if hasattr(cls._topology.border, "wrap_coords"):
+                body += """
+                    if ({is_cell_off_board}) {{
+                        {wrap_coords}
+                    }}
+                """.format(
+                    is_cell_off_board=is_cell_off_board,
+                    wrap_coords=cls._topology.border.wrap_coords("_nx"),
+                )
+                body += state_code
+            else:
+                body += """
+                    if ({is_cell_off_board}) {{
+                        {off_board_cell}
+                    }} else {{
+                        {get_neighbor_state}
+                    }}
+                """.format(
+                    is_cell_off_board=is_cell_off_board,
+                    off_board_cell=cls._topology.border.off_board_state("_nx"),
+                    get_neighbor_state=state_code,
+                )
         body += cls._translate_code(cls.absorb)
         # print(body)
         # hardcoded for now
