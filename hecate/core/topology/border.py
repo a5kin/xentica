@@ -11,7 +11,7 @@ class Border(DimensionsMixin):
 
 
 class TorusBorder(Border):
-    supported_dimensions = [2, ]
+    supported_dimensions = list(range(1, 100))
 
     def wrap_coords(self, coord_prefix):
         code = ""
