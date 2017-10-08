@@ -47,7 +47,7 @@ class BSCA(type):
         cls._topology.lattice.dimensions = cls._topology.dimensions
         cls._topology.neighborhood.dimensions = cls._topology.dimensions
         cls._topology.border.dimensions = cls._topology.dimensions
-        cls._topology.neighborhood.set_border(cls._topology.border)
+        cls._topology.neighborhood.topology = cls._topology.neighborhood
 
         # build CUDA source
         cls._new_class.cuda_source = cls._new_class._build_defines()

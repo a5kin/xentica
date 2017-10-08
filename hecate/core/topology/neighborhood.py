@@ -10,9 +10,7 @@ class Neighborhood(DimensionsMixin):
     """
     def __init__(self):
         self.num_neighbors = None
-
-    def set_border(self, border_object):
-        self.border = border_object
+        self.topology = None
 
     def __len__(self):
         return self.num_neighbors
