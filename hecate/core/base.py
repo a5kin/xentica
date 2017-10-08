@@ -47,7 +47,7 @@ class BSCA(type):
         cls._topology.lattice.dimensions = cls._topology.dimensions
         cls._topology.neighborhood.dimensions = cls._topology.dimensions
         cls._topology.border.dimensions = cls._topology.dimensions
-        cls._topology.neighborhood.topology = cls._topology.neighborhood
+        cls._topology.neighborhood.topology = cls._topology
 
         # build CUDA source
         cls._new_class.cuda_source = cls._new_class._build_defines()
@@ -131,12 +131,12 @@ class BSCA(type):
 
     def _build_absorb(cls):
         args = "unsigned char *fld, int3 *col"
-        body = cls._topology.lattice.generate_index_to_coord("i", "_x", "_w")
+        body = cls._topology.lattice.index_to_coord_code("i", "_x")
         coord_vars = ["_nx%d" % i for i in range(cls._topology.dimensions)]
         body += "int %s;\n" % ", ".join(coord_vars)
         for i in range(len(cls._topology.neighborhood)):
             body += cls._topology.neighborhood.neighbor_coords(i, "_x", "_nx")
-            body += cls._topology.neighborhood.neighbor_state(i, 0, "_nx",
+            body += cls._topology.neighborhood.neighbor_state(i, i, "_nx",
                                                               "_dcell%d" % i)
         body += cls._translate_code(cls.absorb)
         # print(body)

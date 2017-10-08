@@ -40,4 +40,10 @@ class MooreNeighborhood(Neighborhood):
 
     def neighbor_state(self, neighbor_index, state_index,
                        coord_prefix, state_name):
-        return ""
+        cell_index = self.topology.lattice.coord_to_index_code(coord_prefix)
+        if state_index + 1 > 0:
+            cell_index += " + n * " + str(state_index + 1)
+        code = "unsigned char {state} = fld[{cell_index}];\n".format(
+            state=state_name, cell_index=cell_index
+        )
+        return code
