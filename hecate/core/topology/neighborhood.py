@@ -11,6 +11,7 @@ class Neighborhood(DimensionsMixin):
     def __init__(self):
         self.num_neighbors = None
         self.topology = None
+        self._delta2str = {-1: " - 1", 0: "", 1: " + 1"}
 
     def __len__(self):
         return self.num_neighbors
@@ -28,13 +29,12 @@ class MooreNeighborhood(Neighborhood):
         self._neighbor_deltas = [d for d in deltas if d != (0, 0, 0)]
 
     def neighbor_coords(self, index, coord_prefix, neighbor_prefix):
-        delta2str = {-1: " - 1", 0: "", 1: " + 1"}
         code = ""
         for i in range(self.dimensions):
             code += "{neighbor}{i} = {coord}{i}{delta};\n".format(
                 neighbor=neighbor_prefix, i=i,
                 coord=coord_prefix,
-                delta=delta2str[self._neighbor_deltas[index][i]]
+                delta=self._delta2str[self._neighbor_deltas[index][i]]
             )
         return code
 
