@@ -37,3 +37,12 @@ class OrthogonalLattice(Lattice):
                 summand = self.width_prefix + str(j) + " * " + summand
             summands.append(summand)
         return " + ".join(summands)
+
+    def is_off_board_code(self, coord_prefix):
+        conditions = []
+        for i in range(self.dimensions):
+            condition = "{x}{i} < 0 || {x}{i} >= {w}{i}".format(
+                x=coord_prefix, i=i, w=self.width_prefix
+            )
+            conditions.append(condition)
+        return " || ".join(conditions)
