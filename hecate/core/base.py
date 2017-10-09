@@ -55,8 +55,10 @@ class BSCA(type):
         cls._new_class.cuda_source += cls._new_class._build_emit()
         cls._new_class.cuda_source += cls._new_class._build_absorb()
         cls._new_class.cuda_source += cls._new_class._build_render()
+        # print(cls._new_class.cuda_source)
         cls._new_class.index_to_coord = cls.index_to_coord
         cls._new_class.pack_state = cls.pack_state
+        cls._new_class._topology = cls._topology
 
         # hardcoded stuff
         cls._new_class.dtype = np.uint8
@@ -86,36 +88,41 @@ class BSCA(type):
     def _translate_code(cls, func):
         # hardcoded for now
         if func.__name__ == 'emit':
-            return """
-                fld[i + n] = fld[i];
-            """
+            body = ""
+            for i in range(len(cls._topology.neighborhood)):
+                body += "fld[i + n * %d] = fld[i];\n" % (i + 1, )
+            return body
         if func.__name__ == 'absorb':
+            num_neighbors = len(cls._topology.neighborhood)
+            neighbors = ["_dcell%d" % i for i in range(num_neighbors)]
             return """
-                unsigned char s = fld[xm1 + ym1 * w + n] +
-                                  fld[x + ym1 * w + n] +
-                                  fld[xp1 + ym1 * w + n] +
-                                  fld[xm1 + y * w + n] +
-                                  fld[xp1 + y * w + n] +
-                                  fld[xm1 + yp1 * w + n] +
-                                  fld[x + yp1 * w + n] +
-                                  fld[xp1 + yp1 * w + n];
+                unsigned char s = {summed_neighbors};
                 unsigned char state;
                 state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
                 fld[i] = state;
-            """
+            """.format(summed_neighbors=" + ".join(neighbors))
         if func.__name__ == 'render':
             return """
                 int new_r = state * 255 * SMOOTH_FACTOR;
                 int new_g = state * 255 * SMOOTH_FACTOR;
                 int new_b = state * 255 * SMOOTH_FACTOR;
+                int3 old_col = col[i];
+                new_r = max(min(new_r, old_col.x + FADE_IN),
+                            old_col.x - FADE_OUT);
+                new_g = max(min(new_g, old_col.y + FADE_IN),
+                            old_col.y - FADE_OUT);
+                new_b = max(min(new_b, old_col.z + FADE_IN),
+                            old_col.z - FADE_OUT);
+                col[i] = make_int3(new_r, new_g, new_b);
             """
         return ""
 
     def _build_defines(cls):
+        defines = ""
+        for i in range(cls._topology.dimensions):
+            defines += "#define _w%d {w%d}\n" % (i, i)
         # hardcoded for now
-        defines = """
-            #define w {w}
-            #define h {h}
+        defines += """
             #define FADE_IN {fadein}
             #define FADE_OUT {fadeout}
             #define SMOOTH_FACTOR {smooth}
@@ -125,9 +132,7 @@ class BSCA(type):
 
     def _build_emit(cls):
         args = "unsigned char *fld"
-        body = """
-            fld[i + n] = fld[i];
-        """
+        body = cls._translate_code(cls.emit)
         return cls._elementwise_kernel("emit", args, body)
 
     def _build_absorb(cls):
@@ -164,9 +169,10 @@ class BSCA(type):
                     get_neighbor_state=state_code,
                 )
         body += cls._translate_code(cls.absorb)
+        body += cls._translate_code(cls.render)
         # print(body)
         # hardcoded for now
-        body = """
+        body_optimized = """
             int x = i % w;
             int y = i / w;
             int xm1 = x - 1; if (xm1 < 0) xm1 = w + xm1;
@@ -205,11 +211,11 @@ class BSCA(type):
         body = """
             int x = (int) (((float) (i % width)) / (float) zoom) + dx;
             int y = (int) (((float) (i / width)) / (float) zoom) + dy;
-            if (x < 0) x = w - (-x % w);
-            if (x >= w) x = x % w;
-            if (y < 0) y = h - (-y % h);
-            if (y >= h) y = y % h;
-            int ii = x + y * w;
+            if (x < 0) x = _w0 - (-x % _w0);
+            if (x >= _w0) x = x % _w0;
+            if (y < 0) y = _w1 - (-y % _w1);
+            if (y >= _w1) y = y % _w1;
+            int ii = x + y * _w0;
 
             int3 c = col[ii];
             img[i * 3] = c.x / SMOOTH_FACTOR;
@@ -242,8 +248,8 @@ class CellularAutomaton(metaclass=BSCA):
         # CUDA kernel
         self.cells_num = functools.reduce(operator.mul, self.size)
         source = self.cuda_source.replace("{n}", str())
-        source = source.replace("{w}", str(self.size[0]))
-        source = source.replace("{h}", str(self.size[1]))
+        for i in range(self._topology.dimensions):
+            source = source.replace("{w%d}" % i, str(self.size[i]))
         source = source.replace("{fadein}", str(self.fade_in))
         source = source.replace("{fadeout}", str(self.fade_out))
         source = source.replace("{smooth}", str(self.smooth_factor))
