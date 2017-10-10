@@ -16,7 +16,7 @@ class TorusBorder(Border):
     def wrap_coords(self, coord_prefix):
         code = ""
         for i in range(self.dimensions):
-            code += "{x}{i} %= {w}{i};\n".format(
+            code += "{x}{i} = ({x}{i} + {w}{i}) % {w}{i};\n".format(
                 x=coord_prefix, i=i,
                 w=self.topology.lattice.width_prefix
             )
