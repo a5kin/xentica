@@ -21,3 +21,17 @@ class TorusBorder(Border):
                 w=self.topology.lattice.width_prefix
             )
         return code
+
+
+class StaticBorder(Border):
+    supported_dimensions = list(range(1, 100))
+
+    def __init__(self, value=0):
+        self._value = value
+
+    def off_board_state(self, coord_prefix, state_name):
+        body = "{state} = {value};\n".format(
+            state=state_name,
+            value=self._value,
+        )
+        return body
