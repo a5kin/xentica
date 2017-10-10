@@ -9,7 +9,7 @@ from hecate.core.topology.neighborhood import (
     MooreNeighborhood,
 )
 from hecate.core.topology.border import (
-    TorusBorder,
+    TorusBorder, StaticBorder,
 )
 from hecate.core.experiment import Experiment
 
@@ -19,5 +19,6 @@ __all__ = [
     'OrthogonalLattice',
     'MooreNeighborhood',
     'TorusBorder',
+    'StaticBorder',
     'Experiment',
 ]
