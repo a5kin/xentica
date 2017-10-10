@@ -2,6 +2,7 @@ import unittest
 import os
 import binascii
 
+from hecate import core
 from hecate.core.base import HecateException, CellularAutomaton
 from examples.game_of_life import GameOfLife, GOLExperiment
 
@@ -92,3 +93,18 @@ class TestCellularAutomaton(unittest.TestCase):
             class NoLatticeCA(CellularAutomaton):
                 class Topology:
                     pass
+
+    def test_static_border(self):
+        class GameOfLifeStatic(GameOfLife):
+            class Topology:
+                dimensions = 2
+                lattice = core.OrthogonalLattice()
+                neighborhood = core.MooreNeighborhood()
+                border = core.StaticBorder(1)
+
+        ca = GameOfLifeStatic(GOLExperiment)
+        for j in range(self.num_steps):
+            ca.step()
+        checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        self.assertNotEqual(3395585361, checksum,
+                            "Checksum shoud be different from parent class.")
