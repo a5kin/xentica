@@ -101,7 +101,7 @@ class BSCA(type):
                 state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
                 fld[i] = state;
             """.format(summed_neighbors=" + ".join(neighbors))
-        if func.__name__ == 'render':
+        if func.__name__ == 'color':
             return """
                 int new_r = state * 255 * SMOOTH_FACTOR;
                 int new_g = state * 255 * SMOOTH_FACTOR;
@@ -169,7 +169,7 @@ class BSCA(type):
                     get_neighbor_state=state_code,
                 )
         body += cls._translate_code(cls.absorb)
-        body += cls._translate_code(cls.render)
+        body += cls._translate_code(cls.color)
         # print(body)
         # hardcoded for now
         body_optimized = """
