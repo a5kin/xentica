@@ -43,7 +43,7 @@ class MooreNeighborhood(Neighborhood):
         cell_index = self.topology.lattice.coord_to_index_code(coord_prefix)
         if state_index + 1 > 0:
             cell_index += " + n * " + str(state_index + 1)
-        code = "unsigned char {state} = fld[{cell_index}];\n".format(
+        code = "{state} = fld[{cell_index}];\n".format(
             state=state_name, cell_index=cell_index
         )
         return code

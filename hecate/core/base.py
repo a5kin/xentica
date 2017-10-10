@@ -114,7 +114,6 @@ class BSCA(type):
                             old_col.z - FADE_OUT);
                 col[i] = make_int3(new_r, new_g, new_b);
             """
-        return ""
 
     def _build_defines(cls):
         defines = ""
@@ -145,6 +144,7 @@ class BSCA(type):
             state_code = neighborhood.neighbor_state(i, i, "_nx",
                                                      "_dcell%d" % i)
             is_cell_off_board = cls._topology.lattice.is_off_board_code("_nx")
+            body += "unsigned char _dcell%d;" % i
             if hasattr(cls._topology.border, "wrap_coords"):
                 body += """
                     if ({is_cell_off_board}) {{
@@ -164,7 +164,9 @@ class BSCA(type):
                     }}
                 """.format(
                     is_cell_off_board=is_cell_off_board,
-                    off_board_cell=cls._topology.border.off_board_state("_nx"),
+                    off_board_cell=cls._topology.border.off_board_state(
+                        "_nx", "_dcell%d" % i
+                    ),
                     get_neighbor_state=state_code,
                 )
         body += cls._translate_code(cls.absorb)
