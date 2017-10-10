@@ -26,7 +26,7 @@ class MooreNeighborhood(Neighborhood):
         super_class.dimensions.fset(self, num_dim)
         self.num_neighbors = 3 ** num_dim - 1
         deltas = itertools.product([-1, 0, 1], repeat=num_dim)
-        self._neighbor_deltas = [d for d in deltas if d != (0, 0, 0)]
+        self._neighbor_deltas = [d for d in deltas if d != (0, 0)]
 
     def neighbor_coords(self, index, coord_prefix, neighbor_prefix):
         code = ""
