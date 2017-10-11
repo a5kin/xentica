@@ -31,6 +31,14 @@ class GameOfLife(core.CellularAutomaton):
         return (r, g, b)
 
 
+class GameOfLifeStatic(GameOfLife):
+    class Topology:
+        dimensions = 2
+        lattice = core.OrthogonalLattice()
+        neighborhood = core.MooreNeighborhood()
+        border = core.StaticBorder(1)
+
+
 class GOLExperiment(core.Experiment):
     """ Particular experiment, to be loaded at runtime in future """
     word = "HECATE FIRST EXPERIMENT"
