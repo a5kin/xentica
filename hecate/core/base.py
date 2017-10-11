@@ -34,6 +34,7 @@ class BSCA(type):
             return cls._new_class
 
         cls._topology = attrs.get('Topology', None)
+        cls._new_class._topology = cls._topology
         if cls._topology is None:
             raise HecateException("No Topology class declared.")
 
