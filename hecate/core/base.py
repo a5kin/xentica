@@ -2,8 +2,6 @@ import functools
 import operator
 import threading
 import pickle
-import inspect
-import ast
 
 import numpy as np
 
@@ -13,6 +11,8 @@ import pycuda.gpuarray as gpuarray
 
 from hecate.bridge import MoireBridge
 from hecate.seeds.random import LocalRandom
+
+__all__ = ['context', ]
 
 
 class HecateException(Exception):
