@@ -11,6 +11,7 @@ import pycuda.gpuarray as gpuarray
 
 from hecate.bridge import MoireBridge
 from hecate.seeds.random import LocalRandom
+from hecate.core.properties import Property, ContainerProperty
 
 __all__ = ['context', ]
 
@@ -28,11 +29,13 @@ class BSCA(type):
 
     """
     def __new__(cls, name, bases, attrs):
+        # prepare new class
         cls._new_class = super().__new__(cls, name, bases, attrs)
         cls._parents = [b for b in bases if isinstance(b, BSCA)]
         if not cls._parents:
             return cls._new_class
 
+        # prepare topology
         cls._topology = attrs.get('Topology', None)
         cls._new_class._topology = cls._topology
         if cls._topology is None:
@@ -50,6 +53,13 @@ class BSCA(type):
         cls._topology.border.dimensions = cls._topology.dimensions
         cls._topology.neighborhood.topology = cls._topology
         cls._topology.border.topology = cls._topology
+
+        # scan and prepare properties
+        cls._new_class._properties = ContainerProperty()
+        for obj_name, obj in attrs.items():
+            if isinstance(obj, Property):
+                cls._new_class._properties.__dict__[obj_name] = obj
+        # print(dir(cls._new_class._properties))
 
         # build CUDA source
         cls._new_class.cuda_source = cls._new_class._build_defines()
