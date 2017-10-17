@@ -25,6 +25,6 @@ class ContainerProperty(Property):
         return np.uint8
 
     @property
-    def cudatype(self):
+    def ctype(self):
         # hardcoded
         return "unsigned char"
