@@ -55,10 +55,15 @@ class BSCA(type):
         cls._topology.border.topology = cls._topology
 
         # scan and prepare properties
-        cls._new_class._properties = ContainerProperty()
+        cls._new_class.main = ContainerProperty()
+        cls._new_class.buffers = []
+        for i in range(len(cls._topology.neighborhood)):
+            cls._new_class.buffers.append(ContainerProperty())
         for obj_name, obj in attrs.items():
             if isinstance(obj, Property):
-                cls._new_class._properties.__dict__[obj_name] = obj
+                cls._new_class.main.__dict__[obj_name] = obj
+            for i in range(len(cls._topology.neighborhood)):
+                cls._new_class.buffers[i].__dict__[obj_name] = obj
         # print(dir(cls._new_class._properties))
 
         # build CUDA source
@@ -72,7 +77,6 @@ class BSCA(type):
 
         # hardcoded stuff
         cls._new_class.dtype = np.uint8
-        cls._new_class.buffers = [0] * 9
         cls._new_class.fade_in = 255
         cls._new_class.fade_out = 255
         cls._new_class.smooth_factor = 1
@@ -239,7 +243,7 @@ class CellularAutomaton(metaclass=BSCA):
         self.render_gpu = cuda_module.get_function("render")
         init_colors = np.zeros((self.cells_num * 3, ), dtype=np.int32)
         self.colors_gpu = gpuarray.to_gpu(init_colors)
-        cells_total = self.cells_num * len(self.buffers) + 1
+        cells_total = self.cells_num * (len(self.buffers) + 1) + 1
         self.random = LocalRandom(experiment_class.word)
         experiment_class.seed.random = self.random
         init_cells = np.zeros((cells_total, ), dtype=self.dtype)
