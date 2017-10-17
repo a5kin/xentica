@@ -66,7 +66,7 @@ class BSCA(type):
                     cls._new_class.buffers[i].__dict__[obj_name] = obj
 
         cls._new_class.dtype = cls._new_class.main.dtype
-        cls._new_class.cudatype = cls._new_class.main.cudatype
+        cls._new_class._ctype = cls._new_class.main.ctype
         # print(dir(cls._new_class._properties))
 
         # build CUDA source
@@ -85,6 +85,7 @@ class BSCA(type):
         return cls._new_class
 
     def _elementwise_kernel(self, name, args, body):
+        arg_string = ", ".join(["%s %s" % (t, v) for t, v in args])
         kernel = """
             __global__ void %s(%s, int n) {
 
@@ -98,7 +99,7 @@ class BSCA(type):
 
             }
 
-        """ % (name, args, body)
+        """ % (name, arg_string, body)
         return kernel
 
     def _translate_code(cls, func):
@@ -112,11 +113,11 @@ class BSCA(type):
             num_neighbors = len(cls._topology.neighborhood)
             neighbors = ["_dcell%d" % i for i in range(num_neighbors)]
             return """
-                unsigned char s = {summed_neighbors};
-                unsigned char state;
+                {ctype} s = {summed_neighbors};
+                {ctype} state;
                 state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
                 fld[i] = state;
-            """.format(summed_neighbors=" + ".join(neighbors))
+            """.format(summed_neighbors=" + ".join(neighbors), ctype=cls._ctype)
         if func.__name__ == 'color':
             return """
                 int new_r = state * 255 * SMOOTH_FACTOR;
@@ -146,12 +147,12 @@ class BSCA(type):
         return defines
 
     def _build_emit(cls):
-        args = "unsigned char *fld"
+        args = [(cls._ctype, "*fld"), ]
         body = cls._translate_code(cls.emit)
         return cls._elementwise_kernel("emit", args, body)
 
     def _build_absorb(cls):
-        args = "unsigned char *fld, int3 *col"
+        args = [(cls._ctype, "*fld"), ("int3", "*col")]
         body = cls._topology.lattice.index_to_coord_code("i", "_x")
         coord_vars = ["_nx%d" % i for i in range(cls._topology.dimensions)]
         neighborhood = cls._topology.neighborhood
@@ -161,7 +162,7 @@ class BSCA(type):
             state_code = neighborhood.neighbor_state(i, i, "_nx",
                                                      "_dcell%d" % i)
             is_cell_off_board = cls._topology.lattice.is_off_board_code("_nx")
-            body += "unsigned char _dcell%d;" % i
+            body += "%s _dcell%d;" % (cls._ctype, i)
             if hasattr(cls._topology.border, "wrap_coords"):
                 body += """
                     if ({is_cell_off_board}) {{
@@ -191,8 +192,15 @@ class BSCA(type):
         return cls._elementwise_kernel("absorb", args, body)
 
     def _build_render(cls):
-        args = "int3 *col, int *img, int zoom, int dx, int dy, int width"
         # hardcoded for now
+        args = [
+            ("int3", "*col"),
+            ("int", "*img"),
+            ("int", "zoom"),
+            ("int", "dx"),
+            ("int", "dy"),
+            ("int", "width"),
+        ]
         body = """
             int x = (int) (((float) (i % width)) / (float) zoom) + dx;
             int y = (int) (((float) (i / width)) / (float) zoom) + dy;
