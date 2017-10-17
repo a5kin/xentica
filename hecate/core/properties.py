@@ -1,5 +1,7 @@
 import math
 
+import numpy as np
+
 
 class Property:
     """
@@ -16,4 +18,13 @@ class IntegerProperty(Property):
 
 
 class ContainerProperty(Property):
-    pass
+
+    @property
+    def dtype(self):
+        # hardcoded
+        return np.uint8
+
+    @property
+    def cudatype(self):
+        # hardcoded
+        return "unsigned char"
