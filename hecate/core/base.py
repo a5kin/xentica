@@ -64,6 +64,9 @@ class BSCA(type):
                 cls._new_class.main.__dict__[obj_name] = obj
                 for i in range(len(cls._topology.neighborhood)):
                     cls._new_class.buffers[i].__dict__[obj_name] = obj
+
+        cls._new_class.dtype = cls._new_class.main.dtype
+        cls._new_class.cudatype = cls._new_class.main.cudatype
         # print(dir(cls._new_class._properties))
 
         # build CUDA source
@@ -76,7 +79,6 @@ class BSCA(type):
         cls._new_class._topology = cls._topology
 
         # hardcoded stuff
-        cls._new_class.dtype = np.uint8
         cls._new_class.fade_in = 255
         cls._new_class.fade_out = 255
         cls._new_class.smooth_factor = 1
