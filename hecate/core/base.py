@@ -57,12 +57,13 @@ class BSCA(type):
         # scan and prepare properties
         cls._new_class.main = ContainerProperty()
         cls._new_class.buffers = []
-        for i in range(len(cls._topology.neighborhood)):
+        num_neighbors = len(cls._topology.neighborhood)
+        for i in range(num_neighbors):
             cls._new_class.buffers.append(ContainerProperty())
         for obj_name, obj in attrs.items():
             if isinstance(obj, Property):
                 cls._new_class.main.__dict__[obj_name] = obj
-                for i in range(len(cls._topology.neighborhood)):
+                for i in range(num_neighbors):
                     cls._new_class.buffers[i].__dict__[obj_name] = obj
 
         cls._new_class.dtype = cls._new_class.main.dtype
@@ -117,7 +118,8 @@ class BSCA(type):
                 {ctype} state;
                 state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
                 fld[i] = state;
-            """.format(summed_neighbors=" + ".join(neighbors), ctype=cls._ctype)
+            """.format(summed_neighbors=" + ".join(neighbors),
+                       ctype=cls._ctype)
         if func.__name__ == 'color':
             return """
                 int new_r = state * 255 * SMOOTH_FACTOR;
