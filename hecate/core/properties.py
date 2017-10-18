@@ -13,17 +13,37 @@ class Property:
         self._ctype = None
         self._bit_width = None
         self._width = None
+        self._best_type = None
+        self._types = (
+            # (bit_width, numpy_dtype, gpu_c_type)
+            (8, np.uint8, 'char'),
+            (16, np.uint16, 'short'),
+            (32, np.uint32, 'int'),
+        )
+
+    @property
+    def best_type(self):
+        if self._best_type is None:
+            self._best_type = self._types[-1]
+            for t in self._types:
+                type_width = t[0]
+                if self.bit_width <= type_width:
+                    self.best_type = t
+        return self._best_type
 
     @property
     def dtype(self):
         if self._dtype is not None:
             return self._dtype
-        self.bit_width
+        self._dtype = 'unsigned ' + self.best_type[1]
+        return self._dtype
 
     @property
     def ctype(self):
         if self._ctype is not None:
             return self._ctype
+        self._ctype = 'unsigned ' + self.best_type[2]
+        return self._ctype
 
     @property
     def bit_width(self):
@@ -33,8 +53,10 @@ class Property:
 
     @property
     def width(self):
-        if self._width is not None:
-            return self._width
+        if self._width is None:
+            type_width = self.best_type[0]
+            self._width = int(math.ceil(self.bit_width / type_width))
+        return self._width
 
     def calc_bit_width(self):
         return 1  # default, just for consistency
