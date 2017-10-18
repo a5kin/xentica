@@ -28,14 +28,15 @@ class Property:
             for t in self._types:
                 type_width = t[0]
                 if self.bit_width <= type_width:
-                    self.best_type = t
+                    self._best_type = t
+                    break
         return self._best_type
 
     @property
     def dtype(self):
         if self._dtype is not None:
             return self._dtype
-        self._dtype = 'unsigned ' + self.best_type[1]
+        self._dtype = self.best_type[1]
         return self._dtype
 
     @property
