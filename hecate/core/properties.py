@@ -67,6 +67,7 @@ class IntegerProperty(Property):
 
     def __init__(self, max_val):
         self.max_val = max_val
+        super(IntegerProperty, self).__init__()
 
     def calc_bit_width(self):
         return int(math.log2(self.max_val)) + 1
