@@ -62,13 +62,12 @@ class BSCA(type):
             cls._new_class.buffers.append(ContainerProperty())
         for obj_name, obj in attrs.items():
             if isinstance(obj, Property):
-                cls._new_class.main.__dict__[obj_name] = obj
+                cls._new_class.main[obj_name] = obj
                 for i in range(num_neighbors):
-                    cls._new_class.buffers[i].__dict__[obj_name] = obj
+                    cls._new_class.buffers[i][obj_name] = obj
 
         cls._new_class.dtype = cls._new_class.main.dtype
         cls._new_class._ctype = cls._new_class.main.ctype
-        # print(dir(cls._new_class._properties))
 
         # build CUDA source
         cls._new_class.cuda_source = cls._new_class._build_defines()

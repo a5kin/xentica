@@ -1,4 +1,5 @@
 import math
+from collections import OrderedDict
 
 import numpy as np
 
@@ -75,12 +76,20 @@ class IntegerProperty(Property):
 
 class ContainerProperty(Property):
 
-    @property
-    def dtype(self):
-        # hardcoded
-        return np.uint8
+    def __init__(self):
+        super(ContainerProperty, self).__init__()
+        self._properties = OrderedDict()
 
-    @property
-    def ctype(self):
-        # hardcoded
-        return "unsigned char"
+    def items(self):
+        for p in self._properties.values():
+            yield p
+
+    def __getitem__(self, key):
+        return self._properties[key]
+
+    def __setitem__(self, key, val):
+        self._properties[key] = val
+        self.__dict__[key] = val
+
+    def calc_bit_width(self):
+        return sum([p.bit_width for p in self._properties.values()])
