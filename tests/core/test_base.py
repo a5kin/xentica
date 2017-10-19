@@ -2,7 +2,10 @@ import unittest
 import os
 import binascii
 
+import numpy as np
+
 from hecate.core.base import HecateException, CellularAutomaton
+from hecate.core.properties import IntegerProperty
 from examples.game_of_life import (
     GameOfLife, GameOfLifeStatic,
     GOLExperiment,
@@ -104,3 +107,13 @@ class TestCellularAutomaton(unittest.TestCase):
         self.assertNotEqual(3395585361, checksum,
                             "Checksum shoud be different from parent class.")
         self.assertEqual(2543376250, checksum, "Wrong field checksum.")
+
+    def test_cell_width(self):
+        class GameOfLifeInt(GameOfLife):
+            state = IntegerProperty(max_val=2 ** 16 - 1)
+        ca = GameOfLifeInt(GOLExperiment)
+        for j in range(self.num_steps):
+            ca.step()
+        cells = ca.cells_gpu.get()[:ca.cells_num].astype(np.uint8)
+        checksum = binascii.crc32(cells)
+        self.assertEqual(3395585361, checksum, "Wrong field checksum.")
