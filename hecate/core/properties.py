@@ -63,6 +63,9 @@ class Property:
     def calc_bit_width(self):
         return 1  # default, just for consistency
 
+    def set_bsca(self, bsca):
+        self._bsca = bsca
+
 
 class IntegerProperty(Property):
 
@@ -89,7 +92,12 @@ class ContainerProperty(Property):
 
     def __setitem__(self, key, val):
         self._properties[key] = val
-        self.__dict__[key] = val
+        setattr(self, key, val)
 
     def calc_bit_width(self):
         return sum([p.bit_width for p in self._properties.values()])
+
+    def set_bsca(self, bsca):
+        self._bsca = bsca
+        for key in self._properties.keys():
+            self[key].set_bsca(bsca)

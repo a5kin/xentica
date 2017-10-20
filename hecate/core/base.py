@@ -1,4 +1,5 @@
 import functools
+import itertools
 import operator
 import threading
 import pickle
@@ -68,6 +69,9 @@ class BSCA(type):
                 cls._new_class.main[obj_name] = obj
                 for i in range(num_neighbors):
                     cls._new_class.buffers[i][obj_name] = obj
+        cls._new_class.main.set_bsca(cls._new_class)
+        for i in range(num_neighbors):
+            cls._new_class.buffers[i].set_bsca(cls._new_class)
 
         cls._new_class.dtype = cls._new_class.main.dtype
         cls._new_class._ctype = cls._new_class.main.ctype
