@@ -106,6 +106,11 @@ class BSCA(type):
         return kernel
 
     def _translate_code(cls, func):
+        cls._func_body = ""
+        func()
+        return cls._func_body
+
+    def _translate_code_hardcoded(cls, func):
         # hardcoded for now
         if func.__name__ == 'emit':
             body = ""
@@ -152,7 +157,7 @@ class BSCA(type):
 
     def _build_emit(cls):
         args = [(cls._ctype, "*fld"), ]
-        body = cls._translate_code(cls.emit)
+        body = cls._translate_code_hardcoded(cls.emit)
         return cls._elementwise_kernel("emit", args, body)
 
     def _build_absorb(cls):
@@ -191,8 +196,8 @@ class BSCA(type):
                     ),
                     get_neighbor_state=state_code,
                 )
-        body += cls._translate_code(cls.absorb)
-        body += cls._translate_code(cls.color)
+        body += cls._translate_code_hardcoded(cls.absorb)
+        body += cls._translate_code_hardcoded(cls.color)
         return cls._elementwise_kernel("absorb", args, body)
 
     def _build_render(cls):
