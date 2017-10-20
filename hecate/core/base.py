@@ -111,7 +111,7 @@ class BSCA(type):
 
     def _translate_code(cls, func):
         cls._func_body = ""
-        func()
+        func(cls)
         return cls._func_body
 
     def _translate_code_hardcoded(cls, func):
