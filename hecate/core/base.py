@@ -64,7 +64,9 @@ class BSCA(type):
         num_neighbors = len(cls._topology.neighborhood)
         for i in range(num_neighbors):
             cls._new_class.buffers.append(ContainerProperty())
-        for obj_name, obj in attrs.items():
+        attrs_items = [base_class.__dict__.items() for base_class in bases]
+        attrs_items.append(attrs.items())
+        for obj_name, obj in itertools.chain.from_iterable(attrs_items):
             if isinstance(obj, Property):
                 cls._new_class.main[obj_name] = obj
                 for i in range(num_neighbors):
