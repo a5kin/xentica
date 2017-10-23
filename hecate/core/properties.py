@@ -3,6 +3,8 @@ from collections import OrderedDict
 
 import numpy as np
 
+from hecate.core.variables import DeferredExpression
+
 
 class Property:
     """
@@ -15,6 +17,7 @@ class Property:
         self._bit_width = None
         self._width = None
         self._best_type = None
+        self._bsca = None
         self._types = (
             # (bit_width, numpy_dtype, gpu_c_type)
             (8, np.uint8, 'char'),
@@ -75,6 +78,12 @@ class IntegerProperty(Property):
 
     def calc_bit_width(self):
         return int(math.log2(self.max_val)) + 1
+
+    def __get__(self, name):
+        return DeferredExpression(self.var_name)
+
+    def __set__(self, name, val):
+        self._bsca._func_body += val.code
 
 
 class ContainerProperty(Property):
