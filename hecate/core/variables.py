@@ -7,3 +7,9 @@ class Variable:
 
 class IntegerVariable(Variable):
     pass
+
+
+class DeferredExpression:
+
+    def __init__(self, code):
+        self.code = code
