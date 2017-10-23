@@ -66,24 +66,51 @@ class Property:
     def calc_bit_width(self):
         return 1  # default, just for consistency
 
-    def set_bsca(self, bsca):
+    def set_bsca(self, bsca, buf_num):
         self._bsca = bsca
+        self._buf_num = buf_num
+
+    def __getattribute__(self, attr):
+        obj = object.__getattribute__(self, attr)
+        if hasattr(obj, '__get__'):
+            return obj.__get__(self, type(self))
+        return obj
+
+    def __setattr__(self, attr, val):
+        try:
+            obj = object.__getattribute__(self, attr)
+        except AttributeError:
+            object.__setattr__(self, attr, val)
+        else:
+            if hasattr(obj, '__set__'):
+                obj.__set__(self, val)
+            else:
+                object.__setattr__(self, attr, val)
 
 
 class IntegerProperty(Property):
 
     def __init__(self, max_val):
         self.max_val = max_val
+        self.buf_num = 0
         super(IntegerProperty, self).__init__()
 
     def calc_bit_width(self):
         return int(math.log2(self.max_val)) + 1
 
-    def __get__(self, name):
+    @property
+    def var_name(self):
+        offset = ""
+        if self._buf_num > 0:
+            offset = " + n * %d" % self._buf_num
+        return "fld[i%s]" % offset
+
+    def __get__(self, obj, objtype):
         return DeferredExpression(self.var_name)
 
-    def __set__(self, name, val):
-        self._bsca._func_body += val.code
+    def __set__(self, obj, value):
+        code = "%s = %s;\n" % (self.var_name, value.code)
+        self._bsca._func_body += code
 
 
 class ContainerProperty(Property):
@@ -106,7 +133,8 @@ class ContainerProperty(Property):
     def calc_bit_width(self):
         return sum([p.bit_width for p in self._properties.values()])
 
-    def set_bsca(self, bsca):
+    def set_bsca(self, bsca, buf_num):
         self._bsca = bsca
+        self._buf_num = buf_num
         for key in self._properties.keys():
-            self[key].set_bsca(bsca)
+            self[key].set_bsca(bsca, buf_num)

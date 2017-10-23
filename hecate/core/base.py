@@ -3,6 +3,7 @@ import itertools
 import operator
 import threading
 import pickle
+from copy import deepcopy
 
 import numpy as np
 
@@ -68,12 +69,12 @@ class BSCA(type):
         attrs_items.append(attrs.items())
         for obj_name, obj in itertools.chain.from_iterable(attrs_items):
             if isinstance(obj, Property):
-                cls._new_class.main[obj_name] = obj
+                cls._new_class.main[obj_name] = deepcopy(obj)
                 for i in range(num_neighbors):
-                    cls._new_class.buffers[i][obj_name] = obj
-        cls._new_class.main.set_bsca(cls._new_class)
+                    cls._new_class.buffers[i][obj_name] = deepcopy(obj)
+        cls._new_class.main.set_bsca(cls._new_class, 0)
         for i in range(num_neighbors):
-            cls._new_class.buffers[i].set_bsca(cls._new_class)
+            cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1)
 
         cls._new_class.dtype = cls._new_class.main.dtype
         cls._new_class._ctype = cls._new_class.main.ctype
@@ -163,7 +164,7 @@ class BSCA(type):
 
     def _build_emit(cls):
         args = [(cls._ctype, "*fld"), ]
-        body = cls._translate_code_hardcoded(cls.emit)
+        body = cls._translate_code(cls.emit)
         return cls._elementwise_kernel("emit", args, body)
 
     def _build_absorb(cls):
