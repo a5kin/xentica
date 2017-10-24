@@ -128,7 +128,7 @@ class ContainerProperty(Property):
 
     def __setitem__(self, key, val):
         self._properties[key] = val
-        setattr(self, key, val)
+        object.__setattr__(self, key, val)
 
     def calc_bit_width(self):
         return sum([p.bit_width for p in self._properties.values()])
