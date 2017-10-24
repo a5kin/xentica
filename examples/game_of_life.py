@@ -22,7 +22,7 @@ class GameOfLife(core.CellularAutomaton):
             neighbors_alive += self.neighbors[i].buffer.state
         is_born = (8 >> neighbors_alive) & 1
         is_sustain = (12 >> neighbors_alive) & 1
-        self.main.state = is_born | is_sustain & self.main_state
+        self.main.state = is_born | is_sustain & self.main.state
 
     def color(self):
         r = self.main.state * 255
