@@ -2,6 +2,7 @@ import math
 from collections import OrderedDict
 
 import numpy as np
+from cached_property import cached_property
 
 from hecate.core.variables import DeferredExpression
 
@@ -25,43 +26,32 @@ class Property:
             (32, np.uint32, 'int'),
         )
 
-    @property
+    @cached_property
     def best_type(self):
-        if self._best_type is None:
-            self._best_type = self._types[-1]
-            for t in self._types:
-                type_width = t[0]
-                if self.bit_width <= type_width:
-                    self._best_type = t
-                    break
-        return self._best_type
+        _best_type = self._types[-1]
+        for t in self._types:
+            type_width = t[0]
+            if self.bit_width <= type_width:
+                _best_type = t
+                break
+        return _best_type
 
-    @property
+    @cached_property
     def dtype(self):
-        if self._dtype is not None:
-            return self._dtype
-        self._dtype = self.best_type[1]
-        return self._dtype
+        return self.best_type[1]
 
-    @property
+    @cached_property
     def ctype(self):
-        if self._ctype is not None:
-            return self._ctype
-        self._ctype = 'unsigned ' + self.best_type[2]
-        return self._ctype
+        return 'unsigned ' + self.best_type[2]
 
-    @property
+    @cached_property
     def bit_width(self):
-        if self._bit_width is None:
-            self._bit_width = self.calc_bit_width()
-        return self._bit_width
+        return self.calc_bit_width()
 
-    @property
+    @cached_property
     def width(self):
-        if self._width is None:
-            type_width = self.best_type[0]
-            self._width = int(math.ceil(self.bit_width / type_width))
-        return self._width
+        type_width = self.best_type[0]
+        return int(math.ceil(self.bit_width / type_width))
 
     def calc_bit_width(self):
         return 1  # default, just for consistency
@@ -92,13 +82,13 @@ class IntegerProperty(Property):
 
     def __init__(self, max_val):
         self.max_val = max_val
-        self.buf_num = 0
+        self._buf_num = 0
         super(IntegerProperty, self).__init__()
 
     def calc_bit_width(self):
         return int(math.log2(self.max_val)) + 1
 
-    @property
+    @cached_property
     def var_name(self):
         offset = ""
         if self._buf_num > 0:
