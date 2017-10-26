@@ -22,6 +22,13 @@ class HecateException(Exception):
     """ Basic Hecate framework exception """
 
 
+class CachedNeighbor:
+
+    def __init__(self):
+        self.main = ContainerProperty()
+        self.buffer = ContainerProperty()
+
+
 class BSCA(type):
     """
     Meta-class for CellularAutomaton.
@@ -62,9 +69,11 @@ class BSCA(type):
         # scan and prepare properties
         cls._new_class.main = ContainerProperty()
         cls._new_class.buffers = []
+        cls._new_class.neighbors = []
         num_neighbors = len(cls._topology.neighborhood)
         for i in range(num_neighbors):
             cls._new_class.buffers.append(ContainerProperty())
+            cls._new_class.neighbors.append(CachedNeighbor())
         attrs_items = [base_class.__dict__.items() for base_class in bases]
         attrs_items.append(attrs.items())
         for obj_name, obj in itertools.chain.from_iterable(attrs_items):
@@ -72,6 +81,8 @@ class BSCA(type):
                 cls._new_class.main[obj_name] = deepcopy(obj)
                 for i in range(num_neighbors):
                     cls._new_class.buffers[i][obj_name] = deepcopy(obj)
+                    cls._new_class.neighbors[i].main[obj_name] = deepcopy(obj)
+                    cls._new_class.neighbors[i].buffer[obj_name] = deepcopy(obj)
         cls._new_class.main.set_bsca(cls._new_class, 0)
         for i in range(num_neighbors):
             cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1)
