@@ -13,11 +13,6 @@ class Property:
 
     """
     def __init__(self):
-        self._dtype = None
-        self._ctype = None
-        self._bit_width = None
-        self._width = None
-        self._best_type = None
         self._bsca = None
         self._types = (
             # (bit_width, numpy_dtype, gpu_c_type)
