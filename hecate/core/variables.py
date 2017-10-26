@@ -13,6 +13,11 @@ class Variable:
         pass
 
     @cached_property
+    def _bsca(self):
+        frame = inspect.currentframe().f_back.f_back
+        return frame.f_locals.get('self', '')
+
+    @cached_property
     def var_name(self):
         frame = inspect.currentframe().f_back.f_back
         all_vars = itertools.chain(frame.f_globals.items(),
