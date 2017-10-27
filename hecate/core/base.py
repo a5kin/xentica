@@ -123,9 +123,10 @@ class BSCA(type):
         """ % (name, arg_string, body)
         return kernel
 
-    def _translate_code(cls, func):
+    def _translate_code(cls, *funcs):
         cls._func_body = ""
-        func(cls)
+        for func in funcs:
+            func(cls)
         return cls._func_body
 
     def _translate_code_hardcoded(cls, func):
@@ -214,8 +215,9 @@ class BSCA(type):
                     ),
                     get_neighbor_state=state_code,
                 )
-        body += cls._translate_code_hardcoded(cls.absorb)
-        body += cls._translate_code_hardcoded(cls.color)
+        #body += cls._translate_code_hardcoded(cls.absorb)
+        #body += cls._translate_code_hardcoded(cls.color)
+        body += cls._translate_code(cls.absorb, cls.color)
         return cls._elementwise_kernel("absorb", args, body)
 
     def _build_render(cls):
