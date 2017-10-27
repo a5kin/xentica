@@ -132,38 +132,6 @@ class BSCA(type):
             func(cls)
         return cls._func_body
 
-    def _translate_code_hardcoded(cls, func):
-        # hardcoded for now
-        if func.__name__ == 'emit':
-            body = ""
-            for i in range(len(cls._topology.neighborhood)):
-                body += "fld[i + n * %d] = fld[i];\n" % (i + 1, )
-            return body
-        if func.__name__ == 'absorb':
-            num_neighbors = len(cls._topology.neighborhood)
-            neighbors = ["_dcell%d" % i for i in range(num_neighbors)]
-            return """
-                {ctype} s = {summed_neighbors};
-                {ctype} state;
-                state = ((8 >> s) & 1) | ((12 >> s) & 1) & fld[i + n];
-                fld[i] = state;
-            """.format(summed_neighbors=" + ".join(neighbors),
-                       ctype=cls._ctype)
-        if func.__name__ == 'color':
-            return """
-                int new_r = state * 255 * SMOOTH_FACTOR;
-                int new_g = state * 255 * SMOOTH_FACTOR;
-                int new_b = state * 255 * SMOOTH_FACTOR;
-                int3 old_col = col[i];
-                new_r = max(min(new_r, old_col.x + FADE_IN),
-                            old_col.x - FADE_OUT);
-                new_g = max(min(new_g, old_col.y + FADE_IN),
-                            old_col.y - FADE_OUT);
-                new_b = max(min(new_b, old_col.z + FADE_IN),
-                            old_col.z - FADE_OUT);
-                col[i] = make_int3(new_r, new_g, new_b);
-            """
-
     def _build_defines(cls):
         defines = ""
         for i in range(cls._topology.dimensions):
