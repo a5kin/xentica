@@ -36,6 +36,8 @@ class DeferredExpression:
         return DeferredExpression(code)
 
     def __iadd__(self, value):
+        if isinstance(self, Variable):
+            self._declare_once()
         code = "%s += %s;\n" % (self.var_name, value)
         self._bsca._func_body += code
         return self
@@ -50,7 +52,7 @@ class Variable(DeferredExpression):
         super(Variable, self).__init__()
         self._declared = False
         if val is not None:
-            self.__set__(self, DeferredExpression(str(val)))
+            self._init_val = DeferredExpression(str(val))
 
     @property
     def _holder_frame(self):
@@ -74,7 +76,9 @@ class Variable(DeferredExpression):
 
     def _declare_once(self):
         if not self._declared:
-            c = "%s %s;\n" % (self.var_type, self.var_name)
+            c = "%s %s = %s;\n" % (
+                self.var_type, self.var_name, self._init_val
+            )
             self._bsca._func_body += c
             self._declared = True
             setattr(self._bsca, self.var_name, self)
@@ -95,5 +99,5 @@ class Variable(DeferredExpression):
 class IntegerVariable(Variable):
     var_type = "unsigned int"
 
-    def __init__(self, val=None):
+    def __init__(self, val=0):
         super(IntegerVariable, self).__init__(val)
