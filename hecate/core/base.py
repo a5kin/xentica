@@ -81,8 +81,11 @@ class BSCA(type):
                 cls._new_class.main[obj_name] = deepcopy(obj)
                 for i in range(num_neighbors):
                     cls._new_class.buffers[i][obj_name] = deepcopy(obj)
-                    cls._new_class.neighbors[i].main[obj_name] = deepcopy(obj)
-                    cls._new_class.neighbors[i].buffer[obj_name] = deepcopy(obj)
+                    neighbor = cls._new_class.neighbors[i]
+                    neighbor.main[obj_name] = deepcopy(obj)
+                    neighbor.buffer[obj_name] = deepcopy(obj)
+                    # temporary hack to make buffers return correct var name
+                    neighbor.buffer[obj_name].var_name = "_dcell%d" % i
         cls._new_class.main.set_bsca(cls._new_class, 0)
         for i in range(num_neighbors):
             cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1)
@@ -215,8 +218,6 @@ class BSCA(type):
                     ),
                     get_neighbor_state=state_code,
                 )
-        #body += cls._translate_code_hardcoded(cls.absorb)
-        #body += cls._translate_code_hardcoded(cls.color)
         body += cls._translate_code(cls.absorb, cls.color)
         return cls._elementwise_kernel("absorb", args, body)
 
