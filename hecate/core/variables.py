@@ -35,6 +35,14 @@ class DeferredExpression:
         code = "(%s | %s)" % (value, self)
         return DeferredExpression(code)
 
+    def __mul__(self, value):
+        code = "(%s * %s)" % (self, value)
+        return DeferredExpression(code)
+
+    def __rmul__(self, value):
+        code = "(%s * %s)" % (value, self)
+        return DeferredExpression(code)
+
     def __iadd__(self, value):
         if isinstance(self, Variable):
             self._declare_once()
