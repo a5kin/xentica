@@ -8,7 +8,7 @@ def color_effect(func, effect):
             %s
             col[i] = make_int3(new_r, new_g, new_b);
         """ % (r, g, b, effect)
-        return code
+        self_var._func_body += code
     return wrapper
 
 
