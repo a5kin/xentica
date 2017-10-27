@@ -1,5 +1,6 @@
 from hecate import core
 from hecate import seeds
+from hecate.core import color_effects
 
 
 class GameOfLife(core.CellularAutomaton):
@@ -24,6 +25,7 @@ class GameOfLife(core.CellularAutomaton):
         is_sustain = (12 >> neighbors_alive) & 1
         self.main.state = is_born | is_sustain & self.main.state
 
+    @color_effects.moving_average
     def color(self):
         r = self.main.state * 255
         g = self.main.state * 255
