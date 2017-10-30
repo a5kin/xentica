@@ -36,7 +36,7 @@ class DeferredExpression:
                 def op_func(self_var, value):
                     if isinstance(self_var, Variable):
                         self_var._declare_once()
-                    code = "%s += %s;\n" % (self_var.var_name, value)
+                    code = "%s %s= %s;\n" % (self_var.var_name, op, value)
                     self_var._bsca._func_body += code
                     return self
                 return op_func
