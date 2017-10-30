@@ -72,6 +72,13 @@ class Property:
             else:
                 object.__setattr__(self, attr, val)
 
+    def __get__(self, obj, objtype):
+        return DeferredExpression(self.var_name)
+
+    def __set__(self, obj, value):
+        code = "%s = %s;\n" % (self.var_name, value.code)
+        self._bsca._func_body += code
+
 
 class IntegerProperty(Property):
 
@@ -89,13 +96,6 @@ class IntegerProperty(Property):
         if self._buf_num > 0:
             offset = " + n * %d" % self._buf_num
         return "fld[i%s]" % offset
-
-    def __get__(self, obj, objtype):
-        return DeferredExpression(self.var_name)
-
-    def __set__(self, obj, value):
-        code = "%s = %s;\n" % (self.var_name, value.code)
-        self._bsca._func_body += code
 
 
 class ContainerProperty(Property):
@@ -123,3 +123,9 @@ class ContainerProperty(Property):
         self._buf_num = buf_num
         for key in self._properties.keys():
             self[key].set_bsca(bsca, buf_num)
+
+    def __get__(self, obj, objtype):
+        return self
+
+    def __set__(self, obj, value):
+        pass
