@@ -18,6 +18,12 @@ class DeferredExpression:
             ('&', 'and'),
             ('~', 'xor'),
             ('|', 'or'),
+            ('<', 'lt'),
+            ('<=', 'le'),
+            ('==', 'eq'),
+            ('!=', 'ne'),
+            ('>', 'gt'),
+            ('>=', 'ge'),
         )
         for c_op, base_name in ops:
             def binary_direct(op):
