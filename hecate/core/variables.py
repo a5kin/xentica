@@ -7,7 +7,7 @@ class DeferredExpression:
 
     def __init__(self, code=''):
         self.code = code
-        ops = (
+        binary_ops = (
             ('+', 'add'),
             ('-', 'sub'),
             ('*', 'mul'),
@@ -16,7 +16,7 @@ class DeferredExpression:
             ('>>', 'rshift'),
             ('<<', 'lshift'),
             ('&', 'and'),
-            ('~', 'xor'),
+            ('^', 'xor'),
             ('|', 'or'),
             ('<', 'lt'),
             ('<=', 'le'),
@@ -25,7 +25,16 @@ class DeferredExpression:
             ('>', 'gt'),
             ('>=', 'ge'),
         )
-        for c_op, base_name in ops:
+        unary_ops = (
+            ('-', 'neg'),
+            ('+', 'pos'),
+            ('abs', 'abs'),
+            ('~', 'invert'),
+            ('int', 'int'),
+            ('float', 'float'),
+            ('round', 'round'),
+        )
+        for c_op, base_name in binary_ops:
             def binary_direct(op):
                 def op_func(self_var, value):
                     code = "(%s %s %s)" % (self_var, op, value)
@@ -53,6 +62,16 @@ class DeferredExpression:
             setattr(self.__class__, func_name, binary_reflected(c_op))
             func_name = "__i%s__" % base_name
             setattr(self.__class__, func_name, augmented_assign(c_op))
+
+        for c_op, base_name in unary_ops:
+            def unary(op):
+                def op_func(self_var):
+                    code = "%s(%s)" % (op, self_var)
+                    return DeferredExpression(code)
+                return op_func
+
+            func_name = "__%s__" % base_name
+            setattr(self.__class__, func_name, unary(c_op))
 
     def __str__(self):
         return self.code
