@@ -52,7 +52,7 @@ class DeferredExpression:
                     if isinstance(self_var, Variable):
                         self_var._declare_once()
                     code = "%s %s= %s;\n" % (self_var.var_name, op, value)
-                    self_var._bsca._func_body += code
+                    self_var._bsca.append_code(code)
                     return self
                 return op_func
 
@@ -113,7 +113,7 @@ class Variable(DeferredExpression):
             c = "%s %s = %s;\n" % (
                 self.var_type, self.var_name, self._init_val
             )
-            self._bsca._func_body += c
+            self._bsca.append_code(c)
             self._declared = True
             setattr(self._bsca, self.var_name, self)
 
@@ -127,7 +127,7 @@ class Variable(DeferredExpression):
     def __set__(self, obj, value):
         self._declare_once()
         code = "%s = %s;\n" % (self.var_name, value)
-        self._bsca._func_body += code
+        self._bsca.append_code(code)
 
 
 class IntegerVariable(Variable):

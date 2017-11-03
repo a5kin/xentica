@@ -141,6 +141,18 @@ class BSCA(type):
             cls._func_body += "%s = %s;\n" % (p._mem_cell, p.var_name)
         return cls._func_body
 
+    def append_code(cls, code):
+        cls._func_body += code
+
+    def deferred_write(cls, prop):
+        cls._deferred_writes.add(prop)
+
+    def declare(cls, prop):
+        cls._declarations.add(prop)
+
+    def is_declared(cls, prop):
+        return prop in cls._declarations
+
     def _build_defines(cls):
         defines = ""
         for i in range(cls._topology.dimensions):

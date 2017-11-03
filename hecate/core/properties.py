@@ -79,8 +79,8 @@ class Property(DeferredExpression):
     def __set__(self, obj, value):
         self._declare_once()
         code = "%s = %s;\n" % (self.var_name, value.code)
-        self._bsca._func_body += code
-        self._bsca._deferred_writes.add(self)
+        self._bsca.append_code(code)
+        self._bsca.deferred_write(self)
 
     @cached_property
     def _mem_cell(self):
@@ -95,7 +95,7 @@ class Property(DeferredExpression):
             return False
         if self.var_name[:6] == "_dcell":
             return True
-        return self in self._bsca._declarations
+        return self._bsca.is_declared(self)
 
     def _declare_once(self, init_val=None):
         if not self._declared:
@@ -106,8 +106,8 @@ class Property(DeferredExpression):
                 c = "%s %s = %s;\n" % (
                     self.ctype, self.var_name, init_val
                 )
-            self._bsca._func_body += c
-            self._bsca._declarations.add(self)
+            self._bsca.append_code(c)
+            self._bsca.declare(self)
 
 
 class IntegerProperty(Property):
