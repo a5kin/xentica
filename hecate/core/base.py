@@ -79,8 +79,11 @@ class BSCA(type):
         for obj_name, obj in itertools.chain.from_iterable(attrs_items):
             if isinstance(obj, Property):
                 cls._new_class.main[obj_name] = deepcopy(obj)
+                cls._new_class.main[obj_name].var_name = "_cell"
                 for i in range(num_neighbors):
-                    cls._new_class.buffers[i][obj_name] = deepcopy(obj)
+                    buffers = cls._new_class.buffers
+                    buffers[i][obj_name] = deepcopy(obj)
+                    buffers[i][obj_name].var_name = "_bcell%i" % i
                     neighbor = cls._new_class.neighbors[i]
                     neighbor.main[obj_name] = deepcopy(obj)
                     neighbor.buffer[obj_name] = deepcopy(obj)
@@ -89,6 +92,8 @@ class BSCA(type):
         cls._new_class.main.set_bsca(cls._new_class, 0)
         for i in range(num_neighbors):
             cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1)
+            cls._new_class.neighbors[i].main.set_bsca(cls._new_class, i + 1)
+            cls._new_class.neighbors[i].buffer.set_bsca(cls._new_class, i + 1)
 
         cls._new_class.dtype = cls._new_class.main.dtype
         cls._new_class._ctype = cls._new_class.main.ctype
@@ -128,8 +133,12 @@ class BSCA(type):
 
     def _translate_code(cls, *funcs):
         cls._func_body = ""
+        cls._deferred_writes = set()
+        cls._declarations = set()
         for func in funcs:
             func(cls)
+        for p in cls._deferred_writes:
+            cls._func_body += "%s = %s;\n" % (p._mem_cell, p.var_name)
         return cls._func_body
 
     def _build_defines(cls):

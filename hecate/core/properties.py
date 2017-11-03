@@ -7,7 +7,7 @@ from cached_property import cached_property
 from hecate.core.variables import DeferredExpression
 
 
-class Property:
+class Property(DeferredExpression):
     """
     Base class for all properties.
 
@@ -73,11 +73,41 @@ class Property:
                 object.__setattr__(self, attr, val)
 
     def __get__(self, obj, objtype):
+        self._declare_once(self._mem_cell)
         return DeferredExpression(self.var_name)
 
     def __set__(self, obj, value):
+        self._declare_once()
         code = "%s = %s;\n" % (self.var_name, value.code)
         self._bsca._func_body += code
+        self._bsca._deferred_writes.add(self)
+
+    @cached_property
+    def _mem_cell(self):
+        offset = ""
+        if self._buf_num > 0:
+            offset = " + n * %d" % self._buf_num
+        return "fld[i%s]" % offset
+
+    @property
+    def _declared(self):
+        if self._bsca is None:
+            return False
+        if self.var_name[:6] == "_dcell":
+            return True
+        return self in self._bsca._declarations
+
+    def _declare_once(self, init_val=None):
+        if not self._declared:
+            c = "%s %s;\n" % (
+                self.ctype, self.var_name
+            )
+            if init_val is not None:
+                c = "%s %s = %s;\n" % (
+                    self.ctype, self.var_name, init_val
+                )
+            self._bsca._func_body += c
+            self._bsca._declarations.add(self)
 
 
 class IntegerProperty(Property):
@@ -89,13 +119,6 @@ class IntegerProperty(Property):
 
     def calc_bit_width(self):
         return int(math.log2(self.max_val)) + 1
-
-    @cached_property
-    def var_name(self):
-        offset = ""
-        if self._buf_num > 0:
-            offset = " + n * %d" % self._buf_num
-        return "fld[i%s]" % offset
 
 
 class ContainerProperty(Property):
