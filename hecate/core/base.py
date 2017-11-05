@@ -86,14 +86,15 @@ class BSCA(type):
                     buffers[i][obj_name].var_name = "_bcell%i" % i
                     neighbor = cls._new_class.neighbors[i]
                     neighbor.main[obj_name] = deepcopy(obj)
+                    neighbor.main[obj_name].var_name = "_dcell%d" % i
                     neighbor.buffer[obj_name] = deepcopy(obj)
-                    # temporary hack to make buffers return correct var name
-                    neighbor.buffer[obj_name].var_name = "_dcell%d" % i
-        cls._new_class.main.set_bsca(cls._new_class, 0)
+                    neighbor.buffer[obj_name].var_name = "_dbcell%d" % i
+        cls._new_class.main.set_bsca(cls._new_class, 0, 0)
         for i in range(num_neighbors):
-            cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1)
-            cls._new_class.neighbors[i].main.set_bsca(cls._new_class, i + 1)
-            cls._new_class.neighbors[i].buffer.set_bsca(cls._new_class, i + 1)
+            cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1, 0)
+            cls._new_class.neighbors[i].main.set_bsca(cls._new_class, 0, i)
+            cls._new_class.neighbors[i].buffer.set_bsca(cls._new_class,
+                                                        i + 1, i)
 
         cls._new_class.dtype = cls._new_class.main.dtype
         cls._new_class._ctype = cls._new_class.main.ctype
@@ -180,9 +181,9 @@ class BSCA(type):
         for i in range(len(cls._topology.neighborhood)):
             body += neighborhood.neighbor_coords(i, "_x", "_nx")
             state_code = neighborhood.neighbor_state(i, i, "_nx",
-                                                     "_dcell%d" % i)
+                                                     "_dbcell%d" % i)
             is_cell_off_board = cls._topology.lattice.is_off_board_code("_nx")
-            body += "%s _dcell%d;" % (cls._ctype, i)
+            body += "%s _dbcell%d;" % (cls._ctype, i)
             if hasattr(cls._topology.border, "wrap_coords"):
                 body += """
                     if ({is_cell_off_board}) {{
@@ -203,7 +204,7 @@ class BSCA(type):
                 """.format(
                     is_cell_off_board=is_cell_off_board,
                     off_board_cell=cls._topology.border.off_board_state(
-                        "_nx", "_dcell%d" % i
+                        "_nx", "_dbcell%d" % i
                     ),
                     get_neighbor_state=state_code,
                 )

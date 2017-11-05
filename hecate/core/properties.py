@@ -51,9 +51,10 @@ class Property(DeferredExpression):
     def calc_bit_width(self):
         return 1  # default, just for consistency
 
-    def set_bsca(self, bsca, buf_num):
+    def set_bsca(self, bsca, buf_num, nbr_num):
         self._bsca = bsca
         self._buf_num = buf_num
+        self._nbr_num = nbr_num
 
     def __getattribute__(self, attr):
         obj = object.__getattribute__(self, attr)
@@ -93,7 +94,7 @@ class Property(DeferredExpression):
     def _declared(self):
         if self._bsca is None:
             return False
-        if self.var_name[:6] == "_dcell":
+        if self.var_name[:7] == "_dbcell":
             return True
         return self._bsca.is_declared(self)
 
@@ -141,11 +142,12 @@ class ContainerProperty(Property):
     def calc_bit_width(self):
         return sum([p.bit_width for p in self._properties.values()])
 
-    def set_bsca(self, bsca, buf_num):
+    def set_bsca(self, bsca, buf_num, nbr_num):
         self._bsca = bsca
         self._buf_num = buf_num
+        self._nbr_num = nbr_num
         for key in self._properties.keys():
-            self[key].set_bsca(bsca, buf_num)
+            self[key].set_bsca(bsca, buf_num, nbr_num)
 
     def __get__(self, obj, objtype):
         return self
