@@ -7,8 +7,10 @@ class BscaDetector:
 
     @property
     def _holder_frame(self):
+        # TODO: detect base class by scanning inheritance tree:
+        # inspect.getclasstree(inspect.getmro(type(self)))
         frame = inspect.currentframe().f_back.f_back.f_back
-        while isinstance(frame.f_locals.get('self', ''), Constant):
+        while isinstance(frame.f_locals.get('self', ''), self.base_class):
             frame = frame.f_back
         return frame
 
@@ -97,6 +99,7 @@ class Constant(BscaDetector):
         self._name = name
         self._value = value
         self._pattern_name = name
+        self.base_class = Constant
 
     def get_define_code(self):
         code = "#define %s {%s}\n" % (self._name, self._pattern_name)
@@ -115,20 +118,10 @@ class Variable(DeferredExpression, BscaDetector):
     """
     def __init__(self, val=None):
         super(Variable, self).__init__()
+        self.base_class = Variable
         self._declared = False
         if val is not None:
             self._init_val = DeferredExpression(str(val))
-
-    @property
-    def _holder_frame(self):
-        frame = inspect.currentframe().f_back.f_back.f_back
-        while isinstance(frame.f_locals.get('self', ''), Variable):
-            frame = frame.f_back
-        return frame
-
-    @cached_property
-    def _bsca(self):
-        return self._holder_frame.f_locals.get('self', '')
 
     @cached_property
     def var_name(self):
