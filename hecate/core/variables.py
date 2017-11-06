@@ -44,8 +44,8 @@ class DeferredExpression:
             ('+', 'pos'),
             ('abs', 'abs'),
             ('~', 'invert'),
-            ('int', 'int'),
-            ('float', 'float'),
+            ('(int)', 'int'),
+            ('(float)', 'float'),
             ('round', 'round'),
         )
         for c_op, base_name in binary_ops:
@@ -80,7 +80,7 @@ class DeferredExpression:
         for c_op, base_name in unary_ops:
             def unary(op):
                 def op_func(self_var):
-                    code = "%s(%s)" % (op, self_var)
+                    code = "(%s(%s))" % (op, self_var)
                     return DeferredExpression(code)
                 return op_func
 
