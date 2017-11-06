@@ -3,6 +3,20 @@ import inspect
 from cached_property import cached_property
 
 
+class BscaDetector:
+
+    @property
+    def _holder_frame(self):
+        frame = inspect.currentframe().f_back.f_back.f_back
+        while isinstance(frame.f_locals.get('self', ''), Constant):
+            frame = frame.f_back
+        return frame
+
+    @cached_property
+    def _bsca(self):
+        return self._holder_frame.f_locals.get('self', '')
+
+
 class DeferredExpression:
 
     def __init__(self, code=''):
@@ -77,7 +91,24 @@ class DeferredExpression:
         return self.code
 
 
-class Variable(DeferredExpression):
+class Constant(BscaDetector):
+
+    def __init__(self, name, value):
+        self._name = name
+        self._value = value
+        self._pattern_name = name
+
+    def get_define_code(self):
+        code = "#define %s {%s}\n" % (self._name, self._pattern_name)
+        return code
+
+    def replace_value(self, source):
+        # WARNING: potentially dangerous
+        val = "self._bsca.%s" % self._value.split()[0]
+        return source.replace("{%s}" % self._pattern_name, str(eval(val)))
+
+
+class Variable(DeferredExpression, BscaDetector):
     """
     Base class for all variables.
 
