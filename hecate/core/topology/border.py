@@ -29,9 +29,5 @@ class StaticBorder(Border):
     def __init__(self, value=0):
         self._value = value
 
-    def off_board_state(self, coord_prefix, state_name):
-        body = "{state} = {value};\n".format(
-            state=state_name,
-            value=self._value,
-        )
-        return body
+    def off_board_state(self, coord_prefix):
+        return str(self._value)

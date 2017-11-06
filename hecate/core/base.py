@@ -49,7 +49,7 @@ class BSCA(type):
             attrs['Topology'] = cls._new_class.Topology
         cls._topology = attrs.get('Topology', None)
         cls._new_class._topology = cls._topology
-        # cls._new_class.attrs['Topology'] = cls._topology
+
         if cls._topology is None:
             raise HecateException("No Topology class declared.")
 
@@ -89,9 +89,10 @@ class BSCA(type):
                     neighbor.main[obj_name].var_name = "_dcell%d" % i
                     neighbor.buffer[obj_name] = deepcopy(obj)
                     neighbor.buffer[obj_name].var_name = "_dbcell%d" % i
-        cls._new_class.main.set_bsca(cls._new_class, 0, 0)
+        # propagade BSCA to properties
+        cls._new_class.main.set_bsca(cls._new_class, 0, -1)
         for i in range(num_neighbors):
-            cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1, 0)
+            cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1, -1)
             cls._new_class.neighbors[i].main.set_bsca(cls._new_class, 0, i)
             cls._new_class.neighbors[i].buffer.set_bsca(cls._new_class,
                                                         i + 1, i)
@@ -154,6 +155,10 @@ class BSCA(type):
     def is_declared(cls, prop):
         return prop in cls._declarations
 
+    @property
+    def topology(cls):
+        return cls._topology
+
     def _build_defines(cls):
         defines = ""
         for i in range(cls._topology.dimensions):
@@ -176,38 +181,7 @@ class BSCA(type):
         args = [(cls._ctype, "*fld"), ("int3", "*col")]
         body = cls._topology.lattice.index_to_coord_code("i", "_x")
         coord_vars = ["_nx%d" % i for i in range(cls._topology.dimensions)]
-        neighborhood = cls._topology.neighborhood
         body += "int %s;\n" % ", ".join(coord_vars)
-        for i in range(len(cls._topology.neighborhood)):
-            body += neighborhood.neighbor_coords(i, "_x", "_nx")
-            state_code = neighborhood.neighbor_state(i, i, "_nx",
-                                                     "_dbcell%d" % i)
-            is_cell_off_board = cls._topology.lattice.is_off_board_code("_nx")
-            body += "%s _dbcell%d;" % (cls._ctype, i)
-            if hasattr(cls._topology.border, "wrap_coords"):
-                body += """
-                    if ({is_cell_off_board}) {{
-                        {wrap_coords}
-                    }}
-                """.format(
-                    is_cell_off_board=is_cell_off_board,
-                    wrap_coords=cls._topology.border.wrap_coords("_nx"),
-                )
-                body += state_code
-            else:
-                body += """
-                    if ({is_cell_off_board}) {{
-                        {off_board_cell}
-                    }} else {{
-                        {get_neighbor_state}
-                    }}
-                """.format(
-                    is_cell_off_board=is_cell_off_board,
-                    off_board_cell=cls._topology.border.off_board_state(
-                        "_nx", "_dbcell%d" % i
-                    ),
-                    get_neighbor_state=state_code,
-                )
         body += cls._translate_code(cls.absorb, cls.color)
         return cls._elementwise_kernel("absorb", args, body)
 
@@ -266,6 +240,7 @@ class CellularAutomaton(metaclass=BSCA):
         source = source.replace("{fadein}", str(self.fade_in))
         source = source.replace("{fadeout}", str(self.fade_out))
         source = source.replace("{smooth}", str(self.smooth_factor))
+        # print(source)
         cuda_module = SourceModule(source)
         # GPU arrays
         self.emit_gpu = cuda_module.get_function("emit")

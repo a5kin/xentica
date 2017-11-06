@@ -85,6 +85,10 @@ class Property(DeferredExpression):
 
     @cached_property
     def _mem_cell(self):
+        if self._nbr_num >= 0:
+            neighborhood = self._bsca.topology.neighborhood
+            return neighborhood.neighbor_state(self._nbr_num,
+                                               self._buf_num, "_nx")
         offset = ""
         if self._buf_num > 0:
             offset = " + n * %d" % self._buf_num
@@ -94,21 +98,55 @@ class Property(DeferredExpression):
     def _declared(self):
         if self._bsca is None:
             return False
-        if self.var_name[:7] == "_dbcell":
-            return True
         return self._bsca.is_declared(self)
 
     def _declare_once(self, init_val=None):
-        if not self._declared:
-            c = "%s %s;\n" % (
+        if self._declared:
+            return
+        c = ""
+        if self._nbr_num >= 0:
+            neighborhood = self._bsca.topology.neighborhood
+            lattice = self._bsca.topology.lattice
+            border = self._bsca.topology.border
+            c += neighborhood.neighbor_coords(self._nbr_num, "_x", "_nx")
+            is_cell_off_board = lattice.is_off_board_code("_nx")
+            if hasattr(border, "wrap_coords"):
+                c += """
+                    if ({is_cell_off_board}) {{
+                        {wrap_coords}
+                    }}
+                """.format(
+                    is_cell_off_board=is_cell_off_board,
+                    wrap_coords=border.wrap_coords("_nx"),
+                )
+            else:
+                c += """
+                    {type} {var};
+                    if ({is_cell_off_board}) {{
+                        {var} = {off_board_cell};
+                    }} else {{
+                        {var} = {neighbor_state};
+                    }}
+                """.format(
+                    type=self.ctype, var=self.var_name,
+                    is_cell_off_board=is_cell_off_board,
+                    off_board_cell=border.off_board_state("_nx"),
+                    neighbor_state=init_val,
+                )
+                self._bsca.append_code(c)
+                self._bsca.declare(self)
+                return
+
+        if init_val is None:
+            c += "%s %s;\n" % (
                 self.ctype, self.var_name
             )
-            if init_val is not None:
-                c = "%s %s = %s;\n" % (
-                    self.ctype, self.var_name, init_val
-                )
-            self._bsca.append_code(c)
-            self._bsca.declare(self)
+        else:
+            c += "%s %s = %s;\n" % (
+                self.ctype, self.var_name, init_val
+            )
+        self._bsca.append_code(c)
+        self._bsca.declare(self)
 
 
 class IntegerProperty(Property):
