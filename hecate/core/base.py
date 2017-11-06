@@ -47,30 +47,30 @@ class BSCA(type):
         # prepare topology
         if hasattr(cls._new_class, 'Topology'):
             attrs['Topology'] = cls._new_class.Topology
-        cls._topology = attrs.get('Topology', None)
-        cls._new_class._topology = cls._topology
+        cls.topology = attrs.get('Topology', None)
+        cls._new_class.topology = cls.topology
 
-        if cls._topology is None:
+        if cls.topology is None:
             raise HecateException("No Topology class declared.")
 
         mandatory_fields = (
             'dimensions', 'lattice', 'neighborhood', 'border',
         )
         for f in mandatory_fields:
-            if not hasattr(cls._topology, f):
+            if not hasattr(cls.topology, f):
                 raise HecateException("No %s declared in Topology class." % f)
 
-        cls._topology.lattice.dimensions = cls._topology.dimensions
-        cls._topology.neighborhood.dimensions = cls._topology.dimensions
-        cls._topology.border.dimensions = cls._topology.dimensions
-        cls._topology.neighborhood.topology = cls._topology
-        cls._topology.border.topology = cls._topology
+        cls.topology.lattice.dimensions = cls.topology.dimensions
+        cls.topology.neighborhood.dimensions = cls.topology.dimensions
+        cls.topology.border.dimensions = cls.topology.dimensions
+        cls.topology.neighborhood.topology = cls.topology
+        cls.topology.border.topology = cls.topology
 
         # scan and prepare properties
         cls._new_class.main = ContainerProperty()
         cls._new_class.buffers = []
         cls._new_class.neighbors = []
-        num_neighbors = len(cls._topology.neighborhood)
+        num_neighbors = len(cls.topology.neighborhood)
         for i in range(num_neighbors):
             cls._new_class.buffers.append(ContainerProperty())
             cls._new_class.neighbors.append(CachedNeighbor())
@@ -98,16 +98,18 @@ class BSCA(type):
                                                         i + 1, i)
 
         cls._new_class.dtype = cls._new_class.main.dtype
-        cls._new_class._ctype = cls._new_class.main.ctype
+        cls._new_class.ctype = cls._new_class.main.ctype
 
         # build CUDA source
-        cls._new_class.cuda_source = cls._new_class._build_defines()
-        cls._new_class.cuda_source += cls._new_class._build_emit()
-        cls._new_class.cuda_source += cls._new_class._build_absorb()
-        cls._new_class.cuda_source += cls._new_class._build_render()
+        source = cls._new_class.build_emit()
+        source += cls._new_class.build_absorb()
+        source += cls._new_class.build_render()
+        source = cls._new_class.build_defines() + source
+        cls._new_class.cuda_source = source
+
         cls._new_class.index_to_coord = cls.index_to_coord
         cls._new_class.pack_state = cls.pack_state
-        cls._new_class._topology = cls._topology
+        cls._new_class.topology = cls.topology
 
         # hardcoded stuff
         cls._new_class.fade_in = 255
@@ -163,13 +165,9 @@ class BSCA(type):
     def coords_declared(cls):
         return cls._coords_declared
 
-    @property
-    def topology(cls):
-        return cls._topology
-
-    def _build_defines(cls):
+    def build_defines(cls):
         defines = ""
-        for i in range(cls._topology.dimensions):
+        for i in range(cls.topology.dimensions):
             defines += "#define _w%d {w%d}\n" % (i, i)
         # hardcoded for now
         defines += """
@@ -180,17 +178,17 @@ class BSCA(type):
         """
         return defines
 
-    def _build_emit(cls):
-        args = [(cls._ctype, "*fld"), ]
+    def build_emit(cls):
+        args = [(cls.ctype, "*fld"), ]
         body = cls._translate_code(cls.emit)
         return cls._elementwise_kernel("emit", args, body)
 
-    def _build_absorb(cls):
-        args = [(cls._ctype, "*fld"), ("int3", "*col")]
+    def build_absorb(cls):
+        args = [(cls.ctype, "*fld"), ("int3", "*col")]
         body = cls._translate_code(cls.absorb, cls.color)
         return cls._elementwise_kernel("absorb", args, body)
 
-    def _build_render(cls):
+    def build_render(cls):
         # hardcoded for now
         args = [
             ("int3", "*col"),
@@ -240,7 +238,7 @@ class CellularAutomaton(metaclass=BSCA):
         # CUDA kernel
         self.cells_num = functools.reduce(operator.mul, self.size)
         source = self.cuda_source.replace("{n}", str())
-        for i in range(self._topology.dimensions):
+        for i in range(self.topology.dimensions):
             source = source.replace("{w%d}" % i, str(self.size[i]))
         source = source.replace("{fadein}", str(self.fade_in))
         source = source.replace("{fadeout}", str(self.fade_out))
