@@ -14,6 +14,7 @@ import pycuda.gpuarray as gpuarray
 from hecate.bridge import MoireBridge
 from hecate.seeds.random import LocalRandom
 from hecate.core.properties import Property, ContainerProperty
+from hecate.core.variables import Constant
 
 __all__ = ['context', ]
 
@@ -100,6 +101,15 @@ class BSCA(type):
         cls._new_class.dtype = cls._new_class.main.dtype
         cls._new_class.ctype = cls._new_class.main.ctype
 
+        cls._new_class._constants = set()
+        # hardcoded constants
+        for i in range(cls._new_class.topology.dimensions):
+            cls._new_class._constants.add(Constant("_w%d" % i, "size[%d]" % i))
+        cls._new_class._constants.add(Constant("FADE_IN", "fade_in"))
+        cls._new_class._constants.add(Constant("FADE_OUT", "fade_out"))
+        cls._new_class._constants.add(Constant("SMOOTH_FACTOR",
+                                               "smooth_factor"))
+
         # build CUDA source
         source = cls._new_class.build_emit()
         source += cls._new_class.build_absorb()
@@ -167,15 +177,8 @@ class BSCA(type):
 
     def build_defines(cls):
         defines = ""
-        for i in range(cls.topology.dimensions):
-            defines += "#define _w%d {w%d}\n" % (i, i)
-        # hardcoded for now
-        defines += """
-            #define FADE_IN {fadein}
-            #define FADE_OUT {fadeout}
-            #define SMOOTH_FACTOR {smooth}
-
-        """
+        for c in cls._constants:
+            defines += c.get_define_code()
         return defines
 
     def build_emit(cls):
@@ -237,12 +240,9 @@ class CellularAutomaton(metaclass=BSCA):
         self.timestep = 0
         # CUDA kernel
         self.cells_num = functools.reduce(operator.mul, self.size)
-        source = self.cuda_source.replace("{n}", str())
-        for i in range(self.topology.dimensions):
-            source = source.replace("{w%d}" % i, str(self.size[i]))
-        source = source.replace("{fadein}", str(self.fade_in))
-        source = source.replace("{fadeout}", str(self.fade_out))
-        source = source.replace("{smooth}", str(self.smooth_factor))
+        source = self.cuda_source
+        for c in self._constants:
+            source = c.replace_value(source)
         # print(source)
         cuda_module = SourceModule(source)
         # GPU arrays
