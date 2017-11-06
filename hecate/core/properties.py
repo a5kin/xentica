@@ -100,6 +100,12 @@ class Property(DeferredExpression):
             return False
         return self._bsca.is_declared(self)
 
+    @property
+    def _coords_declared(self):
+        if self._bsca is None:
+            return True
+        return self._bsca.coords_declared
+
     def _declare_once(self, init_val=None):
         if self._declared:
             return
@@ -108,6 +114,14 @@ class Property(DeferredExpression):
             neighborhood = self._bsca.topology.neighborhood
             lattice = self._bsca.topology.lattice
             border = self._bsca.topology.border
+            dimensions = self._bsca.topology.dimensions
+
+            if not self._coords_declared:
+                c += lattice.index_to_coord_code("i", "_x")
+                coord_vars = ["_nx%d" % i for i in range(dimensions)]
+                c += "int %s;\n" % ", ".join(coord_vars)
+                self._bsca.declare_coords()
+
             c += neighborhood.neighbor_coords(self._nbr_num, "_x", "_nx")
             is_cell_off_board = lattice.is_off_board_code("_nx")
             if hasattr(border, "wrap_coords"):

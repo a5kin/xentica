@@ -137,6 +137,7 @@ class BSCA(type):
         cls._func_body = ""
         cls._deferred_writes = set()
         cls._declarations = set()
+        cls._coords_declared = False
         for func in funcs:
             func(cls)
         for p in cls._deferred_writes:
@@ -154,6 +155,13 @@ class BSCA(type):
 
     def is_declared(cls, prop):
         return prop in cls._declarations
+
+    def declare_coords(cls):
+        cls._coords_declared = True
+
+    @property
+    def coords_declared(cls):
+        return cls._coords_declared
 
     @property
     def topology(cls):
@@ -179,10 +187,7 @@ class BSCA(type):
 
     def _build_absorb(cls):
         args = [(cls._ctype, "*fld"), ("int3", "*col")]
-        body = cls._topology.lattice.index_to_coord_code("i", "_x")
-        coord_vars = ["_nx%d" % i for i in range(cls._topology.dimensions)]
-        body += "int %s;\n" % ", ".join(coord_vars)
-        body += cls._translate_code(cls.absorb, cls.color)
+        body = cls._translate_code(cls.absorb, cls.color)
         return cls._elementwise_kernel("absorb", args, body)
 
     def _build_render(cls):
