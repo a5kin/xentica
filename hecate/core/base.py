@@ -105,10 +105,6 @@ class BSCA(type):
         # hardcoded constants
         for i in range(cls._new_class.topology.dimensions):
             cls._new_class._constants.add(Constant("_w%d" % i, "size[%d]" % i))
-        cls._new_class._constants.add(Constant("FADE_IN", "fade_in"))
-        cls._new_class._constants.add(Constant("FADE_OUT", "fade_out"))
-        cls._new_class._constants.add(Constant("SMOOTH_FACTOR",
-                                               "smooth_factor"))
 
         # build CUDA source
         source = cls._new_class.build_emit()
