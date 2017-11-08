@@ -7,7 +7,7 @@ from hecate.core.base import BSCA, HecateException
 class ColorEffect:
 
     def __init__(self, func):
-        pass
+        self.func = func
 
     @property
     def _bsca(self):
@@ -21,28 +21,26 @@ class ColorEffect:
             frame = frame.f_back
         raise HecateException("BSCA not detected for ColorEffect")
 
-    def __call__(self, func):
+    def __call__(self, self_var):
         self._bsca._constants.add(Constant("FADE_IN", "fade_in"))
         self._bsca._constants.add(Constant("FADE_OUT", "fade_out"))
         self._bsca._constants.add(Constant("SMOOTH_FACTOR",
                                            "smooth_factor"))
 
-        def wrapper(self_var):
-            r, g, b = func(self_var)
-            code = """
-                int new_r = %s;
-                int new_g = %s;
-                int new_b = %s;
-                %s
-                col[i] = make_int3(new_r, new_g, new_b);
-            """ % (r, g, b, self.effect)
-            self_var.append_code(code)
-        return wrapper
+        r, g, b = self.func(self_var)
+        code = """
+            int new_r = %s;
+            int new_g = %s;
+            int new_b = %s;
+            %s
+            col[i] = make_int3(new_r, new_g, new_b);
+        """ % (r, g, b, self.effect)
+        self_var.append_code(code)
 
 
 class MovingAverage(ColorEffect):
 
-    def __call__(self, func):
+    def __call__(self, *args):
         self.effect = """
             new_r *= SMOOTH_FACTOR;
             new_g *= SMOOTH_FACTOR;
@@ -55,4 +53,4 @@ class MovingAverage(ColorEffect):
             new_b = max(min(new_b, old_col.z + FADE_IN),
                         old_col.z - FADE_OUT);
         """
-        return super(MovingAverage, self).__call__(func)
+        return super(MovingAverage, self).__call__(*args)
