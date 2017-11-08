@@ -1,22 +1,6 @@
-import inspect
-
 from cached_property import cached_property
 
-
-class BscaDetector:
-
-    @property
-    def _holder_frame(self):
-        # TODO: detect base class by scanning inheritance tree:
-        # inspect.getclasstree(inspect.getmro(type(self)))
-        frame = inspect.currentframe().f_back.f_back.f_back
-        while isinstance(frame.f_locals.get('self', ''), self.base_class):
-            frame = frame.f_back
-        return frame
-
-    @cached_property
-    def _bsca(self):
-        return self._holder_frame.f_locals.get('self', '')
+from hecate.core.mixins import BscaDetector
 
 
 class DeferredExpression:
@@ -100,6 +84,10 @@ class Constant(BscaDetector):
         self._value = value
         self._pattern_name = name
         self.base_class = Constant
+
+    @property
+    def _bsca(self):
+        return self._holder_frame.f_locals.get('self', '')
 
     def get_define_code(self):
         code = "#define %s {%s}\n" % (self._name, self._pattern_name)

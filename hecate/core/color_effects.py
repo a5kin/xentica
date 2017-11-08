@@ -1,25 +1,11 @@
-import inspect
-
 from hecate.core.variables import Constant
-from hecate.core.base import BSCA, HecateException
+from hecate.core.mixins import BscaDetector
 
 
-class ColorEffect:
+class ColorEffect(BscaDetector):
 
     def __init__(self, func):
         self.func = func
-
-    @property
-    def _bsca(self):
-        frame = inspect.currentframe()
-        while frame is not None:
-            for l in frame.f_locals.values():
-                if hasattr(l, "__get__"):
-                    continue
-                if isinstance(l, BSCA):
-                    return l
-            frame = frame.f_back
-        raise HecateException("BSCA not detected for ColorEffect")
 
     def __call__(self, self_var):
         self._bsca._constants.add(Constant("FADE_IN", "fade_in"))
