@@ -1,18 +1,28 @@
 from hecate.core.topology.mixins import DimensionsMixin
 
+from hecate.core.mixins import BscaDetector
+from hecate.core.variables import Constant
 
-class Lattice(DimensionsMixin):
+
+class Lattice(DimensionsMixin, BscaDetector):
     """
     Base class for all lattices.
 
     """
     width_prefix = "_w"
 
+    def _define_constants_once(self):
+        for i in range(self._bsca.topology.dimensions):
+            constant = Constant("%s%d" % (self.width_prefix, i),
+                                "size[%d]" % i)
+            self._bsca.define_constant(constant)
+
 
 class OrthogonalLattice(Lattice):
     supported_dimensions = list(range(1, 100))
 
     def index_to_coord_code(self, index_name, coord_prefix):
+        self._define_constants_once()
 
         def wrap_format(s):
             return s.format(x=coord_prefix, i=i,
@@ -30,6 +40,8 @@ class OrthogonalLattice(Lattice):
         return code
 
     def coord_to_index_code(self, coord_prefix):
+        self._define_constants_once()
+
         summands = []
         for i in range(self.dimensions):
             summand = coord_prefix + str(i)
@@ -39,6 +51,8 @@ class OrthogonalLattice(Lattice):
         return " + ".join(summands)
 
     def is_off_board_code(self, coord_prefix):
+        self._define_constants_once()
+
         conditions = []
         for i in range(self.dimensions):
             condition = "{x}{i} < 0 || {x}{i} >= {w}{i}".format(

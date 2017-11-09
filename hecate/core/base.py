@@ -14,7 +14,6 @@ import pycuda.gpuarray as gpuarray
 from hecate.bridge import MoireBridge
 from hecate.seeds.random import LocalRandom
 from hecate.core.properties import Property, ContainerProperty
-from hecate.core.variables import Constant
 
 __all__ = ['context', ]
 
@@ -102,10 +101,6 @@ class BSCA(type):
         cls._new_class.ctype = cls._new_class.main.ctype
 
         cls._new_class._constants = {}
-        # hardcoded constants
-        for i in range(cls._new_class.topology.dimensions):
-            constant = Constant("_w%d" % i, "size[%d]" % i)
-            cls._new_class.define_constant(constant)
 
         # build CUDA source
         source = cls._new_class.build_emit()
