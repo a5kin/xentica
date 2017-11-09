@@ -85,17 +85,13 @@ class Constant(BscaDetector):
         self._pattern_name = name
         self.base_class = Constant
 
-    @property
-    def _bsca(self):
-        return self._holder_frame.f_locals.get('self', '')
-
     def get_define_code(self):
         code = "#define %s {%s}\n" % (self._name, self._pattern_name)
         return code
 
     def replace_value(self, source):
         # WARNING: potentially dangerous
-        val = "self._bsca.%s" % self._value.split()[0]
+        val = "self._holder.%s" % self._value.split()[0]
         return source.replace("{%s}" % self._pattern_name, str(eval(val)))
 
 
