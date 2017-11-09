@@ -1,6 +1,6 @@
 from cached_property import cached_property
 
-from hecate.core.mixins import BscaDetector
+from hecate.core.mixins import BscaDetectorMixin
 
 
 class DeferredExpression:
@@ -77,7 +77,7 @@ class DeferredExpression:
         return self.code
 
 
-class Constant(BscaDetector):
+class Constant(BscaDetectorMixin):
 
     def __init__(self, name, value):
         self._name = name
@@ -99,7 +99,7 @@ class Constant(BscaDetector):
         return self._name
 
 
-class Variable(DeferredExpression, BscaDetector):
+class Variable(DeferredExpression, BscaDetectorMixin):
     """
     Base class for all variables.
 

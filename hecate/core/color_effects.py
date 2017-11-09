@@ -1,8 +1,8 @@
 from hecate.core.variables import Constant
-from hecate.core.mixins import BscaDetector
+from hecate.core.mixins import BscaDetectorMixin
 
 
-class ColorEffect(BscaDetector):
+class ColorEffect(BscaDetectorMixin):
 
     def __init__(self, func):
         self.func = func

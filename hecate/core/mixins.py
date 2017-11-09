@@ -3,7 +3,7 @@ import inspect
 import hecate.core.base
 
 
-class BscaDetector:
+class BscaDetectorMixin:
 
     @property
     def _bsca(self):
