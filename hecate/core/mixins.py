@@ -25,3 +25,7 @@ class BscaDetector:
         while isinstance(frame.f_locals.get('self', ''), self.base_class):
             frame = frame.f_back
         return frame
+
+    @property
+    def _holder(self):
+        return self._holder_frame.f_locals['self']
