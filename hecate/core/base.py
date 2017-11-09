@@ -101,10 +101,11 @@ class BSCA(type):
         cls._new_class.dtype = cls._new_class.main.dtype
         cls._new_class.ctype = cls._new_class.main.ctype
 
-        cls._new_class._constants = set()
+        cls._new_class._constants = {}
         # hardcoded constants
         for i in range(cls._new_class.topology.dimensions):
-            cls._new_class._constants.add(Constant("_w%d" % i, "size[%d]" % i))
+            constant = Constant("_w%d" % i, "size[%d]" % i)
+            cls._new_class.define_constant(constant)
 
         # build CUDA source
         source = cls._new_class.build_emit()
@@ -167,13 +168,16 @@ class BSCA(type):
     def declare_coords(cls):
         cls._coords_declared = True
 
+    def define_constant(cls, constant):
+        cls._constants[constant.name] = deepcopy(constant)
+
     @property
     def coords_declared(cls):
         return cls._coords_declared
 
     def build_defines(cls):
         defines = ""
-        for c in cls._constants:
+        for c in cls._constants.values():
             defines += c.get_define_code()
         return defines
 
@@ -237,7 +241,7 @@ class CellularAutomaton(metaclass=BSCA):
         # CUDA kernel
         self.cells_num = functools.reduce(operator.mul, self.size)
         source = self.cuda_source
-        for c in self._constants:
+        for c in self._constants.values():
             source = c.replace_value(source)
         # print(source)
         cuda_module = SourceModule(source)

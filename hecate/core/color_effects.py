@@ -8,10 +8,10 @@ class ColorEffect(BscaDetector):
         self.func = func
 
     def __call__(self, self_var):
-        self._bsca._constants.add(Constant("FADE_IN", "fade_in"))
-        self._bsca._constants.add(Constant("FADE_OUT", "fade_out"))
-        self._bsca._constants.add(Constant("SMOOTH_FACTOR",
-                                           "smooth_factor"))
+        self._bsca.define_constant(Constant("FADE_IN", "fade_in"))
+        self._bsca.define_constant(Constant("FADE_OUT", "fade_out"))
+        self._bsca.define_constant(Constant("SMOOTH_FACTOR",
+                                            "smooth_factor"))
 
         r, g, b = self.func(self_var)
         code = """

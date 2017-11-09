@@ -94,6 +94,10 @@ class Constant(BscaDetector):
         val = "self._holder.%s" % self._value.split()[0]
         return source.replace("{%s}" % self._pattern_name, str(eval(val)))
 
+    @property
+    def name(self):
+        return self._name
+
 
 class Variable(DeferredExpression, BscaDetector):
     """
