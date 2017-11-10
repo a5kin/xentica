@@ -8,11 +8,6 @@ class ColorEffect(BscaDetectorMixin):
         self.func = func
 
     def __call__(self, self_var):
-        self._bsca.define_constant(Constant("FADE_IN", "fade_in"))
-        self._bsca.define_constant(Constant("FADE_OUT", "fade_out"))
-        self._bsca.define_constant(Constant("SMOOTH_FACTOR",
-                                            "smooth_factor"))
-
         r, g, b = self.func(self_var)
         code = """
             int new_r = %s;
@@ -27,6 +22,13 @@ class ColorEffect(BscaDetectorMixin):
 class MovingAverage(ColorEffect):
 
     def __call__(self, *args):
+        self._bsca.define_constant(Constant("FADE_IN", "fade_in"))
+        self._bsca.define_constant(Constant("FADE_OUT", "fade_out"))
+        self._bsca.define_constant(Constant("SMOOTH_FACTOR",
+                                            "smooth_factor"))
+        self._bsca.fade_in = 255
+        self._bsca.fade_out = 255
+        self._bsca.smooth_factor = 1
         self.effect = """
             new_r *= SMOOTH_FACTOR;
             new_g *= SMOOTH_FACTOR;

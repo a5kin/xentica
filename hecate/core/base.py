@@ -113,10 +113,8 @@ class BSCA(type):
         cls._new_class.pack_state = cls.pack_state
         cls._new_class.topology = cls.topology
 
-        # hardcoded stuff
-        cls._new_class.fade_in = 255
-        cls._new_class.fade_out = 255
-        cls._new_class.smooth_factor = 1
+        cls._new_class.size = (1 for i in range(cls.topology.dimensions))
+
         return cls._new_class
 
     def _elementwise_kernel(self, name, args, body):
