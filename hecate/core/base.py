@@ -111,7 +111,6 @@ class BSCA(type):
 
         cls._new_class.index_to_coord = cls.index_to_coord
         cls._new_class.pack_state = cls.pack_state
-        cls._new_class.topology = cls.topology
 
         cls._new_class.size = (1 for i in range(cls.topology.dimensions))
 
