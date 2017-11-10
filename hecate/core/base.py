@@ -224,9 +224,14 @@ class CellularAutomaton(metaclass=BSCA):
     def __init__(self, experiment_class):
         # visuals
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
-        self.size = experiment_class.size
-        self.zoom = experiment_class.zoom
-        self.pos = experiment_class.pos
+        # populate attributes from Experiment class
+        for attr_name in dir(experiment_class):
+            attr = getattr(experiment_class, attr_name)
+            if (not callable(attr) and not attr_name.startswith("__")):
+                if attr_name == 'seed':
+                    continue
+                setattr(self, attr_name, attr)
+        # default simulation values
         self.speed = 1
         self.paused = False
         self.timestep = 0
