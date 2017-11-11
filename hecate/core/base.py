@@ -116,6 +116,9 @@ class BSCA(type):
 
         return cls._new_class
 
+    def index_to_coord(cls, i):
+        return cls.topology.lattice.index_to_coord(i, cls)
+
     def _elementwise_kernel(self, name, args, body):
         arg_string = ", ".join(["%s %s" % (t, v) for t, v in args])
         kernel = """
@@ -208,9 +211,6 @@ class BSCA(type):
             img[i * 3 + 2] = c.z / SMOOTH_FACTOR;
         """
         return cls._elementwise_kernel("render", args, body)
-
-    def index_to_coord(self, i):
-        return (i % self.size[0], i // self.size[0])
 
     def pack_state(self, state):
         return state['state']

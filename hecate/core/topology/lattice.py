@@ -39,6 +39,17 @@ class OrthogonalLattice(Lattice):
                 code += wrap_format("int {x}{i} = {index};\n")
         return code
 
+    def index_to_coord(self, idx, bsca):
+        coord = []
+        for i in range(self.dimensions):
+            if i < self.dimensions - 1:
+                x_i = idx % bsca.size[i]
+                idx //= bsca.size[i]
+            else:
+                x_i = idx
+            coord.append(x_i)
+        return tuple(coord)
+
     def coord_to_index_code(self, coord_prefix):
         self._define_constants_once()
 
