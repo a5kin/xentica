@@ -74,11 +74,11 @@ class Property(DeferredExpression):
                 object.__setattr__(self, attr, val)
 
     def __get__(self, obj, objtype):
-        self._declare_once()
+        self.declare_once()
         return DeferredExpression(self.var_name)
 
     def __set__(self, obj, value):
-        self._declare_once()
+        self.declare_once()
         code = "%s = %s;\n" % (self.var_name, value.code)
         self._bsca.append_code(code)
         self._bsca.deferred_write(self)
@@ -106,7 +106,7 @@ class Property(DeferredExpression):
             return True
         return self._bsca.coords_declared
 
-    def _declare_once(self, init_val=None):
+    def declare_once(self, init_val=None):
         if self._declared:
             return
         code = "%s %s;\n" % (self.ctype, self.var_name)
@@ -167,7 +167,7 @@ class ContainerProperty(Property):
     def __getattribute__(self, attr):
         obj = object.__getattribute__(self, attr)
         if isinstance(obj, Property):
-            self._declare_once(self._mem_cell)
+            self.declare_once(self._mem_cell)
             self._unpack_state()
             return obj.__get__(self, type(self))
         return obj
@@ -179,12 +179,12 @@ class ContainerProperty(Property):
             object.__setattr__(self, attr, val)
         else:
             if isinstance(obj, Property):
-                obj._declare_once()
+                obj.declare_once()
                 obj.__set__(self, val)
             else:
                 object.__setattr__(self, attr, val)
 
-    def _declare_once(self, init_val=None):
+    def declare_once(self, init_val=None):
         if self._declared:
             return
         code = ""
@@ -246,7 +246,7 @@ class ContainerProperty(Property):
         code = ""
         shift = 0
         for prop in self._properties.values():
-            prop._declare_once()
+            prop.declare_once()
             val = self.var_name
             if shift > 0:
                 val += " >> %d" % shift
