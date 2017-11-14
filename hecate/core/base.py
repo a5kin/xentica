@@ -149,6 +149,7 @@ class BSCA(type):
         cls._func_body = ""
         cls._deferred_writes = set()
         cls._declarations = set()
+        cls._unpacks = set()
         cls._coords_declared = False
         for func in funcs:
             func(cls)
@@ -165,8 +166,14 @@ class BSCA(type):
     def declare(cls, prop):
         cls._declarations.add(prop)
 
+    def unpack(cls, prop):
+        cls._unpacks.add(prop)
+
     def is_declared(cls, prop):
         return prop in cls._declarations
+
+    def is_unpacked(cls, prop):
+        return prop in cls._unpacks
 
     def declare_coords(cls):
         cls._coords_declared = True

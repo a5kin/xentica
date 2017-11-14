@@ -74,7 +74,7 @@ class Property(DeferredExpression):
                 object.__setattr__(self, attr, val)
 
     def __get__(self, obj, objtype):
-        self._declare_once(self._mem_cell)
+        self._declare_once()
         return DeferredExpression(self.var_name)
 
     def __set__(self, obj, value):
@@ -109,57 +109,8 @@ class Property(DeferredExpression):
     def _declare_once(self, init_val=None):
         if self._declared:
             return
-        c = ""
-        if self._nbr_num >= 0:
-            neighborhood = self._bsca.topology.neighborhood
-            lattice = self._bsca.topology.lattice
-            border = self._bsca.topology.border
-            dimensions = self._bsca.topology.dimensions
-
-            if not self._coords_declared:
-                c += lattice.index_to_coord_code("i", "_x")
-                coord_vars = ["_nx%d" % i for i in range(dimensions)]
-                c += "int %s;\n" % ", ".join(coord_vars)
-                self._bsca.declare_coords()
-
-            c += neighborhood.neighbor_coords(self._nbr_num, "_x", "_nx")
-            is_cell_off_board = lattice.is_off_board_code("_nx")
-            if hasattr(border, "wrap_coords"):
-                c += """
-                    if ({is_cell_off_board}) {{
-                        {wrap_coords}
-                    }}
-                """.format(
-                    is_cell_off_board=is_cell_off_board,
-                    wrap_coords=border.wrap_coords("_nx"),
-                )
-            else:
-                c += """
-                    {type} {var};
-                    if ({is_cell_off_board}) {{
-                        {var} = {off_board_cell};
-                    }} else {{
-                        {var} = {neighbor_state};
-                    }}
-                """.format(
-                    type=self.ctype, var=self.var_name,
-                    is_cell_off_board=is_cell_off_board,
-                    off_board_cell=border.off_board_state("_nx"),
-                    neighbor_state=init_val,
-                )
-                self._bsca.append_code(c)
-                self._bsca.declare(self)
-                return
-
-        if init_val is None:
-            c += "%s %s;\n" % (
-                self.ctype, self.var_name
-            )
-        else:
-            c += "%s %s = %s;\n" % (
-                self.ctype, self.var_name, init_val
-            )
-        self._bsca.append_code(c)
+        code = "%s %s;\n" % (self.ctype, self.var_name)
+        self._bsca.append_code(code)
         self._bsca.declare(self)
 
 
@@ -184,6 +135,12 @@ class ContainerProperty(Property):
         for p in self._properties.values():
             yield p
 
+    @property
+    def _unpacked(self):
+        if self._bsca is None:
+            return False
+        return self._bsca.is_unpacked(self)
+
     def __getitem__(self, key):
         return self._properties[key]
 
@@ -206,3 +163,94 @@ class ContainerProperty(Property):
 
     def __set__(self, obj, value):
         pass
+
+    def __getattribute__(self, attr):
+        obj = object.__getattribute__(self, attr)
+        if isinstance(obj, Property):
+            self._declare_once(self._mem_cell)
+            self._unpack_state()
+            return obj.__get__(self, type(self))
+        return obj
+
+    def __setattr__(self, attr, val):
+        try:
+            obj = object.__getattribute__(self, attr)
+        except AttributeError:
+            object.__setattr__(self, attr, val)
+        else:
+            if isinstance(obj, Property):
+                obj._declare_once()
+                obj.__set__(self, val)
+            else:
+                object.__setattr__(self, attr, val)
+
+    def _declare_once(self, init_val=None):
+        if self._declared:
+            return
+        code = ""
+        if self._nbr_num >= 0:
+            neighborhood = self._bsca.topology.neighborhood
+            lattice = self._bsca.topology.lattice
+            border = self._bsca.topology.border
+            dimensions = self._bsca.topology.dimensions
+
+            if not self._coords_declared:
+                code += lattice.index_to_coord_code("i", "_x")
+                coord_vars = ["_nx%d" % i for i in range(dimensions)]
+                code += "int %s;\n" % ", ".join(coord_vars)
+                self._bsca.declare_coords()
+
+            code += neighborhood.neighbor_coords(self._nbr_num, "_x", "_nx")
+            is_cell_off_board = lattice.is_off_board_code("_nx")
+            if hasattr(border, "wrap_coords"):
+                code += """
+                    if ({is_cell_off_board}) {{
+                        {wrap_coords}
+                    }}
+                """.format(
+                    is_cell_off_board=is_cell_off_board,
+                    wrap_coords=border.wrap_coords("_nx"),
+                )
+            else:
+                code += """
+                    {type} {var};
+                    if ({is_cell_off_board}) {{
+                        {var} = {off_board_cell};
+                    }} else {{
+                        {var} = {neighbor_state};
+                    }}
+                """.format(
+                    type=self.ctype, var=self.var_name,
+                    is_cell_off_board=is_cell_off_board,
+                    off_board_cell=border.off_board_state("_nx"),
+                    neighbor_state=init_val,
+                )
+                self._bsca.append_code(code)
+                self._bsca.declare(self)
+                return
+
+        if init_val is None:
+            code += "%s %s;\n" % (
+                self.ctype, self.var_name
+            )
+        else:
+            code += "%s %s = %s;\n" % (
+                self.ctype, self.var_name, init_val
+            )
+        self._bsca.append_code(code)
+        self._bsca.declare(self)
+
+    def _unpack_state(self):
+        if self._unpacked:
+            return
+        code = ""
+        shift = 0
+        for prop in self._properties.values():
+            prop._declare_once()
+            val = self.var_name
+            if shift > 0:
+                val += " >> %d" % shift
+            code += "{var} = {val};\n".format(var=prop.var_name, val=val)
+            shift += prop.bit_width
+        self._bsca.append_code(code)
+        self._bsca.unpack(self)
