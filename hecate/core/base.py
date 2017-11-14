@@ -79,23 +79,31 @@ class BSCA(type):
         for obj_name, obj in itertools.chain.from_iterable(attrs_items):
             if isinstance(obj, Property):
                 cls._new_class.main[obj_name] = deepcopy(obj)
-                cls._new_class.main[obj_name].var_name = "_cell"
+                vname = "_cell_%s" % obj_name
+                cls._new_class.main[obj_name].var_name = vname
                 for i in range(num_neighbors):
                     buffers = cls._new_class.buffers
                     buffers[i][obj_name] = deepcopy(obj)
-                    buffers[i][obj_name].var_name = "_bcell%i" % i
+                    vname = "_bcell_%s%d" % (obj_name, i)
+                    buffers[i][obj_name].var_name = vname
                     neighbor = cls._new_class.neighbors[i]
                     neighbor.main[obj_name] = deepcopy(obj)
-                    neighbor.main[obj_name].var_name = "_dcell%d" % i
+                    vname = "_dcell_%s%d" % (obj_name, i)
+                    neighbor.main[obj_name].var_name = vname
                     neighbor.buffer[obj_name] = deepcopy(obj)
-                    neighbor.buffer[obj_name].var_name = "_dbcell%d" % i
+                    vname = "_dbcell_%s%d" % (obj_name, i)
+                    neighbor.buffer[obj_name].var_name = vname
         # propagade BSCA to properties
         cls._new_class.main.set_bsca(cls._new_class, 0, -1)
+        cls._new_class.main.var_name = "_cell"
         for i in range(num_neighbors):
             cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1, -1)
+            cls._new_class.buffers[i].var_name = "_bcell%i" % i
             cls._new_class.neighbors[i].main.set_bsca(cls._new_class, 0, i)
+            cls._new_class.neighbors[i].main.var_name = "_dcell%d" % i
             cls._new_class.neighbors[i].buffer.set_bsca(cls._new_class,
                                                         i + 1, i)
+            cls._new_class.neighbors[i].buffer.var_name = "_dbcell%d" % i
 
         cls._new_class.dtype = cls._new_class.main.dtype
         cls._new_class.ctype = cls._new_class.main.ctype
