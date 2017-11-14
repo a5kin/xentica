@@ -76,8 +76,9 @@ class BSCA(type):
             cls._new_class.neighbors.append(CachedNeighbor())
         attrs_items = [base_class.__dict__.items() for base_class in bases]
         attrs_items.append(attrs.items())
+        restricted_names = {"main", "buffer"}
         for obj_name, obj in itertools.chain.from_iterable(attrs_items):
-            if isinstance(obj, Property):
+            if isinstance(obj, Property) and obj_name not in restricted_names:
                 cls._new_class.main[obj_name] = deepcopy(obj)
                 vname = "_cell_%s" % obj_name
                 cls._new_class.main[obj_name].var_name = vname
