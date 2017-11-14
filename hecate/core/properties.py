@@ -250,6 +250,8 @@ class ContainerProperty(Property):
             val = self.var_name
             if shift > 0:
                 val += " >> %d" % shift
+            mask = 2 ** prop.bit_width - 1
+            val = "({val}) & {mask}".format(val=val, mask=mask)
             code += "{var} = {val};\n".format(var=prop.var_name, val=val)
             shift += prop.bit_width
         self._bsca.append_code(code)
