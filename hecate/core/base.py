@@ -229,7 +229,13 @@ class BSCA(type):
         return cls._elementwise_kernel("render", args, body)
 
     def pack_state(self, state):
-        return state['state']
+        val = 0
+        shift = 0
+        # TODO: unified properties order
+        for name, prop in self.main._properties.items():
+            val += state[name] << shift
+            shift += prop.bit_width
+        return val
 
 
 class CellularAutomaton(metaclass=BSCA):
