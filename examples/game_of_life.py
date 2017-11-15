@@ -41,6 +41,24 @@ class GameOfLifeStatic(GameOfLife):
         border = core.StaticBorder(1)
 
 
+class GameOfLifeColor(GameOfLife):
+    """ Same Game Of Life, but with color per each cell """
+    state = core.IntegerProperty(max_val=1)
+    red = core.IntegerProperty(max_val=255)
+    green = core.IntegerProperty(max_val=255)
+    blue = core.IntegerProperty(max_val=255)
+
+    class Topology(GameOfLife.Topology):
+        pass
+
+    @color_effects.MovingAverage
+    def color(self):
+        r = self.main.state * self.main.red
+        g = self.main.state * self.main.green
+        b = self.main.state * self.main.blue
+        return (r, g, b)
+
+
 class GOLExperiment(core.Experiment):
     """ Particular experiment, to be loaded at runtime in future """
     word = "HECATE FIRST EXPERIMENT"
@@ -65,6 +83,20 @@ class GOLExperiment2(core.Experiment):
     seed = seeds.patterns.PrimordialSoup(
         vals={
             "state": seeds.random.RandInt(0, 1),
+        }
+    )
+
+
+class GOLExperimentColor(GOLExperiment):
+    """ Special case for GameOfLifeColor """
+    seed = seeds.patterns.BigBang(
+        pos=(320, 180),
+        size=(100, 100),
+        vals={
+            "state": seeds.random.RandInt(0, 1),
+            "red": seeds.random.RandInt(0, 255),
+            "green": seeds.random.RandInt(0, 255),
+            "blue": seeds.random.RandInt(0, 255),
         }
     )
 
