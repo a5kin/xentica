@@ -81,7 +81,6 @@ class Property(DeferredExpression):
         self.declare_once()
         code = "%s = %s;\n" % (self.var_name, value.code)
         self._bsca.append_code(code)
-        self._bsca.deferred_write(self)
 
     @cached_property
     def _mem_cell(self):
@@ -181,6 +180,8 @@ class ContainerProperty(Property):
             if isinstance(obj, Property):
                 obj.declare_once()
                 obj.__set__(self, val)
+                self.declare_once()
+                self._bsca.deferred_write(self)
             else:
                 object.__setattr__(self, attr, val)
 
@@ -256,3 +257,23 @@ class ContainerProperty(Property):
             shift += prop.bit_width
         self._bsca.append_code(code)
         self._bsca.unpack(self)
+
+    def deferred_write(self):
+        """
+        Pack state and write its value to VRAM
+
+        """
+        shift = 0
+        vals = []
+        for prop in self._properties.values():
+            prop.declare_once()
+            val = prop.var_name
+            if shift > 0:
+                val += " << %d" % shift
+            mask = 2 ** prop.bit_width - 1
+            vals.append("(({val}) & {mask})".format(val=val, mask=mask))
+            shift += prop.bit_width
+        summed_vals = " + ".join(vals)
+        code = "{var} = {val};\n".format(var=self.var_name, val=summed_vals)
+        code += "%s = %s;\n" % (self._mem_cell, self.var_name)
+        self._bsca.append_code(code)

@@ -155,7 +155,7 @@ class BSCA(type):
         for func in funcs:
             func(cls)
         for p in cls._deferred_writes:
-            cls._func_body += "%s = %s;\n" % (p._mem_cell, p.var_name)
+            p.deferred_write()
         return cls._func_body
 
     def append_code(cls, code):
