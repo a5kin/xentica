@@ -48,8 +48,18 @@ class GameOfLifeColor(GameOfLife):
     green = core.IntegerProperty(max_val=255)
     blue = core.IntegerProperty(max_val=255)
 
-    class Topology(GameOfLife.Topology):
-        pass
+    def emit(self):
+        for i in range(len(self.buffers)):
+            self.buffers[i].state = self.main.state
+            self.buffers[i].red = self.main.red
+            self.buffers[i].green = self.main.green
+            self.buffers[i].blue = self.main.blue
+
+    def absorb(self):
+        GameOfLife.absorb(self)
+        self.main.red = self.main.red + 1
+        self.main.green = self.main.green + 1
+        self.main.blue = self.main.blue + 1
 
     @color_effects.MovingAverage
     def color(self):
