@@ -3,6 +3,7 @@ import itertools
 import operator
 import threading
 import pickle
+import collections
 from copy import deepcopy
 
 import numpy as np
@@ -37,8 +38,17 @@ class BSCA(type):
     and compiles it for future use.
 
     """
+    @classmethod
+    def __prepare__(self, name, bases):
+        return collections.OrderedDict()
+
     def __new__(cls, name, bases, attrs):
         # prepare new class
+        keys = []
+        for key in attrs.keys():
+            if key not in ('__module__', '__qualname__'):
+                keys.append(key)
+        attrs['__ordered__'] = keys
         cls._new_class = super().__new__(cls, name, bases, attrs)
         cls._parents = [b for b in bases if isinstance(b, BSCA)]
         if not cls._parents:
@@ -231,7 +241,6 @@ class BSCA(type):
     def pack_state(self, state):
         val = 0
         shift = 0
-        # TODO: unified properties order
         for name, prop in self.main._properties.items():
             val += state[name] << shift
             shift += prop.bit_width
@@ -277,6 +286,8 @@ class CellularAutomaton(metaclass=BSCA):
         experiment_class.seed.generate(init_cells, self.cells_num,
                                        self.size, self.index_to_coord,
                                        self.pack_state)
+        # import binascii
+        # print(binascii.crc32(init_cells))
         self.cells_gpu = gpuarray.to_gpu(init_cells)
         # bridge
         self.bridge = MoireBridge
