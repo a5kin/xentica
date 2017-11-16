@@ -57,9 +57,10 @@ class GameOfLifeColor(GameOfLife):
 
     def absorb(self):
         GameOfLife.absorb(self)
-        self.main.red = self.main.red + 1
-        self.main.green = self.main.green + 1
-        self.main.blue = self.main.blue + 1
+        for i in range(len(self.buffers)):
+            self.main.red = self.neighbors[i].buffer.red + 1
+            self.main.green = self.neighbors[i].buffer.green + 1
+            self.main.blue = self.neighbors[i].buffer.blue + 1
 
     @color_effects.MovingAverage
     def color(self):
@@ -99,9 +100,8 @@ class GOLExperiment2(core.Experiment):
 
 class GOLExperimentColor(GOLExperiment):
     """ Special case for GameOfLifeColor """
-    seed = seeds.patterns.BigBang(
-        pos=(320, 180),
-        size=(100, 100),
+    fade_out = 10
+    seed = seeds.patterns.PrimordialSoup(
         vals={
             "state": seeds.random.RandInt(0, 1),
             "red": seeds.random.RandInt(0, 255),
@@ -113,6 +113,6 @@ class GOLExperimentColor(GOLExperiment):
 
 if __name__ == "__main__":
     import moire
-    ca = GameOfLife(GOLExperiment)
+    ca = GameOfLifeColor(GOLExperimentColor)
     gui = moire.GUI(runnable=ca)
     gui.run()
