@@ -267,11 +267,11 @@ class ContainerProperty(Property):
         vals = []
         for prop in self._properties.values():
             prop.declare_once()
-            val = prop.var_name
-            if shift > 0:
-                val += " << %d" % shift
             mask = 2 ** prop.bit_width - 1
-            vals.append("(({val}) & {mask})".format(val=val, mask=mask))
+            val = "({val} & {mask})".format(val=prop.var_name, mask=mask)
+            if shift > 0:
+                val = "({val} << {shift})".format(val=val, shift=shift)
+            vals.append(val)
             shift += prop.bit_width
         summed_vals = " + ".join(vals)
         code = "{var} = {val};\n".format(var=self.var_name, val=summed_vals)
