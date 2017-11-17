@@ -108,13 +108,12 @@ class TestCellularAutomaton(unittest.TestCase):
                             "Checksum shoud be different from parent class.")
         self.assertEqual(2543376250, checksum, "Wrong field checksum.")
 
-    @unittest.skip("This case shows indeterministic behavior")
     def test_multiple_properties(self):
         ca = GameOfLifeColor(GOLExperimentColor)
         for j in range(self.num_steps):
             ca.step()
         checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
-        self.assertEqual(3633610741, checksum, "Wrong field checksum.")
+        self.assertEqual(529208361, checksum, "Wrong field checksum.")
 
     def test_cell_width(self):
         class GameOfLifeInt(GameOfLife):
