@@ -25,6 +25,10 @@ class ValDict(metaclass=ValDictMeta):
             v = self[k]
             yield k, v
 
+    def keys(self):
+        for k in self._d.keys():
+            yield k
+
     def __getitem__(self, key):
         if key in self._d:
             if hasattr(self._d[key], '__get__'):
@@ -74,7 +78,8 @@ class BigBang(RandomPattern):
             coord = np.asarray(index_to_coord(i))
             if all(coord >= self.pos) and all(coord < self.pos + self.size):
                 state = {}
-                for name, val in self.vals.items():
+                for name in sorted(self.vals.keys()):
+                    val = self.vals[name]
                     state[name] = val
                 cells[i] = pack_state(state)
 
@@ -88,6 +93,7 @@ class PrimordialSoup(RandomPattern):
                  index_to_coord, pack_state):
         for i in range(cells_num):
             state = {}
-            for name, val in self.vals.items():
+            for name in sorted(self.vals.keys()):
+                val = self.vals[name]
                 state[name] = val
             cells[i] = pack_state(state)
