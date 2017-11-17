@@ -15,6 +15,7 @@ import pycuda.gpuarray as gpuarray
 from hecate.bridge import MoireBridge
 from hecate.seeds.random import LocalRandom
 from hecate.core.properties import Property, ContainerProperty
+from hecate.core.renderers import RendererPlain
 
 __all__ = ['context', ]
 
@@ -121,6 +122,10 @@ class BSCA(type):
 
         cls._new_class._constants = {}
 
+        # set default renderer as needed
+        if not hasattr(cls._new_class, 'renderer'):
+            cls._new_class.renderer = RendererPlain()
+
         # build CUDA source
         source = cls._new_class.build_emit()
         source += cls._new_class.build_absorb()
@@ -213,29 +218,8 @@ class BSCA(type):
         return cls._elementwise_kernel("absorb", args, body)
 
     def build_render(cls):
-        # hardcoded for now
-        args = [
-            ("int3", "*col"),
-            ("int", "*img"),
-            ("int", "zoom"),
-            ("int", "dx"),
-            ("int", "dy"),
-            ("int", "width"),
-        ]
-        body = """
-            int x = (int) (((float) (i % width)) / (float) zoom) + dx;
-            int y = (int) (((float) (i / width)) / (float) zoom) + dy;
-            if (x < 0) x = _w0 - (-x % _w0);
-            if (x >= _w0) x = x % _w0;
-            if (y < 0) y = _w1 - (-y % _w1);
-            if (y >= _w1) y = y % _w1;
-            int ii = x + y * _w0;
-
-            int3 c = col[ii];
-            img[i * 3] = c.x / SMOOTH_FACTOR;
-            img[i * 3 + 1] = c.y / SMOOTH_FACTOR;
-            img[i * 3 + 2] = c.z / SMOOTH_FACTOR;
-        """
+        args = cls.renderer.args
+        body = cls.renderer.render_code()
         return cls._elementwise_kernel("render", args, body)
 
     def pack_state(self, state):
