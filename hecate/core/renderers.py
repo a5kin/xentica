@@ -1,4 +1,7 @@
-class Renderer:
+from hecate.core.mixins import BscaDetectorMixin
+
+
+class Renderer(BscaDetectorMixin):
     """
     Base class for renderers.
 
@@ -32,19 +35,40 @@ class RendererPlain(Renderer):
             self.projection_axes = (0, 1)
 
     def render_code(self):
-        # hardcoded pure 2D case
+        # calculate projection plain coordinates
         code = """
-            int x = (int) (((float) (i % width)) / (float) zoom) + dx;
-            int y = (int) (((float) (i / width)) / (float) zoom) + dy;
-            if (x < 0) x = _w0 - (-x % _w0);
-            if (x >= _w0) x = x % _w0;
-            if (y < 0) y = _w1 - (-y % _w1);
-            if (y >= _w1) y = y % _w1;
-            int ii = x + y * _w0;
-
+            int {x} = (int) (((float) (i % width)) / (float) zoom) + dx;
+            int {y} = (int) (((float) (i / width)) / (float) zoom) + dy;
+            if ({x} < 0) {x} = _w0 - (-{x} % _w0);
+            if ({x} >= _w0) {x} = {x} % _w0;
+            if ({y} < 0) {y} = _w1 - (-{y} % _w1);
+            if ({y} >= _w1) {y} = {y} % _w1;
+            float r = 0, g = 0, b = 0;
+        """.format(
+            x="x%d" % self.projection_axes[0],
+            y="x%d" % self.projection_axes[1],
+        )
+        # sum over projected dimensions
+        num_cells_projected = 1
+        for i in range(self._bsca.topology.dimensions):
+            if i in self.projection_axes:
+                continue
+            num_cells_projected *= self._bsca.size[i]
+            code += "for (int x{i} = 0; x{i} < _w{i}; x{i}++) {\n".format(i=i)
+        code += """
+            int ii = {coord_to_index};
             int3 c = col[ii];
-            img[i * 3] = c.x / SMOOTH_FACTOR;
-            img[i * 3 + 1] = c.y / SMOOTH_FACTOR;
-            img[i * 3 + 2] = c.z / SMOOTH_FACTOR;
-        """
+            r += c.x;
+            g += c.y;
+            b += c.z;
+        """.format(
+            coord_to_index=self._bsca.topology.lattice.coord_to_index_code("x")
+        )
+        code += "}" * (self._bsca.topology.dimensions - 2)
+        # calculate average
+        code += """
+            img[i * 3] = r / {num} / SMOOTH_FACTOR;
+            img[i * 3 + 1] = g / {num} / SMOOTH_FACTOR;
+            img[i * 3 + 2] = b / {num} / SMOOTH_FACTOR;
+        """.format(num=num_cells_projected)
         return code
