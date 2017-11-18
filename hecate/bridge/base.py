@@ -9,36 +9,22 @@ class Bridge:
         gui.exit_app()
 
     @staticmethod
-    def move_up(ca, gui):
-        ca.move(0, 1)
+    def move(dx, dy):
+        def func(ca, gui):
+            ca.move(dx, dy)
+        return func
 
     @staticmethod
-    def move_down(ca, gui):
-        ca.move(0, -1)
+    def zoom(dzoom):
+        def func(ca, gui):
+            ca.apply_zoom(dzoom)
+        return func
 
     @staticmethod
-    def move_left(ca, gui):
-        ca.move(-1, 0)
-
-    @staticmethod
-    def move_right(ca, gui):
-        ca.move(1, 0)
-
-    @staticmethod
-    def zoom_in(ca, gui):
-        ca.apply_zoom(1)
-
-    @staticmethod
-    def zoom_out(ca, gui):
-        ca.apply_zoom(-1)
-
-    @staticmethod
-    def speed_down(ca, gui):
-        ca.apply_speed(-1)
-
-    @staticmethod
-    def speed_up(ca, gui):
-        ca.apply_speed(1)
+    def speed(dspeed):
+        def func(ca, gui):
+            ca.apply_speed(dspeed)
+        return func
 
     @staticmethod
     def toggle_pause(ca, gui):
