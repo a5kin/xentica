@@ -39,14 +39,17 @@ class RendererPlain(Renderer):
         code = """
             int {x} = (int) (((float) (i % width)) / (float) zoom) + dx;
             int {y} = (int) (((float) (i / width)) / (float) zoom) + dy;
-            if ({x} < 0) {x} = _w0 - (-{x} % _w0);
-            if ({x} >= _w0) {x} = {x} % _w0;
-            if ({y} < 0) {y} = _w1 - (-{y} % _w1);
-            if ({y} >= _w1) {y} = {y} % _w1;
+            if ({x} < 0) {x} = {w}{i0} - (-{x} % {w}{i0});
+            if ({x} >= {w}{i0}) {x} = {x} % {w}{i0};
+            if ({y} < 0) {y} = {w}{i1} - (-{y} % {w}{i1});
+            if ({y} >= {w}{i1}) {y} = {y} % {w}{i1};
             float r = 0, g = 0, b = 0;
         """.format(
             x="x%d" % self.projection_axes[0],
             y="x%d" % self.projection_axes[1],
+            w=self._bsca.topology.lattice.width_prefix,
+            i0=self.projection_axes[0],
+            i1=self.projection_axes[1],
         )
         # sum over projected dimensions
         num_cells_projected = 1
@@ -54,7 +57,9 @@ class RendererPlain(Renderer):
             if i in self.projection_axes:
                 continue
             num_cells_projected *= self._bsca.size[i]
-            code += "for (int x{i} = 0; x{i} < _w{i}; x{i}++) {\n".format(i=i)
+            code += "for (int x{i} = 0; x{i} < {w}{i}; x{i}++) {\n".format(
+                i=i, w=self._bsca.topology.lattice.width_prefix
+            )
         code += """
             int ii = {coord_to_index};
             int3 c = col[ii];
