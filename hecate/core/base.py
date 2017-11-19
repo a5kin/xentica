@@ -270,21 +270,12 @@ class CellularAutomaton(metaclass=BSCA):
         experiment_class.seed.generate(init_cells, self.cells_num,
                                        self.size, self.index_to_coord,
                                        self.pack_state)
-        # import binascii
-        # print(binascii.crc32(init_cells))
         self.cells_gpu = gpuarray.to_gpu(init_cells)
         # bridge
         self.bridge = MoireBridge
+        self.renderer.setup_actions(self.bridge)
         # lock
         self.lock = threading.Lock()
-
-    def move(self, *args):
-        for i in range(len(args)):
-            delta = args[i]
-            self.pos[i] = (self.pos[i] + delta) % self.size[i]
-
-    def apply_zoom(self, dval):
-        self.zoom = max(1, (self.zoom + dval))
 
     def apply_speed(self, dval):
         self.speed = max(1, (self.speed + dval))

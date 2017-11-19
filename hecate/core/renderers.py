@@ -34,6 +34,40 @@ class RendererPlain(Renderer):
         if self.projection_axes is None:
             self.projection_axes = (0, 1)
 
+    def setup_actions(self, bridge):
+        bridge.key_actions.update({
+            "up": self.move(0, 1),
+            "down": self.move(0, -1),
+            "left": self.move(-1, 0),
+            "right": self.move(1, 0),
+            "=": self.zoom(1),
+            "-": self.zoom(-1),
+        })
+        self._bsca.move = self.apply_move
+        self._bsca.apply_zoom = self.apply_zoom
+
+    @staticmethod
+    def move(dx, dy):
+        def func(ca, gui):
+            ca.move(dx, dy)
+        return func
+
+    @staticmethod
+    def zoom(dzoom):
+        def func(ca, gui):
+            ca.apply_zoom(dzoom)
+        return func
+
+    @staticmethod
+    def apply_move(bsca, *args):
+        for i in range(len(args)):
+            delta = args[i]
+            bsca.pos[i] = (bsca.pos[i] + delta) % bsca.size[i]
+
+    @staticmethod
+    def apply_zoom(bsca, dval):
+        bsca.zoom = max(1, (bsca.zoom + dval))
+
     def render_code(self):
         # calculate projection plain coordinates
         code = """

@@ -9,18 +9,6 @@ class Bridge:
         gui.exit_app()
 
     @staticmethod
-    def move(dx, dy):
-        def func(ca, gui):
-            ca.move(dx, dy)
-        return func
-
-    @staticmethod
-    def zoom(dzoom):
-        def func(ca, gui):
-            ca.apply_zoom(dzoom)
-        return func
-
-    @staticmethod
     def speed(dspeed):
         def func(ca, gui):
             ca.apply_speed(dspeed)
