@@ -33,42 +33,50 @@ class TestBridge(unittest.TestCase):
 
     def test_move_up(self):
         y = self.ca.pos[1]
-        Bridge.move_up(self.ca, self.gui)
+        move_up = self.ca.bridge.key_actions['up']
+        move_up(self.ca, self.gui)
         self.assertEqual((y + 1) % self.ca.size[1], self.ca.pos[1])
 
     def test_move_down(self):
         y = self.ca.pos[1]
-        Bridge.move_down(self.ca, self.gui)
+        move_down = self.ca.bridge.key_actions['down']
+        move_down(self.ca, self.gui)
         self.assertEqual((y - 1) % self.ca.size[1], self.ca.pos[1])
 
     def test_move_right(self):
         x = self.ca.pos[0]
-        Bridge.move_right(self.ca, self.gui)
+        move_right = self.ca.bridge.key_actions['right']
+        move_right(self.ca, self.gui)
         self.assertEqual((x + 1) % self.ca.size[0], self.ca.pos[0])
 
     def test_move_left(self):
         x = self.ca.pos[0]
-        Bridge.move_left(self.ca, self.gui)
+        move_left = self.ca.bridge.key_actions['left']
+        move_left(self.ca, self.gui)
         self.assertEqual((x - 1) % self.ca.size[0], self.ca.pos[0])
 
     def test_zoom_in(self):
         zoom = self.ca.zoom
-        Bridge.zoom_in(self.ca, self.gui)
+        zoom_in = self.ca.bridge.key_actions['=']
+        zoom_in(self.ca, self.gui)
         self.assertEqual(zoom + 1, self.ca.zoom)
 
     def test_zoom_out(self):
         zoom = self.ca.zoom
-        Bridge.zoom_out(self.ca, self.gui)
+        zoom_out = self.ca.bridge.key_actions['-']
+        zoom_out(self.ca, self.gui)
         self.assertEqual(max(zoom - 1, 1), self.ca.zoom)
 
     def test_speed_up(self):
         speed = self.ca.speed
-        Bridge.speed_up(self.ca, self.gui)
+        speed_up = self.ca.bridge.key_actions[']']
+        speed_up(self.ca, self.gui)
         self.assertEqual(speed + 1, self.ca.speed)
 
     def test_speed_down(self):
         speed = self.ca.speed
-        Bridge.speed_down(self.ca, self.gui)
+        speed_down = self.ca.bridge.key_actions['[']
+        speed_down(self.ca, self.gui)
         self.assertEqual(max(speed - 1, 1), self.ca.speed)
 
     def test_toggle_pause(self):
