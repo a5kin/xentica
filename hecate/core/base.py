@@ -302,12 +302,9 @@ class CellularAutomaton(metaclass=BSCA):
     def render(self):
         block, grid = self.img_gpu._block, self.img_gpu._grid
         with self.lock:
-            self.render_gpu(self.colors_gpu, self.img_gpu,
-                            np.int32(self.zoom),
-                            np.int32(self.pos[0]), np.int32(self.pos[1]),
-                            np.int32(self.width),
-                            np.int32(self.width * self.height),
-                            block=block, grid=grid)
+            args = self.renderer.get_args_vals(self)
+            args.append(np.int32(self.width * self.height))
+            self.render_gpu(*args, block=block, grid=grid)
             return self.img_gpu.get().astype(np.uint8)
 
     def save(self, filename):

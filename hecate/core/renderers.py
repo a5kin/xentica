@@ -1,3 +1,5 @@
+import numpy as np
+
 from hecate.core.mixins import BscaDetectorMixin
 
 
@@ -11,6 +13,10 @@ class Renderer(BscaDetectorMixin):
             ("int3", "*col"),
             ("int", "*img"),
         ]
+
+    def get_args_vals(self, bsca):
+        args_vals = [bsca.colors_gpu, bsca.img_gpu]
+        return args_vals
 
     def render_code(self):
         return ""
@@ -33,6 +39,16 @@ class RendererPlain(Renderer):
         self.projection_axes = projection_axes
         if self.projection_axes is None:
             self.projection_axes = (0, 1)
+
+    def get_args_vals(self, bsca):
+        args_vals = super(RendererPlain, self).get_args_vals(bsca)
+        args_vals += [
+            np.int32(bsca.zoom),
+            np.int32(bsca.pos[0]),
+            np.int32(bsca.pos[1]),
+            np.int32(bsca.width),
+        ]
+        return args_vals
 
     def setup_actions(self, bridge):
         bridge.key_actions.update({
