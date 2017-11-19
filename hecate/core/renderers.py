@@ -43,19 +43,17 @@ class RendererPlain(Renderer):
             "=": self.zoom(1),
             "-": self.zoom(-1),
         })
-        self._bsca.move = self.apply_move
-        self._bsca.apply_zoom = self.apply_zoom
 
     @staticmethod
     def move(dx, dy):
         def func(ca, gui):
-            ca.move(dx, dy)
+            ca.renderer.apply_move(ca, dx, dy)
         return func
 
     @staticmethod
     def zoom(dzoom):
         def func(ca, gui):
-            ca.apply_zoom(dzoom)
+            ca.renderer.apply_zoom(ca, dzoom)
         return func
 
     @staticmethod
