@@ -1,6 +1,6 @@
 import itertools
 
-from hecate.core.topology.mixins import DimensionsMixin
+from xentica.core.topology.mixins import DimensionsMixin
 
 
 class Neighborhood(DimensionsMixin):

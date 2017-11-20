@@ -12,16 +12,16 @@ from pycuda.autoinit import context
 from pycuda.compiler import SourceModule
 import pycuda.gpuarray as gpuarray
 
-from hecate.bridge import MoireBridge
-from hecate.seeds.random import LocalRandom
-from hecate.core.properties import Property, ContainerProperty
-from hecate.core.renderers import RendererPlain
+from xentica.bridge import MoireBridge
+from xentica.seeds.random import LocalRandom
+from xentica.core.properties import Property, ContainerProperty
+from xentica.core.renderers import RendererPlain
 
 __all__ = ['context', ]
 
 
-class HecateException(Exception):
-    """ Basic Hecate framework exception """
+class XenticaException(Exception):
+    """ Basic Xentica framework exception """
 
 
 class CachedNeighbor:
@@ -62,14 +62,14 @@ class BSCA(type):
         cls._new_class.topology = cls.topology
 
         if cls.topology is None:
-            raise HecateException("No Topology class declared.")
+            raise XenticaException("No Topology class declared.")
 
         mandatory_fields = (
             'dimensions', 'lattice', 'neighborhood', 'border',
         )
         for f in mandatory_fields:
             if not hasattr(cls.topology, f):
-                raise HecateException("No %s declared in Topology class." % f)
+                raise XenticaException("No %s declared in Topology class." % f)
 
         cls.topology.lattice.dimensions = cls.topology.dimensions
         cls.topology.neighborhood.dimensions = cls.topology.dimensions
@@ -233,7 +233,7 @@ class BSCA(type):
 
 class CellularAutomaton(metaclass=BSCA):
     """
-    Base class for all HECATE mods.
+    Base class for all Xentica mods.
 
     """
     def __init__(self, experiment_class):

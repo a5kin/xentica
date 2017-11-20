@@ -1,4 +1,4 @@
-from hecate.bridge.base import Bridge
+from xentica.bridge.base import Bridge
 
 
 class MoireBridge:

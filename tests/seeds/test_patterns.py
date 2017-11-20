@@ -3,9 +3,9 @@ import binascii
 
 import numpy as np
 
-from hecate.seeds.patterns import ValDict
-from hecate.seeds.patterns import BigBang, PrimordialSoup
-from hecate.seeds.random import RandInt, LocalRandom
+from xentica.seeds.patterns import ValDict
+from xentica.seeds.patterns import BigBang, PrimordialSoup
+from xentica.seeds.random import RandInt, LocalRandom
 
 
 class TestValDict(unittest.TestCase):

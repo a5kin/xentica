@@ -4,8 +4,8 @@ import binascii
 
 import numpy as np
 
-from hecate.core.base import HecateException, CellularAutomaton
-from hecate.core.properties import IntegerProperty
+from xentica.core.base import XenticaException, CellularAutomaton
+from xentica.core.properties import IntegerProperty
 from examples.game_of_life import (
     GameOfLife, GameOfLifeStatic, GameOfLifeColor,
     GOLExperiment, GOLExperimentColor,
@@ -89,12 +89,12 @@ class TestCellularAutomaton(unittest.TestCase):
         os.remove("test.ca")
 
     def test_no_topology(self):
-        with self.assertRaises(HecateException):
+        with self.assertRaises(XenticaException):
             class NoTopologyCA(CellularAutomaton):
                 pass
 
     def test_empty_topology(self):
-        with self.assertRaises(HecateException):
+        with self.assertRaises(XenticaException):
             class NoLatticeCA(CellularAutomaton):
                 class Topology:
                     pass

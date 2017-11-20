@@ -1,6 +1,6 @@
 import unittest
 
-from hecate.utils.formatters import sizeof_fmt
+from xentica.utils.formatters import sizeof_fmt
 
 
 class TestSizeFormatter(unittest.TestCase):

@@ -1,4 +1,4 @@
-from hecate.core.topology.mixins import DimensionsMixin
+from xentica.core.topology.mixins import DimensionsMixin
 
 
 class Border(DimensionsMixin):

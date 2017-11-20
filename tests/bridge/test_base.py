@@ -1,6 +1,6 @@
 import unittest
 
-from hecate.bridge.base import Bridge
+from xentica.bridge.base import Bridge
 from examples.game_of_life import GameOfLife, GOLExperiment
 
 

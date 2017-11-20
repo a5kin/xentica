@@ -1,6 +1,6 @@
 #!/bin/bash
 cd ..
-coverage run --source hecate -m unittest discover -s tests
+coverage run --source xentica -m unittest discover -s tests
 echo ""
 echo "COVERAGE"
 echo "========"

@@ -1,6 +1,6 @@
 import unittest
 
-from hecate.core.variables import IntegerVariable
+from xentica.core.variables import IntegerVariable
 
 
 class TestVariable(unittest.TestCase):

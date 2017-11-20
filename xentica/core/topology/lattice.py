@@ -1,7 +1,7 @@
-from hecate.core.topology.mixins import DimensionsMixin
+from xentica.core.topology.mixins import DimensionsMixin
 
-from hecate.core.mixins import BscaDetectorMixin
-from hecate.core.variables import Constant
+from xentica.core.mixins import BscaDetectorMixin
+from xentica.core.variables import Constant
 
 
 class Lattice(DimensionsMixin, BscaDetectorMixin):

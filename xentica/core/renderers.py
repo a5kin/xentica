@@ -1,6 +1,6 @@
 import numpy as np
 
-from hecate.core.mixins import BscaDetectorMixin
+from xentica.core.mixins import BscaDetectorMixin
 
 
 class Renderer(BscaDetectorMixin):

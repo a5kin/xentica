@@ -1,7 +1,7 @@
 import time
 
 from examples.game_of_life import GameOfLife, GOLExperiment
-from hecate.utils.formatters import sizeof_fmt
+from xentica.utils.formatters import sizeof_fmt
 
 
 models = [

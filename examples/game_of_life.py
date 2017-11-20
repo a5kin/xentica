@@ -1,10 +1,10 @@
-from hecate import core
-from hecate import seeds
-from hecate.core import color_effects
+from xentica import core
+from xentica import seeds
+from xentica.core import color_effects
 
 
 class GameOfLife(core.CellularAutomaton):
-    """ The Idea of classic CA built with HECATE framework """
+    """ The classic CA built with Xentica framework """
     state = core.IntegerProperty(max_val=1)
 
     class Topology:
@@ -34,6 +34,7 @@ class GameOfLife(core.CellularAutomaton):
 
 
 class GameOfLifeStatic(GameOfLife):
+    """ Game of Life variant with static border made of live cells"""
     class Topology:
         dimensions = 2
         lattice = core.OrthogonalLattice()

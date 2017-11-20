@@ -1,4 +1,4 @@
-from hecate.core.base import HecateException
+from xentica.core.base import XenticaException
 
 
 class DimensionsMixin:
@@ -20,5 +20,5 @@ class DimensionsMixin:
         if not self.allowed_dimension(num_dim):
             msg = "%d-D %s is not supported."
             msg = msg % (num_dim, self.__class__.__name__)
-            raise HecateException(msg)
+            raise XenticaException(msg)
         self._dimensions = num_dim

@@ -1,6 +1,6 @@
 import inspect
 
-import hecate.core.base
+import xentica.core.base
 
 
 class BscaDetectorMixin:
@@ -12,10 +12,10 @@ class BscaDetectorMixin:
             for l in frame.f_locals.values():
                 if hasattr(l, "__get__"):
                     continue
-                if isinstance(l, hecate.core.base.BSCA):
+                if isinstance(l, xentica.core.base.BSCA):
                     return l
             frame = frame.f_back
-        raise hecate.core.base.HecateException("BSCA not detected")
+        raise xentica.core.base.XenticaException("BSCA not detected")
 
     @property
     def _holder_frame(self):

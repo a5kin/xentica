@@ -1,6 +1,6 @@
 from cached_property import cached_property
 
-from hecate.core.mixins import BscaDetectorMixin
+from xentica.core.mixins import BscaDetectorMixin
 
 
 class DeferredExpression:

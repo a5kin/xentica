@@ -1,5 +1,5 @@
-from hecate.core.variables import Constant
-from hecate.core.mixins import BscaDetectorMixin
+from xentica.core.variables import Constant
+from xentica.core.mixins import BscaDetectorMixin
 
 
 class ColorEffect(BscaDetectorMixin):

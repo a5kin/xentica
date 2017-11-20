@@ -1,5 +1,5 @@
-# HECATE
-### [Hermetically-Evolutionary Cellular Automata Template Engine]
-The core CA framework for the **Artipixoids!** project. 
+# Xentica
+### GPU-Accelerated Engine For Multi-Dimensional Cellular Automata
+The core CA framework for the **Artipixoids!** project.
 
-*Status*: planning the framework architecture.
+*Status*: first public alpha release preparations.

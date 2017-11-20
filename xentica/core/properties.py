@@ -4,7 +4,7 @@ from collections import OrderedDict
 import numpy as np
 from cached_property import cached_property
 
-from hecate.core.variables import DeferredExpression
+from xentica.core.variables import DeferredExpression
 
 
 class Property(DeferredExpression):

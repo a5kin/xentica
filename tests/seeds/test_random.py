@@ -1,6 +1,6 @@
 import unittest
 
-from hecate.seeds.random import RandInt, LocalRandom
+from xentica.seeds.random import RandInt, LocalRandom
 
 
 TEST_SEED = "test"
