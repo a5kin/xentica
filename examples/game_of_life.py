@@ -81,7 +81,7 @@ class GameOfLifeColor(GameOfLife):
 
 class GOLExperiment(core.Experiment):
     """ Particular experiment, to be loaded at runtime in future """
-    word = "HECATE FIRST EXPERIMENT"
+    word = "OBEY XENTICA"
     size = (640, 360, )
     zoom = 3
     pos = [0, 0]
@@ -96,7 +96,7 @@ class GOLExperiment(core.Experiment):
 
 class GOLExperiment2(core.Experiment):
     """ Experiment initialized with Primordial Soup pattern. """
-    word = "HECATE FIRST EXPERIMENT"
+    word = "XENTICA IS YOUR GODDESS"
     size = (640, 360, )
     zoom = 3
     pos = [0, 0]

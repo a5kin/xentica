@@ -23,7 +23,7 @@ class TestCellularAutomaton(unittest.TestCase):
             for j in range(self.num_steps):
                 ca.step()
             checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
-            self.assertEqual(3395585361, checksum, "Wrong field checksum.")
+            self.assertEqual(3106211755, checksum, "Wrong field checksum.")
 
     def test_multiple_ca(self):
         ca1 = GameOfLife(GOLExperiment)
@@ -32,9 +32,9 @@ class TestCellularAutomaton(unittest.TestCase):
             ca1.step()
             ca2.step()
         checksum = binascii.crc32(ca1.cells_gpu.get()[:ca1.cells_num])
-        self.assertEqual(3395585361, checksum, "Wrong field checksum (CA #1).")
+        self.assertEqual(3106211755, checksum, "Wrong field checksum (CA #1).")
         checksum = binascii.crc32(ca2.cells_gpu.get()[:ca2.cells_num])
-        self.assertEqual(3395585361, checksum, "Wrong field checksum (CA #2).")
+        self.assertEqual(3106211755, checksum, "Wrong field checksum (CA #2).")
 
     def test_render(self):
         experiment = GOLExperiment
@@ -44,7 +44,7 @@ class TestCellularAutomaton(unittest.TestCase):
         for j in range(self.num_steps):
             ca.step()
         img = ca.render()
-        self.assertEqual(4150286101, binascii.crc32(img / 255),
+        self.assertEqual(345262372, binascii.crc32(img / 255),
                          "Wrong image checksum.")
 
     def test_pause(self):
@@ -72,7 +72,7 @@ class TestCellularAutomaton(unittest.TestCase):
         for i in range(self.num_steps // 2):
             ca2.step()
         checksum = binascii.crc32(ca2.cells_gpu.get()[:ca2.cells_num])
-        self.assertEqual(3395585361, checksum, "Wrong field checksum.")
+        self.assertEqual(3106211755, checksum, "Wrong field checksum.")
         os.remove("test.ca")
 
     def test_load_random(self):
@@ -104,16 +104,16 @@ class TestCellularAutomaton(unittest.TestCase):
         for j in range(self.num_steps):
             ca.step()
         checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
-        self.assertNotEqual(3395585361, checksum,
+        self.assertNotEqual(3106211755, checksum,
                             "Checksum shoud be different from parent class.")
-        self.assertEqual(2543376250, checksum, "Wrong field checksum.")
+        self.assertEqual(1660369157, checksum, "Wrong field checksum.")
 
     def test_multiple_properties(self):
         ca = GameOfLifeColor(GOLExperimentColor)
         for j in range(self.num_steps):
             ca.step()
         checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
-        self.assertEqual(529208361, checksum, "Wrong field checksum.")
+        self.assertEqual(3492385663, checksum, "Wrong field checksum.")
 
     def test_cell_width(self):
         class GameOfLifeInt(GameOfLife):
@@ -123,4 +123,4 @@ class TestCellularAutomaton(unittest.TestCase):
             ca.step()
         cells = ca.cells_gpu.get()[:ca.cells_num].astype(np.uint8)
         checksum = binascii.crc32(cells)
-        self.assertEqual(3395585361, checksum, "Wrong field checksum.")
+        self.assertEqual(3106211755, checksum, "Wrong field checksum.")
