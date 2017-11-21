@@ -92,6 +92,7 @@ class RendererPlain(Renderer):
             if ({y} < 0) {y} = {w}{i1} - (-{y} % {w}{i1});
             if ({y} >= {w}{i1}) {y} = {y} % {w}{i1};
             float r = 0, g = 0, b = 0;
+            int num_cells_projected = 1;
         """.format(
             x="x%d" % self.projection_axes[0],
             y="x%d" % self.projection_axes[1],
@@ -100,14 +101,17 @@ class RendererPlain(Renderer):
             i1=self.projection_axes[1],
         )
         # sum over projected dimensions
-        num_cells_projected = 1
+        c_for = ""
         for i in range(self._bsca.topology.dimensions):
             if i in self.projection_axes:
                 continue
-            num_cells_projected *= self._bsca.size[i]
-            code += "for (int x{i} = 0; x{i} < {w}{i}; x{i}++) {\n".format(
+            code += "num_cells_projected *= {w}{i};\n".format(
                 i=i, w=self._bsca.topology.lattice.width_prefix
             )
+            c_for += "for (int x{i} = 0; x{i} < {w}{i}; x{i}++) {{\n".format(
+                i=i, w=self._bsca.topology.lattice.width_prefix
+            )
+        code += c_for
         code += """
             int ii = {coord_to_index};
             int3 c = col[ii];
@@ -120,8 +124,8 @@ class RendererPlain(Renderer):
         code += "}" * (self._bsca.topology.dimensions - 2)
         # calculate average
         code += """
-            img[i * 3] = r / {num} / SMOOTH_FACTOR;
-            img[i * 3 + 1] = g / {num} / SMOOTH_FACTOR;
-            img[i * 3 + 2] = b / {num} / SMOOTH_FACTOR;
-        """.format(num=num_cells_projected)
+            img[i * 3] = r / num_cells_projected / SMOOTH_FACTOR;
+            img[i * 3 + 1] = g / num_cells_projected / SMOOTH_FACTOR;
+            img[i * 3 + 2] = b / num_cells_projected / SMOOTH_FACTOR;
+        """
         return code
