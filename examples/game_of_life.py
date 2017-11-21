@@ -79,6 +79,17 @@ class GameOfLifeColor(GameOfLife):
         return (r, g, b)
 
 
+class GameOfLife6D(GameOfLife):
+    """
+    Conway rules in 6D.
+    That's really all you need to go into hyperspace :)
+
+    """
+    class Topology(GameOfLife.Topology):
+        dimensions = 6
+        neighborhood = core.VonNeumannNeighborhood()
+
+
 class GOLExperiment(core.Experiment):
     """ Particular experiment, to be loaded at runtime in future """
     word = "OBEY XENTICA"
@@ -118,6 +129,11 @@ class GOLExperimentColor(GOLExperiment):
             "blue": seeds.random.RandInt(0, 255),
         }
     )
+
+
+class GOLExperiment6D(GOLExperiment2):
+    """ Special case for 6D Life """
+    size = (640, 360, 3, 3, 3, 3)
 
 
 if __name__ == "__main__":
