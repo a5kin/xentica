@@ -9,7 +9,7 @@ from xentica.core.topology.lattice import (
     OrthogonalLattice,
 )
 from xentica.core.topology.neighborhood import (
-    MooreNeighborhood,
+    MooreNeighborhood, VonNeumannNeighborhood
 )
 from xentica.core.topology.border import (
     TorusBorder, StaticBorder,
@@ -22,6 +22,7 @@ __all__ = [
     'IntegerVariable',
     'OrthogonalLattice',
     'MooreNeighborhood',
+    'VonNeumannNeighborhood',
     'TorusBorder',
     'StaticBorder',
     'Experiment',

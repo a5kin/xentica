@@ -17,16 +17,8 @@ class Neighborhood(DimensionsMixin):
         return self.num_neighbors
 
 
-class MooreNeighborhood(Neighborhood):
+class OrthogonalNeighborhood(Neighborhood):
     supported_dimensions = list(range(1, 100))
-
-    @Neighborhood.dimensions.setter
-    def dimensions(self, num_dim):
-        super_class = super(MooreNeighborhood, MooreNeighborhood)
-        super_class.dimensions.fset(self, num_dim)
-        self.num_neighbors = 3 ** num_dim - 1
-        deltas = itertools.product([-1, 0, 1], repeat=num_dim)
-        self._neighbor_deltas = [d for d in deltas if d != (0, 0)]
 
     def neighbor_coords(self, index, coord_prefix, neighbor_prefix):
         code = ""
@@ -44,3 +36,29 @@ class MooreNeighborhood(Neighborhood):
             cell_index += " + n * " + str(state_index)
         code = "fld[{cell_index}]".format(cell_index=cell_index)
         return code
+
+
+class MooreNeighborhood(OrthogonalNeighborhood):
+
+    @OrthogonalNeighborhood.dimensions.setter
+    def dimensions(self, num_dim):
+        super_class = super(MooreNeighborhood, MooreNeighborhood)
+        super_class.dimensions.fset(self, num_dim)
+        self.num_neighbors = 3 ** num_dim - 1
+        deltas = itertools.product([-1, 0, 1], repeat=num_dim)
+        self._neighbor_deltas = [d for d in deltas if d != (0, 0)]
+
+
+class VonNeumannNeighborhood(OrthogonalNeighborhood):
+
+    @OrthogonalNeighborhood.dimensions.setter
+    def dimensions(self, num_dim):
+        super_class = super(VonNeumannNeighborhood, VonNeumannNeighborhood)
+        super_class.dimensions.fset(self, num_dim)
+        self.num_neighbors = 2 * num_dim
+        self._neighbor_deltas = []
+        for i in range(num_dim):
+            delta = tuple((1 if i == j else 0 for j in range(num_dim)))
+            self._neighbor_deltas.append(delta)
+            delta = tuple((-1 if i == j else 0 for j in range(num_dim)))
+            self._neighbor_deltas.append(delta)
