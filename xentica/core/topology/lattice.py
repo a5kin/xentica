@@ -41,7 +41,7 @@ class OrthogonalLattice(Lattice):
 
     def index_to_coord(self, idx, bsca):
         coord = []
-        for i in range(self.dimensions):
+        for i in range(bsca.topology.dimensions):
             if i < self.dimensions - 1:
                 x_i = idx % bsca.size[i]
                 idx //= bsca.size[i]
