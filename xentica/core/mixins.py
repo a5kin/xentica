@@ -1,6 +1,7 @@
 import inspect
 
 import xentica.core.base
+from xentica.core.exceptions import XenticaException
 
 
 class BscaDetectorMixin:
@@ -15,7 +16,7 @@ class BscaDetectorMixin:
                 if isinstance(l, xentica.core.base.BSCA):
                     return l
             frame = frame.f_back
-        raise xentica.core.base.XenticaException("BSCA not detected")
+        raise XenticaException("BSCA not detected")
 
     @property
     def _holder_frame(self):

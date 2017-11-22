@@ -1,4 +1,4 @@
-from xentica.core.base import XenticaException
+from xentica.core.exceptions import XenticaException
 
 
 class DimensionsMixin:

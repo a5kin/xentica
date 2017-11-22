@@ -4,7 +4,8 @@ import binascii
 
 import numpy as np
 
-from xentica.core.base import XenticaException, CellularAutomaton
+from xentica.core.base import CellularAutomaton
+from xentica.core.exceptions import XenticaException
 from xentica.core.properties import IntegerProperty
 from examples.game_of_life import (
     GameOfLife, GameOfLifeStatic, GameOfLifeColor, GameOfLife6D,

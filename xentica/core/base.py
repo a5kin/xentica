@@ -16,12 +16,9 @@ from xentica.bridge import MoireBridge
 from xentica.seeds.random import LocalRandom
 from xentica.core.properties import Property, ContainerProperty
 from xentica.core.renderers import RendererPlain
+from xentica.core.exceptions import XenticaException
 
 __all__ = ['context', ]
-
-
-class XenticaException(Exception):
-    """ Basic Xentica framework exception """
 
 
 class CachedNeighbor:

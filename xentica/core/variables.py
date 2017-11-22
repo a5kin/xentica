@@ -1,6 +1,7 @@
 from cached_property import cached_property
 
 from xentica.core.mixins import BscaDetectorMixin
+from xentica.core.exceptions import XenticaException
 
 
 class DeferredExpression:
@@ -118,7 +119,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
             if isinstance(var, self.__class__):
                 if hash(self) == hash(var):
                     return k
-        return ''
+        raise XenticaException("Variable name not detected!")
 
     def _declare_once(self):
         if not self._declared:

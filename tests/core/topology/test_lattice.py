@@ -1,6 +1,6 @@
 import unittest
 
-from xentica.core.base import XenticaException
+from xentica.core.exceptions import XenticaException
 from xentica.core.topology.lattice import (
     OrthogonalLattice,
 )

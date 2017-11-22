@@ -1,7 +1,7 @@
 import unittest
 
 from xentica.core.mixins import BscaDetectorMixin
-from xentica.core.base import XenticaException
+from xentica.core.exceptions import XenticaException
 
 
 class TestBscaDetector(unittest.TestCase):
