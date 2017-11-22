@@ -7,8 +7,8 @@ import numpy as np
 from xentica.core.base import XenticaException, CellularAutomaton
 from xentica.core.properties import IntegerProperty
 from examples.game_of_life import (
-    GameOfLife, GameOfLifeStatic, GameOfLifeColor,
-    GOLExperiment, GOLExperimentColor,
+    GameOfLife, GameOfLifeStatic, GameOfLifeColor, GameOfLife6D,
+    GOLExperiment, GOLExperiment2, GOLExperimentColor,
 )
 
 
@@ -114,6 +114,15 @@ class TestCellularAutomaton(unittest.TestCase):
             ca.step()
         checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
         self.assertEqual(3492385663, checksum, "Wrong field checksum.")
+
+    def test_multidimensional(self):
+        class GOLExperiment6DLite(GOLExperiment2):
+            size = (64, 36, 3, 3, 3, 3)
+        ca = GameOfLife6D(GOLExperiment6DLite)
+        for j in range(self.num_steps):
+            ca.step()
+        checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        self.assertEqual(1854122883, checksum, "Wrong field checksum.")
 
     def test_cell_width(self):
         class GameOfLifeInt(GameOfLife):
