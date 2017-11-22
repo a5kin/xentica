@@ -119,7 +119,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
             if isinstance(var, self.__class__):
                 if hash(self) == hash(var):
                     return k
-        raise XenticaException("Variable name not detected!")
+        return "var%d" % abs(hash(self))
 
     def _declare_once(self):
         if not self._declared:
