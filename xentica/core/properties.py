@@ -130,7 +130,7 @@ class ContainerProperty(Property):
         super(ContainerProperty, self).__init__()
         self._properties = OrderedDict()
 
-    def items(self):
+    def values(self):
         for p in self._properties.values():
             yield p
 
