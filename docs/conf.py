@@ -182,6 +182,7 @@ class Mock(MagicMock):
 
 
 MOCK_MODULES = [
-    'numpy', 'pycuda', 'pycuda.autoinit', 'pycuda.compiler', 'pycuda.gpuarray'
+    'numpy', 'pycuda', 'pycuda.autoinit', 'pycuda.compiler', 'pycuda.gpuarray',
+    'cached_property',
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
