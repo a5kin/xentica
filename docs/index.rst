@@ -6,7 +6,9 @@
 Welcome to Xentica's documentation!
 ===================================
 
-modules
+.. toctree::
+
+    modules
 
 Indices and tables
 ==================
