@@ -19,6 +19,8 @@
 #
 import os
 import sys
+from unittest.mock import MagicMock
+
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -31,10 +33,12 @@ sys.path.insert(0, os.path.abspath('..'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
+extensions = [
+    'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
-    'sphinx.ext.githubpages']
+    'sphinx.ext.githubpages'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -171,4 +175,13 @@ texinfo_documents = [
 ]
 
 
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return MagicMock()
 
+
+MOCK_MODULES = [
+    'numpy', 'pycuda', 'pycuda.autoinit', 'pycuda.compiler', 'pycuda.gpuarray'
+]
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
