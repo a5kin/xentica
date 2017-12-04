@@ -1,23 +1,64 @@
+"""
+A collection of models derived from Conway's Game Of Life.
+
+Experiment classes included.
+
+"""
 from xentica import core
 from xentica import seeds
 from xentica.core import color_effects
 
 
 class GameOfLife(core.CellularAutomaton):
-    """ The classic CA built with Xentica framework """
+    """
+    The classic CA built with Xentica framework.
+
+    It has only one property called ``state``, which is positive
+    integer with max value of 1.
+
+    """
+
     state = core.IntegerProperty(max_val=1)
 
     class Topology:
+        """
+        Mandatory class for all ``CellularAutomaton`` instances.
+
+        All class variables below are also mandatory.
+
+        Here, we declare the topology as a 2-dimensional orthogonal
+        lattice with Moore neighborhood, wrapped to a 3-torus.
+
+        """
+
         dimensions = 2
         lattice = core.OrthogonalLattice()
         neighborhood = core.MooreNeighborhood()
         border = core.TorusBorder()
 
     def emit(self):
+        """
+        Implement the logic of emit phase.
+
+        Statements below will be translated into C code as emit kernel
+        at the moment of class creation.
+
+        Here, we just copy main state to surrounding buffers.
+
+        """
         for i in range(len(self.buffers)):
             self.buffers[i].state = self.main.state
 
     def absorb(self):
+        """
+        Implement the logic of absorb phase.
+
+        Statements below will be translated into C code as well.
+
+        Here, we sum all neigbors buffered states and apply Conway
+        rule to modify cell's own state.
+
+        """
         neighbors_alive = core.IntegerVariable()
         for i in range(len(self.buffers)):
             neighbors_alive += self.neighbors[i].buffer.state
@@ -27,6 +68,19 @@ class GameOfLife(core.CellularAutomaton):
 
     @color_effects.MovingAverage
     def color(self):
+        """
+        Implement the logic of cell's color calculation.
+
+        Must return a tuple of RGB values computed from ``self.main``
+        properties.
+
+        Also, must be decorated by a class from ``color_effects``
+        module.
+
+        Here, we simply define 0 state as pure black, and 1 state as
+        pure white.
+
+        """
         r = self.main.state * 255
         g = self.main.state * 255
         b = self.main.state * 255
@@ -34,11 +88,21 @@ class GameOfLife(core.CellularAutomaton):
 
 
 class GameOfLifeStatic(GameOfLife):
-    """ Game of Life variant with static border made of live cells"""
-    class Topology:
-        dimensions = 2
-        lattice = core.OrthogonalLattice()
-        neighborhood = core.MooreNeighborhood()
+    """
+    Game of Life variant with static border made of live cells.
+
+    This is an example of how easy you can inherit other models.
+
+    """
+
+    class Topology(GameOfLife.Topology):
+        """
+        You can inherit parent class ``Topology``.
+
+        Then, override only necessary variables.
+
+        """
+
         border = core.StaticBorder(1)
 
 
