@@ -107,13 +107,20 @@ class GameOfLifeStatic(GameOfLife):
 
 
 class GameOfLifeColor(GameOfLife):
-    """ Same Game Of Life, but with color per each cell """
+    """
+    Game Of Life variant with RGB color.
+
+    This is an example of how to use multiple properties per cell.
+
+    """
+
     state = core.IntegerProperty(max_val=1)
     red = core.IntegerProperty(max_val=255)
     green = core.IntegerProperty(max_val=255)
     blue = core.IntegerProperty(max_val=255)
 
     def emit(self):
+        """Copy all properties to surrounding buffers."""
         for i in range(len(self.buffers)):
             self.buffers[i].state = self.main.state
             self.buffers[i].red = self.main.red
@@ -121,6 +128,13 @@ class GameOfLifeColor(GameOfLife):
             self.buffers[i].blue = self.main.blue
 
     def absorb(self):
+        """
+        Calculate RGB as neighbors sum for living cell only.
+
+        Note, parent ``absorb`` method should be called using direct
+        class access, not via ``super``.
+
+        """
         GameOfLife.absorb(self)
         red_sum = core.IntegerVariable()
         for i in range(len(self.buffers)):
@@ -137,6 +151,7 @@ class GameOfLifeColor(GameOfLife):
 
     @color_effects.MovingAverage
     def color(self):
+        """Calculate color as usual."""
         r = self.main.state * self.main.red
         g = self.main.state * self.main.green
         b = self.main.state * self.main.blue
@@ -145,17 +160,41 @@ class GameOfLifeColor(GameOfLife):
 
 class GameOfLife6D(GameOfLife):
     """
-    Conway rules in 6D.
-    That's really all you need to go into hyperspace :)
+    Game of Life variant in 6D.
+
+    Nothing interesting, just to prove you can do it with ease.
 
     """
+
     class Topology(GameOfLife.Topology):
+        """
+        Hyper-spacewalk, is as easy as increase ``dimensions`` value.
+
+        However, we are also changing neighborhood to Von Neumann
+        here, to prevent neighbors number exponential grow.
+
+        """
+
         dimensions = 6
         neighborhood = core.VonNeumannNeighborhood()
 
 
 class GOLExperiment(core.Experiment):
-    """ Particular experiment, to be loaded at runtime in future """
+    """
+    Particular experiment for the vanilla Game of Life.
+
+    Here, we define constants and initial conditions from which the
+    world's seed will be generated.
+
+    The ``word`` is RNG seed string. The ``size``, ``zoom`` and
+    ``pos`` are board contstants. The ``seed`` is a pattern used in
+    initial board state generation.
+
+    ``BigBang`` is a pattern when small area initialized with a
+    high-density random values.
+
+    """
+
     word = "OBEY XENTICA"
     size = (640, 360, )
     zoom = 3
@@ -169,12 +208,19 @@ class GOLExperiment(core.Experiment):
     )
 
 
-class GOLExperiment2(core.Experiment):
-    """ Experiment initialized with Primordial Soup pattern. """
+class GOLExperiment2(GOLExperiment):
+    """
+    Another experiment for the vanilla GoL.
+
+    Since it is inherited from ``GOLExperiment``, we can redefine only
+    values we need.
+
+    ``PrimordialSoup`` is a pattern when the whole board is
+    initialized with low-density random values.
+
+    """
+
     word = "XENTICA IS YOUR GODDESS"
-    size = (640, 360, )
-    zoom = 3
-    pos = [0, 0]
     seed = seeds.patterns.PrimordialSoup(
         vals={
             "state": seeds.random.RandInt(0, 1),
@@ -183,7 +229,17 @@ class GOLExperiment2(core.Experiment):
 
 
 class GOLExperimentColor(GOLExperiment):
-    """ Special case for GameOfLifeColor """
+    """
+    Experiment for GameOfLifeColor.
+
+    Here, we introduce ``fade_out`` constant, which is used in
+    rendering causing cells slowly fade out.
+
+    Note, it is only aestetic effect, and does not affect real cell
+    state.
+
+    """
+
     fade_out = 10
     seed = seeds.patterns.PrimordialSoup(
         vals={
@@ -196,11 +252,23 @@ class GOLExperimentColor(GOLExperiment):
 
 
 class GOLExperiment6D(GOLExperiment2):
-    """ Special case for 6D Life """
+    """
+    Special experiment for 6D Life.
+
+    Here, we define the world with 2 spatial and 4 looped
+    micro-dimensions, 3 cells length each.
+
+    As a result, we get large quasi-stable oscillators, looping over
+    micro-dimensions. Strangely formed, but nothing interesting,
+    really.
+
+    """
+
     size = (640, 360, 3, 3, 3, 3)
 
 
 if __name__ == "__main__":
+    # Finally, an example of how to run model/experiment interactively
     import moire
     ca = GameOfLifeColor(GOLExperimentColor)
     gui = moire.GUI(runnable=ca)
