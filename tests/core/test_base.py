@@ -1,3 +1,4 @@
+"""Tests for ``xentica.core.base`` module."""
 import unittest
 import os
 import binascii
@@ -14,11 +15,18 @@ from examples.game_of_life import (
 
 
 class TestCellularAutomaton(unittest.TestCase):
+    """Tests for ``CellularAutomaton`` class."""
 
     num_steps = 1000
     num_runs = 3
 
     def test_single_ca(self):
+        """
+        Test single CA model.
+
+        Run vanilla GoL for 1000 steps and make sure board checksum is correct.
+
+        """
         for i in range(self.num_runs):
             ca = GameOfLife(GOLExperiment)
             for j in range(self.num_steps):
@@ -27,6 +35,7 @@ class TestCellularAutomaton(unittest.TestCase):
             self.assertEqual(3106211755, checksum, "Wrong field checksum.")
 
     def test_multiple_ca(self):
+        """Test two CellularAutomaton instances could be ran in parallel."""
         ca1 = GameOfLife(GOLExperiment)
         ca2 = GameOfLife(GOLExperiment)
         for j in range(self.num_steps):
@@ -38,6 +47,12 @@ class TestCellularAutomaton(unittest.TestCase):
         self.assertEqual(3106211755, checksum, "Wrong field checksum (CA #2).")
 
     def test_render(self):
+        """
+        Test basic rendering working.
+
+        Run vanilla GoL for 1000 steps and check resulting image's checksum.
+
+        """
         experiment = GOLExperiment
         experiment.zoom = 1
         ca = GameOfLife(experiment)
@@ -49,6 +64,7 @@ class TestCellularAutomaton(unittest.TestCase):
                          "Wrong image checksum.")
 
     def test_pause(self):
+        """Test CA is not evolving when paused."""
         ca = GameOfLife(GOLExperiment)
         ca.paused = False
         checksum_before = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
@@ -64,6 +80,7 @@ class TestCellularAutomaton(unittest.TestCase):
                          "CA is not paused.")
 
     def test_save_load(self):
+        """Save CA and test it's state is identical after load."""
         ca1 = GameOfLife(GOLExperiment)
         for i in range(self.num_steps // 2):
             ca1.step()
@@ -77,6 +94,7 @@ class TestCellularAutomaton(unittest.TestCase):
         os.remove("test.ca")
 
     def test_load_random(self):
+        """Save CA and test it's RNG state is identical after load."""
         ca1 = GameOfLife(GOLExperiment)
         ca1.save("test.ca")
         ca2 = GameOfLife(GOLExperiment)
@@ -90,17 +108,20 @@ class TestCellularAutomaton(unittest.TestCase):
         os.remove("test.ca")
 
     def test_no_topology(self):
+        """Test exception is raised if ``Topology`` is not declared."""
         with self.assertRaises(XenticaException):
             class NoTopologyCA(CellularAutomaton):
                 pass
 
     def test_empty_topology(self):
+        """Test exception is raised if ``Topology`` is empty."""
         with self.assertRaises(XenticaException):
             class NoLatticeCA(CellularAutomaton):
                 class Topology:
                     pass
 
     def test_static_border(self):
+        """Test exception is raised if ``Topology`` is empty."""
         ca = GameOfLifeStatic(GOLExperiment)
         for j in range(self.num_steps):
             ca.step()
@@ -110,6 +131,7 @@ class TestCellularAutomaton(unittest.TestCase):
         self.assertEqual(1660369157, checksum, "Wrong field checksum.")
 
     def test_multiple_properties(self):
+        """Test CA with multiple properties works correctly."""
         ca = GameOfLifeColor(GOLExperimentColor)
         for j in range(self.num_steps):
             ca.step()
@@ -117,6 +139,7 @@ class TestCellularAutomaton(unittest.TestCase):
         self.assertEqual(3492385663, checksum, "Wrong field checksum.")
 
     def test_multidimensional(self):
+        """Test 6-dimensional CA works correctly."""
         class GOLExperiment6DLite(GOLExperiment2):
             size = (64, 36, 3, 3, 3, 3)
         ca = GameOfLife6D(GOLExperiment6DLite)
@@ -126,6 +149,7 @@ class TestCellularAutomaton(unittest.TestCase):
         self.assertEqual(1854122883, checksum, "Wrong field checksum.")
 
     def test_cell_width(self):
+        """Test CA with 16 bit/cell works correctly."""
         class GameOfLifeInt(GameOfLife):
             state = IntegerProperty(max_val=2 ** 16 - 1)
         ca = GameOfLifeInt(GOLExperiment)
