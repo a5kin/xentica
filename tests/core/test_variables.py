@@ -1,3 +1,4 @@
+"""Tests for ``xentica.core.variables`` module."""
 import unittest
 
 from xentica.core.variables import IntegerVariable
@@ -5,11 +6,14 @@ from xentica import core
 
 
 class TestVariable(unittest.TestCase):
+    """Tests for ``Variable`` class and its children."""
 
     def test_integer(self):
+        """Test ``IntegerVariable`` initialization."""
         IntegerVariable()
 
     def test_descriptor(self):
+        """Test ``Variable`` acting as class descriptor."""
         class InvertCA(core.CellularAutomaton):
             state = core.IntegerProperty(max_val=1)
 
