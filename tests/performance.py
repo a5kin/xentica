@@ -1,3 +1,4 @@
+"""Script to run performance check."""
 import time
 
 from examples.game_of_life import GameOfLife, GOLExperiment
