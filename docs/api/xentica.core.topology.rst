@@ -1,46 +1,37 @@
-xentica\.core\.topology package
-===============================
+xentica\.core\.topology
+=======================
 
-Submodules
-----------
+.. automodule:: xentica.core.topology
 
-xentica\.core\.topology\.border module
---------------------------------------
+xentica\.core\.topology\.border
+-------------------------------
 
 .. automodule:: xentica.core.topology.border
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.topology\.lattice module
----------------------------------------
+xentica\.core\.topology\.lattice
+--------------------------------
 
 .. automodule:: xentica.core.topology.lattice
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.topology\.mixins module
---------------------------------------
+xentica\.core\.topology\.mixins
+-------------------------------
 
 .. automodule:: xentica.core.topology.mixins
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.topology\.neighborhood module
---------------------------------------------
+xentica\.core\.topology\.neighborhood
+-------------------------------------
 
 .. automodule:: xentica.core.topology.neighborhood
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: xentica.core.topology
-    :members:
-    :undoc-members:
-    :show-inheritance:
