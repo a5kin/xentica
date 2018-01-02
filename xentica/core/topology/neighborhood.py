@@ -15,6 +15,7 @@ All classes there are intended to be used inside ``Topology`` for
 
 """
 import itertools
+import abc
 
 from xentica.core.topology.mixins import DimensionsMixin
 
@@ -46,6 +47,53 @@ class Neighborhood(DimensionsMixin):
     def __len__(self):
         """Return number of neighbors for a single cell."""
         return self.num_neighbors
+
+    @abc.abstractmethod
+    def neighbor_coords(self, index, coord_prefix, neighbor_prefix):
+        """
+        Generate C code to obtain neighbor coordinates by its index.
+
+        This is an abstract method, you must implement it in
+        :class:`Neighborhood` subclasses.
+
+        :param index:
+            Neighbor index, a non-negative integer less than number of
+            neighbors.
+        :param coord_prefix:
+            The prefix for variables containing main cell's coordinates.
+        :param neighbor_prefix:
+            The prefix for resulting variables containing neighbor coordinates.
+
+        :returns:
+            A string with C code doing all necessary to get neighbor
+            state from RAM. No assignment, only a valid expression
+            needed.
+
+        """
+
+    @abc.abstractmethod
+    def neighbor_state(self, neighbor_index, state_index, coord_prefix):
+        """
+        Generate C code to obtain neighbor state by its index.
+
+        This is an abstract method, you must implement it in
+        :class:`Neighborhood` subclasses.
+
+        :param neighbor_index:
+            Neighbor index, a non-negative integer less than number of
+            neighbors.
+        :param state_index:
+            State index, a non-negative integer less than number of
+            neighbors for buffered states or -1 for main state.
+        :param coord_prefix:
+            The prefix for variables containing neighbor coordinates.
+
+        :returns:
+            A string with C code doing all necessary to process
+            neighbors's coordinates and store them to neighbor
+            coordinates variables.
+
+        """
 
 
 class OrthogonalNeighborhood(Neighborhood):
@@ -97,7 +145,7 @@ class MooreNeighborhood(OrthogonalNeighborhood):
     """
     N-dimensional Moore neighborhood implementation.
 
-    The neighbors is all cells, sharing at least one vertex.
+    The neighbors are all cells, sharing at least one vertex.
 
     """
 
