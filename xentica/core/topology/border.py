@@ -14,6 +14,8 @@ All classes there are intended to be used inside ``Topology`` for
         # ...
 
 """
+import abc
+
 from xentica.core.topology.mixins import DimensionsMixin
 
 
@@ -32,7 +34,55 @@ class Border(DimensionsMixin):
         self.topology = None
 
 
-class TorusBorder(Border):
+class WrappedBorder(Border):
+    """
+    Base class for borders wrapping the field into different manifolds.
+
+    For correct behavior, you should implement :meth:`wrap_coords` method.
+
+    See the detailed description below.
+
+    """
+
+    @abc.abstractmethod
+    def wrap_coords(self, coord_prefix):
+        """
+        Generate C code to translate off-board coordinates to on-board ones.
+
+        This is an abstract method, you must implement it in
+        :class:`WrappedBorder` subclasses.
+
+        :param coord_prefix:
+            The prefix for variables containing cell's coordinates.
+
+        """
+
+
+class GeneratedBorder(Border):
+    """
+    Base class for borders generating states of the off-board cells.
+
+    For correct behavior, you should implement :meth:`off_board_state` method.
+
+    See the detailed description below.
+
+    """
+
+    @abc.abstractmethod
+    def off_board_state(self, coord_prefix):
+        """
+        Generate C code to obtain off-board cell's state.
+
+        This is an abstract method, you must implement it in
+        :class:`GeneratedBorder` subclasses.
+
+        :param coord_prefix:
+            The prefix for variables containing cell's coordinates.
+
+        """
+
+
+class TorusBorder(WrappedBorder):
     """
     Wraps the entire field into N-torus manifold.
 
@@ -61,7 +111,7 @@ class TorusBorder(Border):
         return code
 
 
-class StaticBorder(Border):
+class StaticBorder(GeneratedBorder):
     """
     Generates a static value for every off-board cell.
 
