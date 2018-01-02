@@ -1,3 +1,19 @@
+"""
+The collection of classes describing different neighborhood topologies.
+
+All classes there are intended to be used inside ``Topology`` for
+``neighborhood`` class variable definition. They are also available via
+:mod:`xentica.core` shortcut. The example::
+
+    from xentica.core import CellularAutomaton, MooreNeighborhood
+
+    class MyCA(CellularAutomaton)
+        class Topology:
+            neighborhood = MooreNeighborhood()
+            # ...
+        # ...
+
+"""
 import itertools
 
 from xentica.core.topology.mixins import DimensionsMixin
@@ -5,22 +21,55 @@ from xentica.core.topology.mixins import DimensionsMixin
 
 class Neighborhood(DimensionsMixin):
     """
-    Base class for all types of neighborhood.
+    Base class for all neighborhood topologies.
+
+    For correct behavior, neighborhood classes should be inherited from
+    this class. You should also implement the following functions:
+
+    - :meth:`neighbor_coords`
+
+    - :meth:`neighbor_state`
+
+    See the detailed description below.
 
     """
+
     def __init__(self):
+        """Initialize main attributes."""
+        #: Number of neighbors, you must re-define it in sub-classes.
         self.num_neighbors = None
+        #: A reference to ``Topology`` holder class, will be set in
+        #: ``BSCA`` metaclass.
         self.topology = None
         self._delta2str = {-1: " - 1", 0: "", 1: " + 1"}
 
     def __len__(self):
+        """Return number of neighbors for a single cell."""
         return self.num_neighbors
 
 
 class OrthogonalNeighborhood(Neighborhood):
+    """
+    Base class for neighborhoods on orthogonal lattice.
+
+    It is implementing all necessary :class:`Neighborhood` abstract
+    methods, the only thing you should override is :meth:`dimensions`
+    setter. In :meth:`dimensions`, you should correctly set
+    ``num_neighbors`` and ``_neighbor_deltas`` attributes.
+
+    """
+
+    #: Any number of dimentions is supported, 100 is just to limit your
+    #: hyperspatial hunger.
     supported_dimensions = list(range(1, 100))
 
     def neighbor_coords(self, index, coord_prefix, neighbor_prefix):
+        """
+        Implement neighbor coordinates obtaining by its index, in C.
+
+        See :meth:`Neighborhood.neighbor_coords` for details.
+
+        """
         code = ""
         for i in range(self.dimensions):
             code += "{neighbor}{i} = {coord}{i}{delta};\n".format(
@@ -31,6 +80,12 @@ class OrthogonalNeighborhood(Neighborhood):
         return code
 
     def neighbor_state(self, neighbor_index, state_index, coord_prefix):
+        """
+        Implement state obtaining by neighbor/state index, in C.
+
+        See :meth:`Neighborhood.neighbor_coords` for details.
+
+        """
         cell_index = self.topology.lattice.coord_to_index_code(coord_prefix)
         if state_index + 1 > 0:
             cell_index += " + n * " + str(state_index)
@@ -39,9 +94,16 @@ class OrthogonalNeighborhood(Neighborhood):
 
 
 class MooreNeighborhood(OrthogonalNeighborhood):
+    """
+    N-dimensional Moore neighborhood implementation.
+
+    The neighbors is all cells, sharing at least one vertex.
+
+    """
 
     @OrthogonalNeighborhood.dimensions.setter
     def dimensions(self, num_dim):
+        """Set number of neighbors and their relative coordinates."""
         super_class = super(MooreNeighborhood, MooreNeighborhood)
         super_class.dimensions.fset(self, num_dim)
         self.num_neighbors = 3 ** num_dim - 1
@@ -50,9 +112,16 @@ class MooreNeighborhood(OrthogonalNeighborhood):
 
 
 class VonNeumannNeighborhood(OrthogonalNeighborhood):
+    """
+    N-dimensional Von Neumann neighborhood implementation.
+
+    The neighbors are adjacent cells in all possible orthogonal directions.
+
+    """
 
     @OrthogonalNeighborhood.dimensions.setter
     def dimensions(self, num_dim):
+        """Set number of neighbors and their relative coordinates."""
         super_class = super(VonNeumannNeighborhood, VonNeumannNeighborhood)
         super_class.dimensions.fset(self, num_dim)
         self.num_neighbors = 2 * num_dim
