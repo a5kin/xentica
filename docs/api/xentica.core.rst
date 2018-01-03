@@ -1,6 +1,8 @@
 xentica\.core package
 =====================
 
+.. automodule:: xentica.core
+
 Subpackages
 -----------
 
@@ -15,7 +17,7 @@ xentica\.core\.base module
 --------------------------
 
 .. automodule:: xentica.core.base
-    :members:
+    :members: CellularAutomaton
     :undoc-members:
     :show-inheritance:
 
@@ -71,15 +73,6 @@ xentica\.core\.variables module
 -------------------------------
 
 .. automodule:: xentica.core.variables
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: xentica.core
     :members:
     :undoc-members:
     :show-inheritance:
