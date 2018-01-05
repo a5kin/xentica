@@ -7,7 +7,7 @@ All classes there are intended to be used inside ``Topology`` for
 
     from xentica.core import CellularAutomaton, TorusBorder
 
-    class MyCA(CellularAutomaton)
+    class MyCA(CellularAutomaton):
         class Topology:
             border = TorusBorder()
             # ...
