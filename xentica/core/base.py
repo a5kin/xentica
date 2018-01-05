@@ -194,6 +194,9 @@ class BSCA(type):
     def define_constant(cls, constant):
         cls._constants[constant.name] = deepcopy(constant)
 
+    def is_constant(cls, constant):
+        return constant in cls._constants
+
     @property
     def coords_declared(cls):
         return cls._coords_declared

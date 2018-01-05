@@ -123,9 +123,12 @@ class RendererPlain(Renderer):
         )
         code += "}" * (self._bsca.topology.dimensions - 2)
         # calculate average
+        by_smooth_factor = ""
+        if self._bsca.is_constant("SMOOTH_FACTOR"):
+            by_smooth_factor = "/ SMOOTH_FACTOR"
         code += """
-            img[i * 3] = r / num_cells_projected / SMOOTH_FACTOR;
-            img[i * 3 + 1] = g / num_cells_projected / SMOOTH_FACTOR;
-            img[i * 3 + 2] = b / num_cells_projected / SMOOTH_FACTOR;
-        """
+            img[i * 3] = r / num_cells_projected {by_smooth_factor};
+            img[i * 3 + 1] = g / num_cells_projected {by_smooth_factor};
+            img[i * 3 + 2] = b / num_cells_projected {by_smooth_factor};
+        """.format(by_smooth_factor=by_smooth_factor)
         return code

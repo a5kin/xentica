@@ -58,6 +58,7 @@ class ColorEffect(BscaDetectorMixin):
     def __init__(self, func):
         """Initialize base attributes."""
         self.func = func
+        self.effect = ""
 
     def __call__(self, self_var):
         """
@@ -67,14 +68,14 @@ class ColorEffect(BscaDetectorMixin):
         ``super`` result, like shown in the example above.
 
         """
-        r, g, b = self.func(self_var)
+        red, green, blue = self.func(self_var)
         code = """
             int new_r = %s;
             int new_g = %s;
             int new_b = %s;
             %s
             col[i] = make_int3(new_r, new_g, new_b);
-        """ % (r, g, b, self.effect)
+        """ % (red, green, blue, self.effect)
         self_var.append_code(code)
 
 
