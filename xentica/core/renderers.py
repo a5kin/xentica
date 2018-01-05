@@ -1,3 +1,25 @@
+"""
+The collection of classes implementing render logic.
+
+The renderer takes the array of cells' colors and renders the screen
+frame from it. Also, it is possible to expand a list of user actions,
+adding ones specific to the renderer, like zoom, scroll etc.
+
+The default renderer is :class:`RendererPlain`. Though there are no
+other renderers yet, you may try to implement your own and apply it to
+CA model as follows::
+
+    from xentica.core import CellularAutomaton
+    from xentica.core.renderers import Renderer
+
+    class MyRenderer(Renderer):
+        # ...
+
+    class MyCA(CellularAutomaton):
+        renderer = MyRenderer()
+        # ...
+
+"""
 import numpy as np
 
 from xentica.core.mixins import BscaDetectorMixin
@@ -5,30 +27,105 @@ from xentica.core.mixins import BscaDetectorMixin
 
 class Renderer(BscaDetectorMixin):
     """
-    Base class for renderers.
+    Base class for all renderers.
+
+    For correct behavior, renderer classes should be inherited from
+    this class. Then at least :meth:`render_code` method should be implemented.
+
+    However, if you are planning to add user actions specific to your
+    renderer, more methods should be overridden:
+
+    - :meth:`__init__`, where you expand a list of kernel arguments in
+      ``self.args``;
+
+    - :meth:`get_args_vals`, where you expand the list of arguments' values;
+
+    - :meth:`setup_actions`, where you expand a dictionary of bridge actions;
+
+    See :class:`RendererPlain` code as an example.
 
     """
+
     def __init__(self):
+        """Initialize kernel arguments."""
         self.args = [
             ("int3", "*col"),
             ("int", "*img"),
         ]
 
     def get_args_vals(self, bsca):
+        """
+        Get a list of kernel arguments values.
+
+        The order should correspond to ``self.args``, with the values
+        themselves as either PyCUDA ``GpuArray`` or correct NumPy
+        instance. Those values will be used directly as arguments to
+        PyCUDA kernel execution.
+
+        :param bsca:
+            :class:`xentica.core.CellularAutomaton` instance.
+
+        """
         args_vals = [bsca.colors_gpu, bsca.img_gpu]
         return args_vals
 
     def render_code(self):
+        """
+        Generate C code for rendering.
+
+        At minimum, it should process cells colors stored in ``col``
+        GPU-array, and store the resulting pixel's value into ``img``
+        GPU-array. It can additionally use other custom arguments, if
+        any set up.
+
+        """
         return ""
+
+    def setup_actions(self, bridge):
+        """
+        Expand bridge with custom user actions.
+
+        You can do it as follows::
+
+            class MyRenderer(Renderer):
+                # ...
+
+                @staticmethod
+                def my_awesome_action():
+                    def func(ca, gui):
+                        # do something with ``ca`` and ``gui``
+                    return func
+
+                def setup_actions(self):
+                    bridge.key_actions.update({
+                        "some_key": self.my_awesome_action(),
+                    })
+
+        :param bridge:
+            :class:`xentica.bridge.Bridge` instance.
+
+        """
 
 
 class RendererPlain(Renderer):
     """
-    Render board as 2D plain, and make projection
-    from higher dimensions as needed.
+    Render board as 2D plain.
+
+    If your model has more than 2 dimensions, a projection over
+    ``projection_axes`` tuple will be made. The default is two first
+    axes, which corresponds to ``(0, 1)`` tuple.
 
     """
+
     def __init__(self, projection_axes=None):
+        """Initialize custom kernel arguments and projection axes.
+
+        :param projection_axes: 
+            A tuple with indexes of 2 axes over which a projection is
+            made.  If ``None`` value is given, two first axes, ``(0, 1)``
+            will be used.
+
+        """
         super(RendererPlain, self).__init__()
         self.args += [
             ("int", "zoom"),
@@ -41,6 +138,7 @@ class RendererPlain(Renderer):
             self.projection_axes = (0, 1)
 
     def get_args_vals(self, bsca):
+        """Extend kernel arguments values."""
         args_vals = super(RendererPlain, self).get_args_vals(bsca)
         args_vals += [
             np.int32(bsca.zoom),
@@ -51,6 +149,7 @@ class RendererPlain(Renderer):
         return args_vals
 
     def setup_actions(self, bridge):
+        """Extend bridge with scroll and zoom user actions."""
         bridge.key_actions.update({
             "up": self.move(0, 1),
             "down": self.move(0, -1),
@@ -62,27 +161,57 @@ class RendererPlain(Renderer):
 
     @staticmethod
     def move(dx, dy):
+        """
+        Move over game field by some delta.
+
+        :param dx: Delta by x-axis.
+        :param dy: Delta by y-axis.
+
+        """
         def func(ca, gui):
             ca.renderer.apply_move(ca, dx, dy)
         return func
 
     @staticmethod
     def zoom(dzoom):
+        """
+        Zoom game field by some delta.
+
+        :param dzoom: Delta by which field is zoomed.
+
+        """
         def func(ca, gui):
             ca.renderer.apply_zoom(ca, dzoom)
         return func
 
     @staticmethod
     def apply_move(bsca, *args):
+        """
+        Apply field move action to CA class.
+
+        :param bsca:
+            :class:`xentica.core.CellularAutomaton` instance.
+
+        """
         for i in range(len(args)):
             delta = args[i]
             bsca.pos[i] = (bsca.pos[i] + delta) % bsca.size[i]
 
     @staticmethod
     def apply_zoom(bsca, dval):
+        """
+        Apply field zoom action to CA class.
+
+        :param bsca:
+            :class:`xentica.core.CellularAutomaton` instance.
+        :param dval:
+            Delta by which field is zoomed.
+
+        """
         bsca.zoom = max(1, (bsca.zoom + dval))
 
     def render_code(self):
+        """Implement the code for render kernel."""
         # calculate projection plain coordinates
         code = """
             int {x} = (int) (((float) (i % width)) / (float) zoom) + dx;
