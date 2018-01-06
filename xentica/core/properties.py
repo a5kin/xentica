@@ -1,3 +1,46 @@
+"""
+The collection of classes to describe properties of CA models.
+
+.. warning::
+    Do not confuse with Python properties.
+
+Xentica properties are declaring as class variables and helping you to
+organize CA state into complex structures.
+
+Each :class:`CellularAutomaton <xentica.core.base.CellularAutomaton>`
+instance should have at least one property declared. The property name
+is up to you. If your model has just one value for state (like in most
+classic CA), the best practice is to call it ``state`` as follows::
+
+    from xentica import core
+
+    class MyCA(core.CellularAutomaton):
+        state = core.IntegerProperty(max_val=1)
+        # ...
+
+Then, you can use it in expressions of ``emit()``, ``absorb()`` and
+``color()`` functions as:
+
+``self.main.state``
+    to get and set main state;
+
+``self.buffers[i].state``
+    to get and set i-th buffered state;
+
+``self.neighbors[i].buffer.state``
+    to get and set i-th neighbor buffered state.
+
+Xentica will take care of all other things, like packing CA properties
+into binary representation and back, storing and getting corresponding
+values from VRAM, etc.
+
+Most of properties will return
+:class:`DeferredExpression <xentica.core.variables.DeferredExpression>`
+on access, so you can use them safely in mixed expressions::
+
+    self.buffers[i].state = self.main.state + 1
+
+"""
 import math
 from collections import OrderedDict
 
