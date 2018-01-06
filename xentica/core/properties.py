@@ -54,8 +54,14 @@ class Property(DeferredExpression):
     """
     Base class for all properties.
 
+    Has a vast set of default functionality already
+    implemented. Though, you are free to re-define it all to implement
+    really custom behavior.
+
     """
+
     def __init__(self):
+        """Initialize default attributes."""
         self._bsca = None
         self._types = (
             # (bit_width, numpy_dtype, gpu_c_type)
@@ -66,6 +72,14 @@ class Property(DeferredExpression):
 
     @cached_property
     def best_type(self):
+        """
+        Get type that suits best to store a property.
+
+        :returns:
+            tuple representing best type:
+            ``(bit_width, numpy_dtype, gpu_c_type)``
+
+        """
         _best_type = self._types[-1]
         for t in self._types:
             type_width = t[0]
@@ -76,36 +90,94 @@ class Property(DeferredExpression):
 
     @cached_property
     def dtype(self):
+        """
+        Get NumPy dtype, based on result of :meth:`best_type`.
+
+        :returns:
+            NumPy dtype that suits best to store a property.
+
+        """
         return self.best_type[1]
 
     @cached_property
     def ctype(self):
+        """
+        Get C type, based on result of :meth:`best_type`.
+
+        :returns:
+            C type that suits best to store a property.
+
+        """
         return 'unsigned ' + self.best_type[2]
 
     @cached_property
     def bit_width(self):
+        """
+        Get the number of bits necessary to store a property.
+
+        :returns:
+            Positive integer, a property's bit width.
+
+        """
         return self.calc_bit_width()
 
     @cached_property
     def width(self):
+        """
+        Get the number of memory cells to store a property.
+
+        In example, if ``ctype == "int"`` and ``bit_width == 64``, you
+        need 2 memory cells.
+
+        :returns:
+            Positive integer, a property's width.
+
+        """
         type_width = self.best_type[0]
         return int(math.ceil(self.bit_width / type_width))
 
     def calc_bit_width(self):
+        """
+        Calculate the property's bit width.
+
+        This is the method you most likely need to override. It will
+        be called from :meth:`bit_width`.
+
+        :returns:
+            Positive integer, calculated property's width in bits.
+
+        """
         return 1  # default, just for consistency
 
     def set_bsca(self, bsca, buf_num, nbr_num):
+        """
+        Set up a reference to BSCA instance.
+
+        Do not override this method, it is cruicial to inner framework
+        mechanics.
+
+        :param bsca:
+            :class:`CellularAutomaton <xentica.core.base.CellularAutomaton>`
+            instance.
+        :param buf_num:
+            Buffer's index, associated to property.
+        :param nbr_num:
+            Neighbor's index, associated to property.
+
+        """
         self._bsca = bsca
         self._buf_num = buf_num
         self._nbr_num = nbr_num
 
     def __getattribute__(self, attr):
+        """Implement custom logic when property is get as class attribute."""
         obj = object.__getattribute__(self, attr)
         if hasattr(obj, '__get__'):
             return obj.__get__(self, type(self))
         return obj
 
     def __setattr__(self, attr, val):
+        """Implement custom logic when property is set as class attribute."""
         try:
             obj = object.__getattribute__(self, attr)
         except AttributeError:
@@ -117,16 +189,25 @@ class Property(DeferredExpression):
                 object.__setattr__(self, attr, val)
 
     def __get__(self, obj, objtype):
+        """Implement custom logic when property is get as class descriptor."""
         self.declare_once()
         return DeferredExpression(self.var_name)
 
     def __set__(self, obj, value):
+        """Implement custom logic when property is set as class descriptor."""
         self.declare_once()
         code = "%s = %s;\n" % (self.var_name, value.code)
         self._bsca.append_code(code)
 
     @cached_property
     def _mem_cell(self):
+        """
+        Generate C expression to get cell's state from RAM.
+
+        :returns:
+            String with C expression getting the state from memory.
+
+        """
         if self._nbr_num >= 0:
             neighborhood = self._bsca.topology.neighborhood
             return neighborhood.neighbor_state(self._nbr_num,
@@ -138,17 +219,30 @@ class Property(DeferredExpression):
 
     @property
     def _declared(self):
+        """Test if the state variable is declared."""
         if self._bsca is None:
             return False
         return self._bsca.is_declared(self)
 
     @property
     def _coords_declared(self):
+        """Test if the coordinates variables are declared."""
         if self._bsca is None:
             return True
         return self._bsca.coords_declared
 
     def declare_once(self, init_val=None):
+        """
+        Generate C code to declare a variable holding cell's state.
+
+        You must push the generated code to BSCA via
+        ``self._bsca.append_code()``, then declare necessary stuff via
+        ``self._bsca.declare()``.
+
+        You should also take care of skipping the whole process if
+        things are already declared.
+
+        """
         if self._declared:
             return
         code = "%s %s;\n" % (self.ctype, self.var_name)
@@ -157,13 +251,21 @@ class Property(DeferredExpression):
 
 
 class IntegerProperty(Property):
+    """
+    Most generic property for you to use.
+
+    It is just a positive integer with upper limit of ``max_val``.
+
+    """
 
     def __init__(self, max_val):
+        """Initialize class specific attributes."""
         self.max_val = max_val
         self._buf_num = 0
         super(IntegerProperty, self).__init__()
 
     def calc_bit_width(self):
+        """Calculate bit width, based on ``max_val``."""
         return int(math.log2(self.max_val)) + 1
 
 
