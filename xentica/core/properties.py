@@ -270,32 +270,52 @@ class IntegerProperty(Property):
 
 
 class ContainerProperty(Property):
+    """
+    A property acting as a holder for other properties.
+
+    Currently is used only for inner framework mechanics, in
+    particular, to hold, pack and unpack all top-level properties.
+
+    It will be enhanced in future versions, and give you the
+    ability to implement nested properties structures.
+
+    .. warning::
+        Right now, direct use of this class is prohibited.
+
+    """
 
     def __init__(self):
+        """Initialize ``OrderedDict`` to hold other properties."""
         super(ContainerProperty, self).__init__()
         self._properties = OrderedDict()
 
     def values(self):
+        """Iterate over properties, emulating ``dict`` functionality."""
         for p in self._properties.values():
             yield p
 
     @property
     def _unpacked(self):
+        """Test if inner properties are unpacked from memory."""
         if self._bsca is None:
             return False
         return self._bsca.is_unpacked(self)
 
     def __getitem__(self, key):
+        """Get property by key, emulating ``dict`` functionality."""
         return self._properties[key]
 
     def __setitem__(self, key, val):
+        """Set property by key, emulating ``dict`` functionality."""
         self._properties[key] = val
         object.__setattr__(self, key, val)
 
     def calc_bit_width(self):
+        """Calculate bit width as sum of inner properties' bit widths."""
         return sum([p.bit_width for p in self._properties.values()])
 
     def set_bsca(self, bsca, buf_num, nbr_num):
+        """Propagate BSCA setting to inner properties."""
         self._bsca = bsca
         self._buf_num = buf_num
         self._nbr_num = nbr_num
@@ -303,12 +323,15 @@ class ContainerProperty(Property):
             self[key].set_bsca(bsca, buf_num, nbr_num)
 
     def __get__(self, obj, objtype):
+        """Return self reference when getting as class descriptor."""
         return self
 
     def __set__(self, obj, value):
+        """Do nothing when setting as class descriptor."""
         pass
 
     def __getattribute__(self, attr):
+        """Get value from VRAM and unpack it to variables."""
         obj = object.__getattribute__(self, attr)
         if isinstance(obj, Property):
             self.declare_once(self._mem_cell)
@@ -317,6 +340,7 @@ class ContainerProperty(Property):
         return obj
 
     def __setattr__(self, attr, val):
+        """Declare resulting variable and defer the write memory access."""
         try:
             obj = object.__getattribute__(self, attr)
         except AttributeError:
@@ -331,6 +355,15 @@ class ContainerProperty(Property):
                 object.__setattr__(self, attr, val)
 
     def declare_once(self, init_val=None):
+        """
+        Do all necessary declarations for inner properties.
+
+        Also, implements the case of off-board neighbor access.
+
+        :param init_val:
+             Default value for the property.
+
+        """
         if self._declared:
             return
         code = ""
@@ -387,6 +420,7 @@ class ContainerProperty(Property):
         self._bsca.declare(self)
 
     def _unpack_state(self):
+        """Unpack inner properties values from in-memory representation."""
         if self._unpacked:
             return
         code = ""
@@ -405,7 +439,9 @@ class ContainerProperty(Property):
 
     def deferred_write(self):
         """
-        Pack state and write its value to VRAM
+        Pack state and write its value to VRAM.
+
+        This method is called from ``BSCA`` at the end of kernel processing.
 
         """
         shift = 0
