@@ -231,7 +231,7 @@ class Property(DeferredExpression):
             return True
         return self._bsca.coords_declared
 
-    def declare_once(self, init_val=None):
+    def declare_once(self):
         """
         Generate C code to declare a variable holding cell's state.
 
