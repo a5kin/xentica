@@ -179,7 +179,9 @@ texinfo_documents = [
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-            return MagicMock()
+        if name == "cached_property":
+            return property
+        return MagicMock()
 
 
 MOCK_MODULES = [
