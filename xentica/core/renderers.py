@@ -120,7 +120,7 @@ class RendererPlain(Renderer):
     def __init__(self, projection_axes=None):
         """Initialize custom kernel arguments and projection axes.
 
-        :param projection_axes: 
+        :param projection_axes:
             A tuple with indexes of 2 axes over which a projection is
             made.  If ``None`` value is given, two first axes, ``(0, 1)``
             will be used.
