@@ -177,8 +177,17 @@ class Variable(DeferredExpression, BscaDetectorMixin):
     """
     Base class for all variables.
 
+    Most of the functionality for variables are already implemented in
+    it. Though, you are free to re-define it all to implement really
+    custom behavior.
+
+    :param val:
+         Initial value for the variable.
+
     """
+
     def __init__(self, val=None):
+        """Initialize base class features."""
         super(Variable, self).__init__()
         self.base_class = Variable
         self._declared = False
@@ -187,6 +196,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
 
     @cached_property
     def var_name(self):
+        """Get variable name."""
         all_vars = self._holder_frame.f_locals.items()
         for k, var in all_vars:
             if isinstance(var, self.__class__):
@@ -195,6 +205,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
         return "var%d" % abs(hash(self))
 
     def _declare_once(self):
+        """Declare variable and assign initial value to it."""
         if not self._declared:
             c = "%s %s = %s;\n" % (
                 self.var_type, self.var_name, self._init_val
@@ -204,20 +215,27 @@ class Variable(DeferredExpression, BscaDetectorMixin):
             setattr(self._bsca, self.var_name, self)
 
     def __str__(self):
+        """Return a variable name to use in mixed expressions."""
         return self.var_name
 
     def __get__(self, obj, objtype):
+        """Declare a variable on first use."""
         self._declare_once()
         return self
 
     def __set__(self, obj, value):
+        """Assign a new value to variable (doesn't work properly now)."""
         self._declare_once()
         code = "%s = %s;\n" % (self.var_name, value)
         self._bsca.append_code(code)
 
 
 class IntegerVariable(Variable):
+    """The variable intended to hold a positive integer."""
+
+    #: C type to use in definition.
     var_type = "unsigned int"
 
     def __init__(self, val=0):
+        """Initialize variable with default value."""
         super(IntegerVariable, self).__init__(val)
