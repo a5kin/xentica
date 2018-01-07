@@ -28,8 +28,33 @@ from xentica.core.mixins import BscaDetectorMixin
 
 
 class DeferredExpression:
+    """Base class for other classes intended to be used in mixed expressions.
+
+    In particular, it is used in base
+    :class:`Variable <xentica.core.variables.Variable>` and :class:`Property
+    <xentica.core.properties.Property>` classes.
+
+    Most of the magic methods dealing with binary and unary operators,
+    as well as augmented assigns are automatically overridden for this
+    class. As a result, you can use its subclasses in mixed
+    expressions with ordinary Python values. See the example in
+    module description above.
+
+    Allowed binary ops
+        ``+``, ``-``, ``*``, ``/``, ``%``, ``>>``, ``<<``, ``&``,
+        ``^``, ``|``, ``<``, ``<=``, ``>``, ``>=``, ``==``, ``!=``
+
+    Allowed unary ops
+        ``+``, ``-``, ``~``, ``abs``, ``int``, ``float``, ``round``
+
+    Allowed augmented assigns
+        ``+=``, ``-=``, ``*=``, ``/=``, ``%=``, ``<<=``, ``>>=``,
+        ``&=``, ``^=``, ``|=``
+
+    """
 
     def __init__(self, code=''):
+        """Override arithmetic operators and augmented assigns."""
         self.code = code
         binary_ops = (
             ('+', 'add'),
@@ -98,6 +123,7 @@ class DeferredExpression:
             setattr(self.__class__, func_name, unary(c_op))
 
     def __str__(self):
+        """Return the code accumulated in ``self.code``."""
         return self.code
 
 
