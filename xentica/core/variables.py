@@ -128,24 +128,48 @@ class DeferredExpression:
 
 
 class Constant(BscaDetectorMixin):
+    """The class for defining constants and ``#define`` patterns.
+
+    Once you instantiate :class:`Constant`, you must feed it to
+    ``BSCA.define_constant()`` in order to generate correct C code::
+
+        const = Constant("C_NAME", "bsca_var")
+        self._bsca.define_constant(const)
+
+    :param name:
+        Name to use in ``#define``.
+    :param value:
+        String, evaluating into ``bsca.<value>``, second part of ``#define``.
+
+    """
 
     def __init__(self, name, value):
+        """Initialize the class."""
         self._name = name
         self._value = value
         self._pattern_name = name
         self.base_class = Constant
 
     def get_define_code(self):
+        """Get the C code for ``#define``."""
         code = "#define %s {%s}\n" % (self._name, self._pattern_name)
         return code
 
     def replace_value(self, source):
+        """
+        Replace the constant's value in generated C code.
+
+        :param source:
+            Generated C code.
+
+        """
         # WARNING: potentially dangerous
         val = "self._holder.%s" % self._value.split()[0]
         return source.replace("{%s}" % self._pattern_name, str(eval(val)))
 
     @property
     def name(self):
+        """Get the name of constant."""
         return self._name
 
 
