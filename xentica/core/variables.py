@@ -1,3 +1,27 @@
+"""
+The collection of classes to declare and use C variables and constants.
+
+If the logic of your ``emit()``, ``absorb()`` or ``color()`` functions
+requires the intermediate variables, you must declare them via classes
+from this module in the following way::
+
+    from xentica import core
+
+    class MyCA(core.CellularAutomaton):
+        # ...
+
+        def emit(self):
+            myvar = core.IntegerVariable()
+
+Then you can use them in mixed expressions, like::
+
+    myvar += self.neighbors[i].buffer.state
+    self.main.state = myvar & 1
+
+You may also define constants or other ``#define`` patterns with
+:class:`Constant` class.
+
+"""
 from cached_property import cached_property
 
 from xentica.core.mixins import BscaDetectorMixin
