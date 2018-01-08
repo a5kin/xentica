@@ -17,22 +17,6 @@ xentica\.core\.base module
 --------------------------
 
 .. automodule:: xentica.core.base
-    :members: CellularAutomaton
-    :undoc-members:
-    :show-inheritance:
-
-xentica\.core\.color\_effects module
-------------------------------------
-
-.. automodule:: xentica.core.color_effects
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-xentica\.core\.exceptions module
---------------------------------
-
-.. automodule:: xentica.core.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
@@ -45,18 +29,26 @@ xentica\.core\.experiment module
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.mixins module
-----------------------------
-
-.. automodule:: xentica.core.mixins
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 xentica\.core\.properties module
 --------------------------------
 
 .. automodule:: xentica.core.properties
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+xentica\.core\.variables module
+-------------------------------
+
+.. automodule:: xentica.core.variables
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+xentica\.core\.color\_effects module
+------------------------------------
+
+.. automodule:: xentica.core.color_effects
     :members:
     :undoc-members:
     :show-inheritance:
@@ -69,10 +61,18 @@ xentica\.core\.renderers module
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.variables module
--------------------------------
+xentica\.core\.exceptions module
+--------------------------------
 
-.. automodule:: xentica.core.variables
+.. automodule:: xentica.core.exceptions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+xentica\.core\.mixins module
+----------------------------
+
+.. automodule:: xentica.core.mixins
     :members:
     :undoc-members:
     :show-inheritance:
