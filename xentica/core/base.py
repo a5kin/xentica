@@ -1,3 +1,77 @@
+"""The module with the base class for all CA models.
+
+All Xentica models should be inherited from :class:`CellularAutomaton`
+base class. Inside the model, you should correctly define the
+``Topology`` class and describe the CA logic in ``emit()``,
+``absorb()`` and ``color()`` methods.
+
+``Topology`` is the place where you define the dimensionality,
+lattice, neighborhood and border effects for your CA. See
+:mod:`xentica.core.topology` package for details.
+
+The logic of the model will follow Buffered State Cellular Automaton
+(BSCA) principle. In general, every cell mirrors its state in buffers
+by the number of neighbors, each buffer intended for one of
+neighbors. Then, at each step, the interaction between cells are
+performed via buffers in 2-phase emit/absorb process. More detailed
+description of BSCA principle is available in The Core section of `The
+Concept`_ document.
+
+``emit()`` describes the logic of the first phase of BSCA. At this
+phase, you should fill cell's buffers with corresponding values,
+depending on cell's main state and (optionally) on neighbors' main
+states. The most easy logic is to just copy the main state to
+buffers. It is esspecially useful when you're intending to emulate
+classic CA (like Conway's Life) with BSCA. Write access to main state
+is prohibited there.
+
+``absorb()`` describes the logic of the second phase of BSCA. At this
+phase, you should set the cell's main state, depending on neighbors'
+buffered states. Write access to buffers is prohibited there.
+
+``color()`` describes how to calculate cell's color from its raw
+state. See detailed instructions on it in :mod:`xentica.core.color_effects`.
+
+The logic of the functions from above will be translated into C code
+at the moment of class creation. For the further instructions on how
+to use cell's main and buffered states, see
+:mod:`xentica.core.properties`, for the instructions on variables and
+expressions with them, see :mod:`xentica.core.variables`.
+
+A minimal example, the CA where each cell is taking the mean value of
+its neighbors each step::
+
+    from xentica import core
+    from xentica.core import color_effects
+
+    class MeanCA(core.CellularAutomaton):
+
+        state = core.IntegerProperty(max_val=255)
+
+        class Topology:
+            dimensions = 2
+            lattice = core.OrthogonalLattice()
+            neighborhood = core.MooreNeighborhood()
+            border = core.TorusBorder()
+
+        def emit(self):
+            for i in range(len(self.buffers)):
+                self.buffers[i].state = self.main.state
+
+        def absorb(self):
+            s = core.IntegerVariable()
+            for i in range(len(self.buffers)):
+                s += self.neighbors[i].buffer.state
+            self.main.state = s / len(self.buffers)
+
+        @color_effects.MovingAverage
+        def color(self):
+            v = self.main.state
+            return (v, v, v)
+
+.. _The Concept: http://artipixoids.a5kin.net/concept/artipixoids_concept.pdf
+
+"""
 import functools
 import itertools
 import operator
@@ -18,7 +92,7 @@ from xentica.core.properties import Property, ContainerProperty
 from xentica.core.renderers import RendererPlain
 from xentica.core.exceptions import XenticaException
 
-__all__ = ['context', ]
+__all__ = ['context', 'BSCA', 'CellularAutomaton', 'CachedNeighbor']
 
 
 class CachedNeighbor:
