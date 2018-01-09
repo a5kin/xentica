@@ -107,18 +107,25 @@ class CachedNeighbor:
 
 class BSCA(type):
     """
-    Meta-class for CellularAutomaton.
+    Meta-class for :class:`CellularAutomaton`.
 
-    Generates parallel code given class definition
-    and compiles it for future use.
+    Performs all necessary stuff to generate GPU kernels given class
+    definition.
+
+    It is also preparing ``main``, ``buffers`` and ``neighbors`` class
+    variables being used in ``emit()``, ``absorb()`` and ``color()``
+    methods.
 
     """
+
     @classmethod
     def __prepare__(self, name, bases):
+        """Preserve the order of class variables."""
         return collections.OrderedDict()
 
     def __new__(cls, name, bases, attrs):
-        # prepare new class
+        """Build new :class:`CellularAutomaton` class."""
+        # prepare class itself
         keys = []
         for key in attrs.keys():
             if key not in ('__module__', '__qualname__'):
@@ -215,9 +222,27 @@ class BSCA(type):
         return cls._new_class
 
     def index_to_coord(cls, i):
+        """
+        Wrap ``lattice.index_to_coord`` method.
+
+        :param i: Cell's index.
+
+        """
         return cls.topology.lattice.index_to_coord(i, cls)
 
     def _elementwise_kernel(self, name, args, body):
+        """
+        Build elementwise kernel using template.
+
+        :param name:
+            Kernel's name.
+        :param args:
+            List of kernel's arguments, consisting of
+            ``("type", "var_name")`` tuples.
+        :param body:
+            C code for the kernel's "body", processing a single element.
+
+        """
         arg_string = ", ".join(["%s %s" % (t, v) for t, v in args])
         kernel = """
             __global__ void %s(%s, int n) {
@@ -236,6 +261,16 @@ class BSCA(type):
         return kernel
 
     def _translate_code(cls, *funcs):
+        """
+        Translate Python method to C code by execution.
+
+        :param funcs:
+            List of functions to translate in a single context.
+
+        :returns:
+            String with generated C code for elementwise kernel.
+
+        """
         cls._func_body = ""
         cls._deferred_writes = set()
         cls._declarations = set()
@@ -248,58 +283,171 @@ class BSCA(type):
         return cls._func_body
 
     def append_code(cls, code):
+        """Append ``code`` to kernel's C code."""
         cls._func_body += code
 
     def deferred_write(cls, prop):
+        """
+        Declare a property for deferred write.
+
+        The property will be written into a memory at the end of C
+        code generation.
+
+        :param prop:
+            :class:`Property <xentica.core.properties.Property>`
+            subclass instance.
+
+        """
         cls._deferred_writes.add(prop)
 
     def declare(cls, prop):
+        """
+        Mark property declared.
+
+        :param prop:
+            :class:`Property <xentica.core.properties.Property>`
+            subclass instance.
+
+        """
         cls._declarations.add(prop)
 
     def unpack(cls, prop):
+        """
+        Mark ``prop`` property unpacked.
+
+        :param prop:
+            :class:`Property <xentica.core.properties.Property>`
+            subclass instance.
+
+        """
         cls._unpacks.add(prop)
 
     def is_declared(cls, prop):
+        """
+        Check if ``prop`` property is declared.
+
+        :param prop:
+            :class:`Property <xentica.core.properties.Property>`
+            subclass instance.
+
+        :returns:
+            ``True`` if property is declared, ``False`` otherwise.
+
+        """
         return prop in cls._declarations
 
     def is_unpacked(cls, prop):
+        """
+        Check if ``prop`` property is unpacked.
+
+        :param prop:
+            :class:`Property <xentica.core.properties.Property>`
+            subclass instance.
+
+        :returns:
+            ``True`` if property is unpacked, ``False`` otherwise.
+
+        """
         return prop in cls._unpacks
 
     def declare_coords(cls):
+        """Mark coordinate variables declared."""
         cls._coords_declared = True
 
     def define_constant(cls, constant):
+        """
+        Remember the constant is defined.
+
+        :param constant:
+            :class:`Constant <xentica.core.variables.Constant>`
+            instance.
+
+        """
         cls._constants[constant.name] = deepcopy(constant)
 
     def is_constant(cls, constant):
+        """
+        Check if the constant is defined.
+
+        :param constant:
+            :class:`Constant <xentica.core.variables.Constant>`
+            instance.
+
+        :returns:
+            ``True`` if constant is defined, ``False`` otherwise.
+
+        """
         return constant in cls._constants
 
     @property
     def coords_declared(cls):
+        """
+        Check if coordinate variables are declared.
+
+        :returns:
+            ``True`` if coordinate variables are declared, ``False``
+            otherwise.
+
+        """
         return cls._coords_declared
 
     def build_defines(cls):
+        """
+        Generate ``#define`` section for all kernels.
+
+        :returns:
+            String with C code with necessary defines.
+
+        """
         defines = ""
         for c in cls._constants.values():
             defines += c.get_define_code()
         return defines
 
     def build_emit(cls):
+        """
+        Generate ``emit()`` kernel.
+
+        :returns:
+            String with C code for ``emit()`` kernel.
+
+        """
         args = [(cls.ctype, "*fld"), ]
         body = cls._translate_code(cls.emit)
         return cls._elementwise_kernel("emit", args, body)
 
     def build_absorb(cls):
+        """
+        Generate ``absorb()`` kernel.
+
+        :returns:
+            String with C code for ``absorb()`` kernel.
+
+        """
         args = [(cls.ctype, "*fld"), ("int3", "*col")]
         body = cls._translate_code(cls.absorb, cls.color)
         return cls._elementwise_kernel("absorb", args, body)
 
     def build_render(cls):
+        """
+        Generate ``render()`` kernel.
+
+        :returns:
+            String with C code for ``render()`` kernel.
+
+        """
         args = cls.renderer.args
         body = cls.renderer.render_code()
         return cls._elementwise_kernel("render", args, body)
 
     def pack_state(self, state):
+        """
+        Pack state structure into raw in-memory representation.
+
+        :returns:
+            Integer representing packed state.
+
+        """
         val = 0
         shift = 0
         for name, prop in self.main._properties.items():
