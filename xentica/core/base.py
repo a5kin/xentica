@@ -1,4 +1,5 @@
-"""The module with the base class for all CA models.
+"""
+The module with the base class for all CA models.
 
 All Xentica models should be inherited from :class:`CellularAutomaton`
 base class. Inside the model, you should correctly define the
@@ -96,8 +97,10 @@ __all__ = ['context', 'BSCA', 'CellularAutomaton', 'CachedNeighbor']
 
 
 class CachedNeighbor:
+    """Utility class, intended to hold main and buffered CA state."""
 
     def __init__(self):
+        """Initialize empty main and buffered states."""
         self.main = ContainerProperty()
         self.buffer = ContainerProperty()
 
