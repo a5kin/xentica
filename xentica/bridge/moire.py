@@ -1,7 +1,27 @@
+"""
+Module with the bridge to `Moire`_ UI.
+
+.. _Moire: https://github.com/a5kin/moire
+
+"""
 from xentica.bridge.base import Bridge
 
 
 class MoireBridge:
+    """
+    Class incaplulating the actions for Moire UI.
+
+    ``[`` Speed simulation down.
+
+    ``]`` Speed simulation up.
+
+    ``SPACEBAR`` Pause/unpause simulation.
+
+    ``F12`` Toggle system info.
+
+    ``ESC`` Exit app.
+
+    """
 
     key_actions = {
         "[": Bridge.speed(-1),
