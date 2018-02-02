@@ -1,8 +1,7 @@
 xentica\.bridge package
 =======================
 
-Submodules
-----------
+.. automodule:: xentica.bridge
 
 xentica\.bridge\.base module
 ----------------------------
@@ -17,14 +16,5 @@ xentica\.bridge\.moire module
 
 .. automodule:: xentica.bridge.moire
     :members:
-    :undoc-members:
-    :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: xentica.bridge
-    :members:
-    :undoc-members:
-    :show-inheritance:
