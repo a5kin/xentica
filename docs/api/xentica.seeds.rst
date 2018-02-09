@@ -1,8 +1,8 @@
 xentica\.seeds package
 ======================
 
-Submodules
-----------
+.. automodule:: xentica.seeds
+    :members:
 
 xentica\.seeds\.patterns module
 -------------------------------
@@ -16,15 +16,6 @@ xentica\.seeds\.random module
 -----------------------------
 
 .. automodule:: xentica.seeds.random
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: xentica.seeds
     :members:
     :undoc-members:
     :show-inheritance:
