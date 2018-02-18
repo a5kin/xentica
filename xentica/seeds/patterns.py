@@ -12,6 +12,8 @@ See the example of general usage above.
 
 """
 
+import abc
+
 import numpy as np
 
 from .random import LocalRandom
@@ -98,6 +100,29 @@ class RandomPattern:
         self.random = LocalRandom()
         self.vals = ValDict(vals, self)
 
+    @abc.abstractmethod
+    def generate(self, cells, cells_num, field_size,
+                 index_to_coord, pack_state):
+        """
+        Generate the entire initial state.
+
+        This is an abstract method, you must implement it in
+        :class:`RandomPattern` subclasses.
+
+        :param cells:
+            NumPy array with cells' states as items. The seed will be
+            generated over this array.
+        :param cells_num:
+            Total number of cells in ``cells`` array.
+        :param field_size:
+            Tuple with field sizes per each dimension.
+        :param index_to_coord:
+            Function translating cell's index to coordinate.
+        :param pack_state:
+            Function packing state into single integer.
+
+        """
+
 
 class BigBang(RandomPattern):
     """
@@ -131,7 +156,12 @@ class BigBang(RandomPattern):
 
     def generate(self, cells, cells_num, field_size,
                  index_to_coord, pack_state):
-        """Generate the entire initial state."""
+        """
+        Generate the entire initial state.
+
+        See :meth:`RandomPattern.generate` for details.
+
+        """
         dims = range(len(field_size))
         if self.size is None:
             rnd_vec = [self.random.std.randint(1, field_size[i]) for i in dims]
@@ -175,7 +205,12 @@ class PrimordialSoup(RandomPattern):
 
     def generate(self, cells, cells_num, field_size,
                  index_to_coord, pack_state):
-        """Generate the entire initial state."""
+        """
+        Generate the entire initial state.
+
+        See :meth:`RandomPattern.generate` for details.
+
+        """
         for i in range(cells_num):
             state = {}
             for name in sorted(self.vals.keys()):
