@@ -1,19 +1,59 @@
+"""
+Module containing different patterns for CA seed initialization.
+
+Each pattern class having one mandatory method ``generate()`` which is
+called automatically at the initialization stage.
+
+Patterns are intended to use in
+:class:`Experiment <xentica.core.experiments.Experiment>` classes.
+See the example of general usage above.
+
+.. _The Concept: http://artipixoids.a5kin.net/concept/artipixoids_concept.pdf
+
+"""
+
 import numpy as np
 
 from .random import LocalRandom
 
 
 class ValDictMeta(type):
-    pass
+    """Placeholder for :class:`ValDict` metaclass."""
 
 
 class ValDict(metaclass=ValDictMeta):
     """
-    Wrapper over Python dictionary, to keep descriptors
-    along with regular values. READONLY.
+    Wrapper over Python dictionary.
+
+    It can keep descriptor classes along with regular values. Then, on
+    the item getting, the necessary value is automatically obtaining
+    either directly or via descriptor logic.
+
+    Readonly, you should set all dictionary values at the class
+    initialization.
+
+    Example of usage::
+
+        >>> from xentica.seeds.random import RandInt
+        >>> from xentica.seeds.patterns import ValDict
+        >>> d = {'a': 2, 's': RandInt(11, 23), 'd': 3.3}
+        >>> vd = ValDict(d)
+        >>> vd['a']
+        2
+        >>> vd['s']
+        14
+        >>> vd['d']
+        3.3
+
+    :param d:
+        Dictionary with mixed values. May contain descriptor classes.
+    :param parent:
+        A reference to class holding the dictionary. Optional.
 
     """
+
     def __init__(self, d, parent=None):
+        """Initialize class."""
         self._d = d
         self.parent = parent
         if parent is None:
@@ -21,15 +61,18 @@ class ValDict(metaclass=ValDictMeta):
             self.random = LocalRandom()
 
     def items(self):
+        """Iterate over dictionary items."""
         for k in self._d.keys():
             v = self[k]
             yield k, v
 
     def keys(self):
+        """Iterate over dictionary keys."""
         for k in self._d.keys():
             yield k
 
     def __getitem__(self, key):
+        """Implement the logic of obtaining item from dictionary."""
         if key in self._d:
             if hasattr(self._d[key], '__get__'):
                 return self._d[key].__get__(self.parent, self.parent.__class__)
@@ -37,6 +80,7 @@ class ValDict(metaclass=ValDictMeta):
         raise KeyError(key)
 
     def __setitem__(self, key, val):
+        """Suppress direct item setting, may be allowed in future."""
         raise NotImplementedError
 
 
@@ -44,24 +88,50 @@ class RandomPattern:
     """
     Base class for random patterns.
 
+    :param vals:
+        Dictionary with mixed values. May contain descriptor classes.
+
     """
+
     def __init__(self, vals):
+        """Initialize class."""
         self.random = LocalRandom()
         self.vals = ValDict(vals, self)
 
 
 class BigBang(RandomPattern):
     """
-    Init pattern : small area is initialized with random values.
+    Random init pattern, known as *"Big Bang"*.
+
+    Citation from `The Concept`_:
+
+        *"A small area of space is initialized with a high amount of energy
+        and random parameters per each quantum. Outside the area, quanta
+        has either zero or minimum possible amount of energy. This is a
+        good test for the ability of energy to spread in empty space."*
+
+    The current implementation allows to generate a value for every
+    cell inside specified N-cube area. Cells outside the area have
+    zero values.
+
+    :param vals:
+        Dictionary with mixed values. May contain descriptor classes.
+    :param pos:
+        A tuple with the coordinates of the lowest corner of the Bang area.
+    :param size:
+        A tuple with the size of Bang area per each dimension.
 
     """
+
     def __init__(self, vals, pos=None, size=None):
+        """Initialize class."""
         self.pos = np.asarray(pos) if pos else None
         self.size = np.asarray(size) if size else None
         super(BigBang, self).__init__(vals)
 
     def generate(self, cells, cells_num, field_size,
                  index_to_coord, pack_state):
+        """Generate the entire initial state."""
         dims = range(len(field_size))
         if self.size is None:
             rnd_vec = [self.random.std.randint(1, field_size[i]) for i in dims]
@@ -86,11 +156,26 @@ class BigBang(RandomPattern):
 
 class PrimordialSoup(RandomPattern):
     """
-    Init pattern : the entire field is initialized with random values.
+    Random init pattern, known as *"Primordial Soup"*.
+
+    Citation from `The Concept`_:
+
+        *"Each and every quantum initially has an equally small amount
+        of energy, other parameters are random. This is a good test
+        for the ability of energy to self-organize in clusters from
+        the completely uniform distribution."*
+
+    The current implementation allows to populate the entire board
+    with generated values.
+
+    :param vals:
+        Dictionary with mixed values. May contain descriptor classes.
 
     """
+
     def generate(self, cells, cells_num, field_size,
                  index_to_coord, pack_state):
+        """Generate the entire initial state."""
         for i in range(cells_num):
             state = {}
             for name in sorted(self.vals.keys()):
