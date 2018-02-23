@@ -1,10 +1,10 @@
-xentica\.utils package
-======================
+Utilities (xentica\.utils)
+==========================
 
 .. automodule:: xentica.utils
 
-xentica\.utils\.formatters module
----------------------------------
+Formatters (xentica\.utils\.formatters)
+---------------------------------------
 
 .. automodule:: xentica.utils.formatters
     :members:

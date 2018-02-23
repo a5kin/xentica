@@ -1,19 +1,19 @@
-xentica\.seeds package
-======================
+The Seeds (xentica\.seeds)
+==========================
 
 .. automodule:: xentica.seeds
     :members:
 
-xentica\.seeds\.patterns module
--------------------------------
+Patterns (xentica\.seeds\.patterns)
+-----------------------------------
 
 .. automodule:: xentica.seeds.patterns
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.seeds\.random module
------------------------------
+RNG (xentica\.seeds\.random)
+----------------------------
 
 .. automodule:: xentica.seeds.random
     :members:

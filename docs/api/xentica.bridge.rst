@@ -1,9 +1,9 @@
-xentica\.bridge package
-=======================
+The Bridge (xentica\.bridge)
+============================
 
 .. automodule:: xentica.bridge
 
-xentica\.bridge\.base module
+Base (xentica\.bridge\.base)
 ----------------------------
 
 .. automodule:: xentica.bridge.base
@@ -11,8 +11,8 @@ xentica\.bridge\.base module
     :undoc-members:
     :show-inheritance:
 
-xentica\.bridge\.moire module
------------------------------
+Moire (xentica\.bridge\.moire)
+------------------------------
 
 .. automodule:: xentica.bridge.moire
     :members:

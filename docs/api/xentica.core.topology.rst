@@ -1,34 +1,34 @@
-xentica\.core\.topology
-=======================
+The Topology (xentica\.core\.topology)
+======================================
 
 .. automodule:: xentica.core.topology
 
-xentica\.core\.topology\.lattice
---------------------------------
+Lattice (xentica\.core\.topology\.lattice)
+------------------------------------------
 
 .. automodule:: xentica.core.topology.lattice
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.topology\.neighborhood
--------------------------------------
+Neighborhood (xentica\.core\.topology\.neighborhood)
+----------------------------------------------------
 
 .. automodule:: xentica.core.topology.neighborhood
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.topology\.border
--------------------------------
+Border (xentica\.core\.topology\.border)
+----------------------------------------
 
 .. automodule:: xentica.core.topology.border
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.topology\.mixins
--------------------------------
+Mixins (xentica\.core\.topology\.mixins)
+----------------------------------------
 
 .. automodule:: xentica.core.topology.mixins
     :members:

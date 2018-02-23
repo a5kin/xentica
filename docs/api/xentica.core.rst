@@ -1,76 +1,66 @@
-xentica\.core package
-=====================
+The Core (xentica\.core)
+========================
 
 .. automodule:: xentica.core
 
-Subpackages
------------
-
-.. toctree::
-
-    xentica.core.topology
-
-Submodules
-----------
-
-xentica\.core\.base module
---------------------------
+Base Classes (xentica\.core\.base)
+----------------------------------
 
 .. automodule:: xentica.core.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.experiment module
---------------------------------
+Experiments (xentica\.core\.experiment)
+---------------------------------------
 
 .. automodule:: xentica.core.experiment
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.properties module
---------------------------------
+Properties (xentica\.core\.properties)
+--------------------------------------
 
 .. automodule:: xentica.core.properties
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.variables module
--------------------------------
+Variables (xentica\.core\.variables)
+------------------------------------
 
 .. automodule:: xentica.core.variables
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.color\_effects module
-------------------------------------
+Color Effects (xentica\.core\.color\_effects)
+---------------------------------------------
 
 .. automodule:: xentica.core.color_effects
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.renderers module
--------------------------------
+Renderers (xentica\.core\.renderers)
+------------------------------------
 
 .. automodule:: xentica.core.renderers
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.exceptions module
---------------------------------
+Exceptions (xentica\.core\.exceptions)
+--------------------------------------
 
 .. automodule:: xentica.core.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
 
-xentica\.core\.mixins module
-----------------------------
+Mixins (xentica\.core\.mixins)
+------------------------------
 
 .. automodule:: xentica.core.mixins
     :members:
