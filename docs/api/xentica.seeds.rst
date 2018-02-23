@@ -8,7 +8,7 @@ xentica\.seeds\.patterns module
 -------------------------------
 
 .. automodule:: xentica.seeds.patterns
-    :members: RandomPattern, BigBang, PrimordialSoup, ValDict
+    :members:
     :undoc-members:
     :show-inheritance:
 

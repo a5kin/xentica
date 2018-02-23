@@ -36,6 +36,8 @@ The quick example::
 
 """
 
+__all__ = ['Experiment', ]
+
 
 class Experiment:
     """

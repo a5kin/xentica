@@ -21,6 +21,8 @@ from xentica.core.topology.mixins import DimensionsMixin
 from xentica.core.mixins import BscaDetectorMixin
 from xentica.core.variables import Constant
 
+__all__ = ['Lattice', 'OrthogonalLattice', ]
+
 
 class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
     """

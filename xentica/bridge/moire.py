@@ -6,6 +6,8 @@ Module with the bridge to `Moire`_ UI.
 """
 from xentica.bridge.base import Bridge
 
+__all__ = ['MoireBridge', ]
+
 
 class MoireBridge:
     """

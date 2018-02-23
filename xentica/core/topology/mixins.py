@@ -7,6 +7,8 @@ core functionality.
 """
 from xentica.core.exceptions import XenticaException
 
+__all__ = ['DimensionsMixin', ]
+
 
 class DimensionsMixin:
     """

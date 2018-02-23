@@ -18,6 +18,11 @@ import abc
 
 from xentica.core.topology.mixins import DimensionsMixin
 
+__all__ = [
+    'Border', 'WrappedBorder', 'GeneratedBorder',
+    'TorusBorder', 'StaticBorder',
+]
+
 
 class Border(DimensionsMixin):
     """

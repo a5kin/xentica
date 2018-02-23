@@ -7,7 +7,7 @@ xentica\.core\.topology\.lattice
 --------------------------------
 
 .. automodule:: xentica.core.topology.lattice
-    :members: Lattice, OrthogonalLattice
+    :members:
     :undoc-members:
     :show-inheritance:
 
@@ -15,7 +15,7 @@ xentica\.core\.topology\.neighborhood
 -------------------------------------
 
 .. automodule:: xentica.core.topology.neighborhood
-    :members: Neighborhood, OrthogonalNeighborhood, MooreNeighborhood, VonNeumannNeighborhood
+    :members:
     :undoc-members:
     :show-inheritance:
 
@@ -23,7 +23,7 @@ xentica\.core\.topology\.border
 -------------------------------
 
 .. automodule:: xentica.core.topology.border
-    :members: Border, WrappedBorder, GeneratedBorder, TorusBorder, StaticBorder
+    :members:
     :undoc-members:
     :show-inheritance:
 

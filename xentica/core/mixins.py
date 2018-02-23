@@ -10,6 +10,8 @@ import inspect
 import xentica.core.base
 from xentica.core.exceptions import XenticaException
 
+__all__ = ['BscaDetectorMixin', ]
+
 
 class BscaDetectorMixin:
     """

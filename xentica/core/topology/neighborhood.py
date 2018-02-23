@@ -19,6 +19,11 @@ import abc
 
 from xentica.core.topology.mixins import DimensionsMixin
 
+__all__ = [
+    'Neighborhood', 'OrthogonalNeighborhood',
+    'MooreNeighborhood', 'VonNeumannNeighborhood',
+]
+
 
 class Neighborhood(DimensionsMixin):
     """

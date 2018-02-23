@@ -24,6 +24,8 @@ import numpy as np
 
 from xentica.core.mixins import BscaDetectorMixin
 
+__all__ = ['Renderer', 'RendererPlain', ]
+
 
 class Renderer(BscaDetectorMixin):
     """

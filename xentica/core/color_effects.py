@@ -29,6 +29,8 @@ The minimal example::
 from xentica.core.variables import Constant
 from xentica.core.mixins import BscaDetectorMixin
 
+__all__ = ['ColorEffect', 'MovingAverage', ]
+
 
 class ColorEffect(BscaDetectorMixin):
     """

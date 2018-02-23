@@ -49,6 +49,8 @@ from cached_property import cached_property
 
 from xentica.core.variables import DeferredExpression
 
+__all__ = ['Property', 'IntegerProperty', 'ContainerProperty', ]
+
 
 class Property(DeferredExpression):
     """

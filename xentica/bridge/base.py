@@ -5,6 +5,8 @@ Methods from :class:`Bridge` class should be used in other bridges
 
 """
 
+__all__ = ['Bridge', ]
+
 
 class Bridge:
     """Main bridge class containing basic functions."""
