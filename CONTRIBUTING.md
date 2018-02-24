@@ -46,5 +46,5 @@ we are abiding. In general, just be benevolent and respect others. And
 stay inspired with the beautiful world of multi-dimensional cellular
 automata.
 
-With Planck-level blessings,
+With Planck-level blessings,\
 Xentica Core Team
