@@ -46,7 +46,6 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     install_requires=[
         'numpy',
-        'pycuda',
         'cached-property',
     ],
     extras_require={
