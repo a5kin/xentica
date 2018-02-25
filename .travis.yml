@@ -11,7 +11,6 @@ python:
 install:
     - pip install --quiet tox
     - pip install --quiet numpy
-    - pip install --quiet pycuda
     - pip install --quiet cached-property
 
 script:
