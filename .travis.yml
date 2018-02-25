@@ -1,0 +1,19 @@
+# Use containers instead of full VMs for faster startup.
+sudo: false
+
+language: python
+python:
+    - "3.5"
+    - "3.6"
+    - "pypy"
+    - "pypy3"
+
+install:
+    - pip install --quiet tox
+    - pip install --quiet numpy
+    - pip install --quiet pycuda
+    - pip install --quiet cached-property
+
+script:
+    - if [[ $TRAVIS_PYTHON_VERSION == 2* || $TRAVIS_PYTHON_VERSION == 3* ]]; then tox -e $(echo $TRAVIS_PYTHON_VERSION | sed 's/\.//g;s/^/py/'); fi
+    - if [[ $TRAVIS_PYTHON_VERSION == 'pypy'* ]]; then tox -e $TRAVIS_PYTHON_VERSION; fi
