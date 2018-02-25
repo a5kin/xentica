@@ -4,4 +4,5 @@ exclude =
     __pycache__,
     docs,
     build,
-    dist
+    dist,
+    .tox
