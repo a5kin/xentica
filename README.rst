@@ -23,7 +23,7 @@ Xentica
     :target: https://pypi.org/project/xentica/
     :alt: Supported Python versions
 
-.. image:: http://artipixoids.a5kin.net/assets/img/banners/xentica.png
+.. image:: http://artipixoids.a5kin.net/assets/images/banners/xentica.png
     :alt: XENTICA Core Engine
 
 **Xentica** is the core framework for the `Artipixoids!`_ project,
