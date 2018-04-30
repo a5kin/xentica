@@ -267,9 +267,13 @@ class GOLExperiment6D(GOLExperiment2):
     size = (640, 360, 3, 3, 3, 3)
 
 
-if __name__ == "__main__":
+def main():
     # Finally, an example of how to run model/experiment interactively
     import moire
     ca = GameOfLifeColor(GOLExperimentColor)
     gui = moire.GUI(runnable=ca)
     gui.run()
+
+
+if __name__ == "__main__":
+    main()
