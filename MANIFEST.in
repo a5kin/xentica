@@ -4,11 +4,14 @@ include README.rst
 include *.yml
 include *.md
 include .flake8
+recursive-include examples *.sh
 recursive-include docs *.bat
 recursive-include docs *.png
 recursive-include docs *.py
 recursive-include docs *.rst
 recursive-include docs Makefile
 recursive-include requirements *.txt
-  
+
+recursive-exclude docs/_build *
+
 # recursive-include data *
