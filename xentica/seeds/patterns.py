@@ -103,8 +103,7 @@ class RandomPattern:
         self.vals = ValDict(vals, self)
 
     @abc.abstractmethod
-    def generate(self, cells, cells_num, field_size,
-                 index_to_coord, pack_state):
+    def generate(self, cells, bsca):
         """
         Generate the entire initial state.
 
@@ -156,34 +155,33 @@ class BigBang(RandomPattern):
         self.size = np.asarray(size) if size else None
         super(BigBang, self).__init__(vals)
 
-    def generate(self, cells, cells_num, field_size,
-                 index_to_coord, pack_state):
+    def generate(self, cells, bsca):
         """
         Generate the entire initial state.
 
         See :meth:`RandomPattern.generate` for details.
 
         """
-        dims = range(len(field_size))
+        dims = range(len(bsca.size))
         if self.size is None:
-            rnd_vec = [self.random.std.randint(1, field_size[i]) for i in dims]
+            rnd_vec = [self.random.std.randint(1, bsca.size[i]) for i in dims]
             self.size = np.asarray(rnd_vec)
         if self.pos is None:
-            rnd_vec = [self.random.std.randint(0, field_size[i]) for i in dims]
+            rnd_vec = [self.random.std.randint(0, bsca.size[i]) for i in dims]
             self.pos = np.asarray(rnd_vec)
         for i in range(len(self.pos)):
-            coord, width, side = self.pos[i], self.size[i], field_size[i]
+            coord, width, side = self.pos[i], self.size[i], bsca.size[i]
             if coord + width >= side:
                 self.pos[i] = side - width
             self.pos[i] = max(0, self.pos[i])
-        for i in range(cells_num):
-            coord = np.asarray(index_to_coord(i))
+        for i in range(bsca.cells_num):
+            coord = np.asarray(bsca.index_to_coord(i))
             if all(coord >= self.pos) and all(coord < self.pos + self.size):
                 state = {}
                 for name in sorted(self.vals.keys()):
                     val = self.vals[name]
                     state[name] = val
-                cells[i] = pack_state(state)
+                cells[i] = bsca.pack_state(state)
 
 
 class PrimordialSoup(RandomPattern):
@@ -205,17 +203,16 @@ class PrimordialSoup(RandomPattern):
 
     """
 
-    def generate(self, cells, cells_num, field_size,
-                 index_to_coord, pack_state):
+    def generate(self, cells, bsca):
         """
         Generate the entire initial state.
 
         See :meth:`RandomPattern.generate` for details.
 
         """
-        for i in range(cells_num):
+        for i in range(bsca.cells_num):
             state = {}
             for name in sorted(self.vals.keys()):
                 val = self.vals[name]
                 state[name] = val
-            cells[i] = pack_state(state)
+            cells[i] = bsca.pack_state(state)

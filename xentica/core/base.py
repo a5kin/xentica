@@ -527,9 +527,7 @@ class CellularAutomaton(metaclass=BSCA):
         self.random = LocalRandom(experiment_class.word)
         experiment_class.seed.random = self.random
         init_cells = np.zeros((cells_total, ), dtype=self.dtype)
-        experiment_class.seed.generate(init_cells, self.cells_num,
-                                       self.size, self.index_to_coord,
-                                       self.pack_state)
+        experiment_class.seed.generate(init_cells, self)
         self.cells_gpu = gpuarray.to_gpu(init_cells)
         # bridge
         self.bridge = MoireBridge
