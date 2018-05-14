@@ -177,7 +177,7 @@ class OrthogonalLattice(Lattice):
             else:
                 x_i = idx
             coord.append(x_i)
-        return tuple(coord)
+        return coord
 
     def coord_to_index_code(self, coord_prefix):
         """
