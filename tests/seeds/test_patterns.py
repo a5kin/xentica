@@ -7,6 +7,7 @@ import numpy as np
 from xentica.seeds.patterns import ValDict
 from xentica.seeds.patterns import BigBang, PrimordialSoup
 from xentica.seeds.random import RandInt, LocalRandom
+from examples.game_of_life import GameOfLife, GOLExperiment
 
 
 class TestValDict(unittest.TestCase):
@@ -81,18 +82,27 @@ class TestPatternBase(unittest.TestCase):
         return state['s']
 
 
+class TestExperiment(GOLExperiment):
+    """Regular experiment for tests."""
+    size = (100, 100, )
+    seed = BigBang(
+        pos=(32, 20),
+        size=(10, 10),
+        vals={
+            "state": RandInt(0, 1),
+        }
+    )
+
+
 class TestBigBang(TestPatternBase):
     """Tests for ``BigBang`` class."""
 
     def test_2d(self):
         """Test all cells are inside region after generation."""
+        bsca = GameOfLife(TestExperiment)
+        cells = bsca.cells_gpu.get()[:bsca.cells_num]
         pos = (32, 20)
         size = (10, 10)
-        vals = {'s': RandInt(0, 1)}
-        bb = BigBang(pos=pos, size=size, vals=vals)
-        cells = np.zeros((10000, ), dtype=np.int32)
-        bb.generate(cells, 10000, (100, 100),
-                    self.index_to_coord, self.pack_state)
         for i in np.where(cells == 1)[0]:
             x, y = self.index_to_coord(i)
             self.assertGreaterEqual(x, pos[0], "Wrong right bound.")
@@ -102,35 +112,35 @@ class TestBigBang(TestPatternBase):
 
     def test_random_size(self):
         """Test omitted size behavior."""
-        vals = {'s': RandInt(0, 1)}
+        bsca = GameOfLife(TestExperiment)
+        vals = {'state': RandInt(0, 1)}
         bb = BigBang(pos=(10, 10), vals=vals)
         cells = np.zeros((10000, ), dtype=np.int32)
-        bb.generate(cells, 10000, (100, 100),
-                    self.index_to_coord, self.pack_state)
+        bb.generate(cells, bsca)
 
     def test_random_pos(self):
         """Test omitted position behavior."""
-        vals = {'s': RandInt(0, 1)}
+        bsca = GameOfLife(TestExperiment)
+        vals = {'state': RandInt(0, 1)}
         bb = BigBang(size=(10, 10), vals=vals)
         cells = np.zeros((10000, ), dtype=np.int32)
-        bb.generate(cells, 10000, (100, 100),
-                    self.index_to_coord, self.pack_state)
+        bb.generate(cells, bsca)
 
     def test_random_full(self):
         """Test omitted size and position behavior."""
-        vals = {'s': RandInt(0, 1)}
+        bsca = GameOfLife(TestExperiment)
+        vals = {'state': RandInt(0, 1)}
         bb = BigBang(vals=vals)
         cells = np.zeros((10000, ), dtype=np.int32)
-        bb.generate(cells, 10000, (100, 100),
-                    self.index_to_coord, self.pack_state)
+        bb.generate(cells, bsca)
 
     def test_wrong_pos(self):
         """Test position auto-correction to make area fit to field."""
-        vals = {'s': RandInt(0, 1)}
+        bsca = GameOfLife(TestExperiment)
+        vals = {'state': RandInt(0, 1)}
         bb = BigBang(pos=(90, 90), size=(20, 20), vals=vals)
         cells = np.zeros((10000, ), dtype=np.int32)
-        bb.generate(cells, 10000, (100, 100),
-                    self.index_to_coord, self.pack_state)
+        bb.generate(cells, bsca)
         self.assertEqual(bb.pos[0], 80, "Wrong X position.")
         self.assertEqual(bb.pos[1], 80, "Wrong Y position.")
 
@@ -140,11 +150,11 @@ class TestPrimordialSoup(TestPatternBase):
 
     def test_2d(self):
         """Test same field is generated with same seed."""
-        vals = {'s': RandInt(0, 1)}
+        bsca = GameOfLife(TestExperiment)
+        vals = {'state': RandInt(0, 1)}
         seed = PrimordialSoup(vals=vals)
         cells = np.zeros((10000, ), dtype=np.int32)
         seed.random = LocalRandom("test")
-        seed.generate(cells, 10000, (100, 100),
-                      self.index_to_coord, self.pack_state)
+        seed.generate(cells, bsca)
         self.assertEqual(binascii.crc32(cells[:10000]), 2251764292,
                          "Wrong field checksum.")
