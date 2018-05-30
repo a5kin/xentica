@@ -9,6 +9,9 @@ same, no matter how many other CA's you're running in parallel.
 
 """
 import random
+import functools
+import operator
+
 import numpy
 
 __all__ = ['LocalRandom', 'RandInt', ]
@@ -76,4 +79,9 @@ class RandInt:
         at the stage of constructing the initial board state.
 
         """
+        if hasattr(instance, "size"):
+            num_values = functools.reduce(operator.mul, instance.size)
+            return instance.random.np.randint(self.min_val,
+                                              self.max_val + 1,
+                                              num_values)
         return instance.random.std.randint(self.min_val, self.max_val)
