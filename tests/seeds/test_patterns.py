@@ -156,5 +156,5 @@ class TestPrimordialSoup(TestPatternBase):
         cells = np.zeros((10000, ), dtype=np.int32)
         seed.random = LocalRandom("test")
         seed.generate(cells, bsca)
-        self.assertEqual(binascii.crc32(cells[:10000]), 2251764292,
+        self.assertEqual(binascii.crc32(cells[:10000]), 1648433356,
                          "Wrong field checksum.")
