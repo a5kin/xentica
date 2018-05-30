@@ -75,20 +75,20 @@ class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def index_to_coord(self, idx, bsca):
-        """
-        Obtain cell's coordinates by its index, in pure Python.
+        """Obtain cell's coordinates by its index, in pure Python.
 
         This is an abstract method, you must implement it in :class:`Lattice`
         subclasses.
 
         :param idx:
-            Cell's index, a positive integer.
+            Cell's index, a positive integer, or NumPy array of indices.
         :param bsca:
             :class:`xentica.core.CellularAutomaton` instance, to access
             field size and number of dimensions.
 
         :returns:
-            Tuple of integer coordinates.
+            Tuple of integer coordinates, or NumPy arrays of coords
+            per each axis.
 
         """
 
