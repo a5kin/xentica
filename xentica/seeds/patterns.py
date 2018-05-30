@@ -174,14 +174,21 @@ class BigBang(RandomPattern):
             if coord + width >= side:
                 self.pos[i] = side - width
             self.pos[i] = max(0, self.pos[i])
-        for i in range(bsca.cells_num):
-            coord = np.asarray(bsca.index_to_coord(i))
-            if all(coord >= self.pos) and all(coord < self.pos + self.size):
-                state = {}
-                for name in sorted(self.vals.keys()):
-                    val = self.vals[name]
-                    state[name] = val
-                cells[i] = bsca.pack_state(state)
+        indices = np.arange(0, bsca.cells_num)
+        coords = bsca.index_to_coord(indices)
+        area = None
+        for i in dims:
+            condition = (coords[i] >= self.pos[i])
+            condition &= (coords[i] < self.pos[i] + self.size[i])
+            if area is None:
+                area = condition
+                continue
+            area &= (condition)
+        state = {}
+        for name in sorted(self.vals.keys()):
+            val = self.vals[name]
+            state[name] = val
+        cells[np.where(area)] = bsca.pack_state(state)
 
 
 class PrimordialSoup(RandomPattern):
@@ -210,9 +217,9 @@ class PrimordialSoup(RandomPattern):
         See :meth:`RandomPattern.generate` for details.
 
         """
-        for i in range(bsca.cells_num):
-            state = {}
-            for name in sorted(self.vals.keys()):
-                val = self.vals[name]
-                state[name] = val
-            cells[i] = bsca.pack_state(state)
+        self.size = bsca.size
+        state = {}
+        for name in sorted(self.vals.keys()):
+            val = self.vals[name]
+            state[name] = val
+        cells[:bsca.cells_num] = bsca.pack_state(state)
