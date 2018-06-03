@@ -12,6 +12,7 @@ from examples.game_of_life import (
     GameOfLife, GameOfLifeStatic, GameOfLifeColor, GameOfLife6D,
     GOLExperiment, GOLExperiment2, GOLExperimentColor,
 )
+from examples.shifting_sands import ShiftingSands, ShiftingSandsExperiment
 
 
 class TestCellularAutomaton(unittest.TestCase):
@@ -158,3 +159,11 @@ class TestCellularAutomaton(unittest.TestCase):
         cells = ca.cells_gpu.get()[:ca.cells_num].astype(np.uint8)
         checksum = binascii.crc32(cells)
         self.assertEqual(2981695958, checksum, "Wrong field checksum.")
+
+    def test_nonuniform_interactions(self):
+        """Test non-uniform buffer interactions."""
+        ca = ShiftingSands(ShiftingSandsExperiment)
+        for j in range(self.num_steps):
+            ca.step()
+        checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        self.assertEqual(1117367015, checksum, "Wrong field checksum.")
