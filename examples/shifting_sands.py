@@ -7,7 +7,6 @@ Experiment classes included.
 from xentica import core
 from xentica import seeds
 from xentica.core import color_effects
-from xentica.core.variables import DeferredExpression
 
 
 class ShiftingSands(core.CellularAutomaton):
@@ -37,7 +36,7 @@ class ShiftingSands(core.CellularAutomaton):
                 self.buffers[i].state = self.main.state
             else:
                 # TODO: direct assignment ``self.buffers[i].state = 0``
-                self.buffers[i].state = DeferredExpression("0")
+                self.buffers[i].state = 0
 
     def absorb(self):
         """Absorb surrounding values by summing them."""
