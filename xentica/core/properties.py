@@ -198,6 +198,8 @@ class Property(DeferredExpression):
     def __set__(self, obj, value):
         """Implement custom logic when property is set as class descriptor."""
         self.declare_once()
+        if not hasattr(value, "code"):
+            value = DeferredExpression(str(value))
         code = "%s = %s;\n" % (self.var_name, value.code)
         self._bsca.append_code(code)
 
