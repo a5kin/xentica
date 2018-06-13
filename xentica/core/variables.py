@@ -231,6 +231,15 @@ class Variable(DeferredExpression, BscaDetectorMixin):
         code = "%s = %s;\n" % (self.var_name, value)
         self._bsca.append_code(code)
 
+    @property
+    def code(self):
+        """Get the variable name as code."""
+        return self.var_name
+
+    @code.setter
+    def code(self, val):
+        """Prevent the change of code."""
+
 
 class IntegerVariable(Variable):
     """The variable intended to hold a positive integer."""
