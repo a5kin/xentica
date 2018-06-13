@@ -355,6 +355,7 @@ class ContainerProperty(Property):
                 obj.__set__(self, val)
                 self.declare_once()
                 self._bsca.deferred_write(self)
+                self._bsca.unpack(self)
             else:
                 object.__setattr__(self, attr, val)
 
