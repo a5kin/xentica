@@ -35,7 +35,6 @@ class ShiftingSands(core.CellularAutomaton):
             if i == direction:
                 self.buffers[i].state = self.main.state
             else:
-                # TODO: direct assignment ``self.buffers[i].state = 0``
                 self.buffers[i].state = 0
 
     def absorb(self):
@@ -44,7 +43,7 @@ class ShiftingSands(core.CellularAutomaton):
         for i in range(len(self.buffers)):
             new_val += self.neighbors[i].buffer.state
         # TODO: direct assignment ``self.main.state = new_val``
-        self.main.state = new_val + 0 * self.main.state
+        self.main.state = new_val + 0
 
     @color_effects.MovingAverage
     def color(self):
