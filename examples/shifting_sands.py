@@ -42,8 +42,7 @@ class ShiftingSands(core.CellularAutomaton):
         new_val = core.IntegerVariable()
         for i in range(len(self.buffers)):
             new_val += self.neighbors[i].buffer.state
-        # TODO: direct assignment ``self.main.state = new_val``
-        self.main.state = new_val + 0
+        self.main.state = new_val
 
     @color_effects.MovingAverage
     def color(self):
