@@ -28,23 +28,23 @@ class TestCellularAutomaton(unittest.TestCase):
         Run vanilla GoL for 1000 steps and make sure board checksum is correct.
 
         """
-        for i in range(self.num_runs):
-            ca = GameOfLife(GOLExperiment)
-            for j in range(self.num_steps):
-                ca.step()
-            checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        for _ in range(self.num_runs):
+            model = GameOfLife(GOLExperiment)
+            for _ in range(self.num_steps):
+                model.step()
+            checksum = binascii.crc32(model.cells_gpu.get()[:model.cells_num])
             self.assertEqual(2981695958, checksum, "Wrong field checksum.")
 
     def test_multiple_ca(self):
         """Test two CellularAutomaton instances could be ran in parallel."""
-        ca1 = GameOfLife(GOLExperiment)
-        ca2 = GameOfLife(GOLExperiment)
-        for j in range(self.num_steps):
-            ca1.step()
-            ca2.step()
-        checksum = binascii.crc32(ca1.cells_gpu.get()[:ca1.cells_num])
+        mod1 = GameOfLife(GOLExperiment)
+        mod2 = GameOfLife(GOLExperiment)
+        for _ in range(self.num_steps):
+            mod1.step()
+            mod2.step()
+        checksum = binascii.crc32(mod1.cells_gpu.get()[:mod1.cells_num])
         self.assertEqual(2981695958, checksum, "Wrong field checksum (CA #1).")
-        checksum = binascii.crc32(ca2.cells_gpu.get()[:ca2.cells_num])
+        checksum = binascii.crc32(mod2.cells_gpu.get()[:mod2.cells_num])
         self.assertEqual(2981695958, checksum, "Wrong field checksum (CA #2).")
 
     def test_render(self):
@@ -56,39 +56,40 @@ class TestCellularAutomaton(unittest.TestCase):
         """
         experiment = GOLExperiment
         experiment.zoom = 1
-        ca = GameOfLife(experiment)
-        ca.set_viewport(experiment.size)
-        for j in range(self.num_steps):
-            ca.step()
-        img = ca.render()
+        model = GameOfLife(experiment)
+        model.set_viewport(experiment.size)
+        for _ in range(self.num_steps):
+            model.step()
+        img = model.render()
         self.assertEqual(1955702083, binascii.crc32(img / 255),
                          "Wrong image checksum.")
 
     def test_pause(self):
         """Test CA is not evolving when paused."""
-        ca = GameOfLife(GOLExperiment)
-        ca.paused = False
-        checksum_before = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
-        ca.step()
-        checksum_after = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        model = GameOfLife(GOLExperiment)
+        model.paused = False
+        cells_num = model.cells_num
+        checksum_before = binascii.crc32(model.cells_gpu.get()[:cells_num])
+        model.step()
+        checksum_after = binascii.crc32(model.cells_gpu.get()[:cells_num])
         self.assertNotEqual(checksum_before, checksum_after,
                             "CA is paused.")
-        ca.paused = True
+        model.paused = True
         checksum_before = checksum_after
-        ca.step()
-        checksum_after = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        model.step()
+        checksum_after = binascii.crc32(model.cells_gpu.get()[:cells_num])
         self.assertEqual(checksum_before, checksum_after,
                          "CA is not paused.")
 
     def test_save_load(self):
         """Save CA and test it's state is identical after load."""
         ca1 = GameOfLife(GOLExperiment)
-        for i in range(self.num_steps // 2):
+        for _ in range(self.num_steps // 2):
             ca1.step()
         ca1.save("test.ca")
         ca2 = GameOfLife(GOLExperiment)
         ca2.load("test.ca")
-        for i in range(self.num_steps // 2):
+        for _ in range(self.num_steps // 2):
             ca2.step()
         checksum = binascii.crc32(ca2.cells_gpu.get()[:ca2.cells_num])
         self.assertEqual(2981695958, checksum, "Wrong field checksum.")
@@ -112,58 +113,65 @@ class TestCellularAutomaton(unittest.TestCase):
         """Test exception is raised if ``Topology`` is not declared."""
         with self.assertRaises(XenticaException):
             class NoTopologyCA(CellularAutomaton):
-                pass
+                """CA without topology declared, to test exceptions."""
+            self.assertEqual(type(NoTopologyCA), "",
+                             "This line never should be executed.")
 
     def test_empty_topology(self):
         """Test exception is raised if ``Topology`` is empty."""
         with self.assertRaises(XenticaException):
             class NoLatticeCA(CellularAutomaton):
+                """CA with empty topology to test exceptions."""
                 class Topology:
-                    pass
+                    """Empty topology."""
+            self.assertEqual(type(NoLatticeCA), "",
+                             "This line never should be executed.")
 
     def test_static_border(self):
         """Test exception is raised if ``Topology`` is empty."""
-        ca = GameOfLifeStatic(GOLExperiment)
-        for j in range(self.num_steps):
-            ca.step()
-        checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        model = GameOfLifeStatic(GOLExperiment)
+        for _ in range(self.num_steps):
+            model.step()
+        checksum = binascii.crc32(model.cells_gpu.get()[:model.cells_num])
         self.assertNotEqual(2981695958, checksum,
                             "Checksum shoud be different from parent class.")
         self.assertEqual(1098273940, checksum, "Wrong field checksum.")
 
     def test_multiple_properties(self):
         """Test CA with multiple properties works correctly."""
-        ca = GameOfLifeColor(GOLExperimentColor)
-        for j in range(self.num_steps):
-            ca.step()
-        checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        model = GameOfLifeColor(GOLExperimentColor)
+        for _ in range(self.num_steps):
+            model.step()
+        checksum = binascii.crc32(model.cells_gpu.get()[:model.cells_num])
         self.assertEqual(532957133, checksum, "Wrong field checksum.")
 
     def test_multidimensional(self):
         """Test 6-dimensional CA works correctly."""
         class GOLExperiment6DLite(GOLExperiment2):
+            """Small 6D board to test higher dimensions."""
             size = (64, 36, 3, 3, 3, 3)
-        ca = GameOfLife6D(GOLExperiment6DLite)
-        for j in range(self.num_steps):
-            ca.step()
-        checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        model = GameOfLife6D(GOLExperiment6DLite)
+        for _ in range(self.num_steps):
+            model.step()
+        checksum = binascii.crc32(model.cells_gpu.get()[:model.cells_num])
         self.assertEqual(2742543959, checksum, "Wrong field checksum.")
 
     def test_cell_width(self):
         """Test CA with 16 bit/cell works correctly."""
         class GameOfLifeInt(GameOfLife):
+            """16-bit model to test bit width."""
             state = IntegerProperty(max_val=2 ** 16 - 1)
-        ca = GameOfLifeInt(GOLExperiment)
-        for j in range(self.num_steps):
-            ca.step()
-        cells = ca.cells_gpu.get()[:ca.cells_num].astype(np.uint8)
+        model = GameOfLifeInt(GOLExperiment)
+        for _ in range(self.num_steps):
+            model.step()
+        cells = model.cells_gpu.get()[:model.cells_num].astype(np.uint8)
         checksum = binascii.crc32(cells)
         self.assertEqual(2981695958, checksum, "Wrong field checksum.")
 
     def test_nonuniform_interactions(self):
         """Test non-uniform buffer interactions."""
-        ca = ShiftingSands(ShiftingSandsExperiment)
-        for j in range(self.num_steps):
-            ca.step()
-        checksum = binascii.crc32(ca.cells_gpu.get()[:ca.cells_num])
+        model = ShiftingSands(ShiftingSandsExperiment)
+        for _ in range(self.num_steps):
+            model.step()
+        checksum = binascii.crc32(model.cells_gpu.get()[:model.cells_num])
         self.assertEqual(1117367015, checksum, "Wrong field checksum.")
