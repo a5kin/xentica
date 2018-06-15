@@ -10,23 +10,28 @@ class TestVariable(unittest.TestCase):
 
     def test_integer(self):
         """Test ``IntegerVariable`` initialization."""
-        IntegerVariable()
+        var = IntegerVariable()
+        self.assertEqual(str(var), "var", "Wrong variable name.")
 
     def test_descriptor(self):
         """Test ``Variable`` acting as class descriptor."""
+
         class InvertCA(core.CellularAutomaton):
+            """CA that inverts each cell's value each step."""
             state = core.IntegerProperty(max_val=1)
 
             class Topology:
+                """Most common topology."""
                 dimensions = 2
                 lattice = core.OrthogonalLattice()
                 neighborhood = core.MooreNeighborhood()
                 border = core.TorusBorder()
 
             def emit(self):
-                pass
+                """Do nothing at emit phase."""
 
             def absorb(self):
+                """Invert cell's value."""
                 # really weird way to declare variables
                 # but at least it work with current system
                 self.__class__.intvar = IntegerVariable()
@@ -34,4 +39,7 @@ class TestVariable(unittest.TestCase):
                 self.main.state = -self.intvar
 
             def color(self):
-                pass
+                """Do nothing, no color processing required."""
+
+        self.assertEqual(InvertCA.__name__, "InvertCA",
+                         "Wrong class name.")
