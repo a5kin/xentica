@@ -14,7 +14,7 @@ class TestLocalRandom(unittest.TestCase):
         """Test built-in random works."""
         rng = LocalRandom()
         val = rng.std.random()
-        for i in range(10):
+        for _ in range(10):
             new_val = rng.std.random()
             self.assertNotEqual(val, new_val,
                                 "Not a random sequence: numbers repeating.")
@@ -60,7 +60,7 @@ class TestRandInt(unittest.TestCase):
         """Test generated values are in valid range."""
         holder = RandomHolder()
         holder.__class__.rand_val = RandInt(11, 23)
-        for i in range(10):
+        for _ in range(10):
             self.assertGreaterEqual(holder.rand_val, 11, "Wrong random value.")
             self.assertLessEqual(holder.rand_val, 23, "Wrong random value.")
 
