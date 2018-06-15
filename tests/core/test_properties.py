@@ -12,35 +12,37 @@ class TestProperty(unittest.TestCase):
 
     def test_width(self):
         """Test width calculation."""
-        p = IntegerProperty(max_val=1)
-        self.assertEqual(p.width, 1, "Wrong property width")
+        prop = IntegerProperty(max_val=1)
+        self.assertEqual(prop.width, 1, "Wrong property width")
 
     def test_default_bit_width(self):
         """Test default bit width is set to 1."""
-        p = Property()
-        self.assertEqual(p.bit_width, 1, "Wrong default bit width")
+        prop = Property()
+        self.assertEqual(prop.bit_width, 1, "Wrong default bit width")
 
     def test_set(self):
         """Test we can set property as class descriptor."""
         # really hypothetic case, just for coverage here
-        self.p = Property()
-        self.p.r = ContainerProperty()
-        self.p.r.var_name = "r"
-        self.p.r = 1
+        prop = Property()
+        prop.r = ContainerProperty()
+        prop.r.var_name = "r"
+        prop.r = 1
+        self.assertEqual(type(prop.r).__name__, "ContainerProperty",
+                         "Wrong property's class.")
 
     def test_unbound(self):
         """Test unbound ``Property`` default flags values."""
-        self.p = Property()
-        self.assertFalse(self.p._declared,
+        prop = Property()
+        self.assertFalse(prop.declared,
                          "Unbound property declared")
-        self.assertTrue(self.p._coords_declared,
+        self.assertTrue(prop.coords_declared,
                         "Unbound coords not declared")
-        self.cp = ContainerProperty()
-        self.assertFalse(self.cp._unpacked,
+        cprop = ContainerProperty()
+        self.assertFalse(cprop.unpacked,
                          "Unbound property unpacked")
 
     def test_container_values(self):
         """Test iteration over CA properties."""
-        ca = GameOfLife
-        props = [v for v in ca.main.values()]
+        model = GameOfLife
+        props = [v for v in model.main.values()]
         self.assertEqual(len(props), 1, "Wrong number of properties")
