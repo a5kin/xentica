@@ -222,14 +222,14 @@ class Property(DeferredExpression):
         return "fld[i%s]" % offset
 
     @property
-    def _declared(self):
+    def declared(self):
         """Test if the state variable is declared."""
         if self._bsca is None:
             return False
         return self._bsca.is_declared(self)
 
     @property
-    def _coords_declared(self):
+    def coords_declared(self):
         """Test if the coordinates variables are declared."""
         if self._bsca is None:
             return True
@@ -247,7 +247,7 @@ class Property(DeferredExpression):
         things are already declared.
 
         """
-        if self._declared:
+        if self.declared:
             return
         code = "%s %s;\n" % (self.ctype, self.var_name)
         self._bsca.append_code(code)
@@ -299,7 +299,7 @@ class ContainerProperty(Property):
             yield p
 
     @property
-    def _unpacked(self):
+    def unpacked(self):
         """Test if inner properties are unpacked from memory."""
         if self._bsca is None:
             return False
@@ -369,7 +369,7 @@ class ContainerProperty(Property):
              Default value for the property.
 
         """
-        if self._declared:
+        if self.declared:
             return
         code = ""
         if self._nbr_num >= 0:
@@ -378,7 +378,7 @@ class ContainerProperty(Property):
             border = self._bsca.topology.border
             dimensions = self._bsca.topology.dimensions
 
-            if not self._coords_declared:
+            if not self.coords_declared:
                 code += lattice.index_to_coord_code("i", "_x")
                 coord_vars = ["_nx%d" % i for i in range(dimensions)]
                 code += "int %s;\n" % ", ".join(coord_vars)
@@ -426,7 +426,7 @@ class ContainerProperty(Property):
 
     def _unpack_state(self):
         """Unpack inner properties values from in-memory representation."""
-        if self._unpacked:
+        if self.unpacked:
             return
         code = ""
         shift = 0
