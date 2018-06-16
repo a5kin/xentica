@@ -6,20 +6,25 @@ https://github.com/pypa/sampleproject
 
 """
 
-from setuptools import setup, find_packages
-from codecs import open
+import codecs
 from os import path
 
-here = path.abspath(path.dirname(__file__))
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+from setuptools import setup, find_packages
+
+
+def get_long_description():
+    """Load description from README file."""
+    here = path.abspath(path.dirname(__file__))
+    with codecs.open(path.join(here, 'README.rst'), encoding='utf-8') as file:
+        return file.read()
+
 
 setup(
     name='xentica',
     version='0.1.0',
     description='GPU-accelerated engine for multi-dimensional '
                 'cellular automata',
-    long_description=long_description,
+    long_description=get_long_description(),
     url='https://github.com/a5kin/xentica',
     author='Andrey Zamaraev',
     author_email='a5kin@github.com',
