@@ -4,6 +4,7 @@ include README.rst
 include *.yml
 include *.md
 include .flake8
+include .pylintrc
 recursive-include examples *.sh
 recursive-include docs *.bat
 recursive-include docs *.png
