@@ -11,7 +11,12 @@ class TestBscaDetector(unittest.TestCase):
     def test_not_detected(self):
         """Test exception is raised if BSCA not detected."""
         class Dummy(BscaDetectorMixin):
-            pass
+            """Dummy class for BSCA detecting test."""
+            @property
+            def bsca(self):
+                """Get BSCA class."""
+                return self._bsca
         with self.assertRaises(XenticaException):
             dummy = Dummy()
-            dummy._bsca
+            bsca = dummy.bsca
+            self.assertEqual(bsca.__name__, "BSCA", "Wrong class detected.")
