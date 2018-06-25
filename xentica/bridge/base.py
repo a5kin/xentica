@@ -12,27 +12,28 @@ class Bridge:
     """Main bridge class containing basic functions."""
 
     @staticmethod
-    def noop(ca, gui):
+    def noop(_model, _gui):
         """Do nothing."""
 
     @staticmethod
-    def exit_app(ca, gui):
+    def exit_app(_model, gui):
         """Exit GUI application."""
         gui.exit_app()
 
     @staticmethod
     def speed(dspeed):
         """Change simulation speed."""
-        def func(ca, gui):
-            ca.apply_speed(dspeed)
+        def func(model, _gui):
+            """Apply speed."""
+            model.apply_speed(dspeed)
         return func
 
     @staticmethod
-    def toggle_pause(ca, gui):
+    def toggle_pause(model, _gui):
         """Pause/unpause simulation."""
-        ca.toggle_pause()
+        model.toggle_pause()
 
     @staticmethod
-    def toggle_sysinfo(ca, gui):
+    def toggle_sysinfo(_model, gui):
         """Turn system info panel on/off."""
         gui.sysinfo.toggle()
