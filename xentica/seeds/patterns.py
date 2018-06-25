@@ -66,9 +66,9 @@ class ValDict(metaclass=ValDictMeta):
 
     def items(self):
         """Iterate over dictionary items."""
-        for k in self._d.keys():
-            v = self[k]
-            yield k, v
+        for key in self._d.keys():
+            val = self[key]
+            yield key, val
 
     def keys(self):
         """Iterate over dictionary keys."""
@@ -155,6 +155,27 @@ class BigBang(RandomPattern):
         self.size = np.asarray(size) if size else None
         super(BigBang, self).__init__(vals)
 
+    def _prepare_area(self, bsca_size):
+        """
+        Prepare area size and position.
+
+        :param bsca_size: tuple with CA size.
+
+        """
+        dims = range(len(bsca_size))
+        randint = self.random.standard.randint
+        if self.size is None:
+            rnd_vec = [randint(1, bsca_size[i]) for i in dims]
+            self.size = np.asarray(rnd_vec)
+        if self.pos is None:
+            rnd_vec = [randint(0, bsca_size[i]) for i in dims]
+            self.pos = np.asarray(rnd_vec)
+        for i in range(len(self.pos)):
+            coord, width, side = self.pos[i], self.size[i], bsca_size[i]
+            if coord + width >= side:
+                self.pos[i] = side - width
+            self.pos[i] = max(0, self.pos[i])
+
     def generate(self, cells, bsca):
         """
         Generate the entire initial state.
@@ -162,23 +183,11 @@ class BigBang(RandomPattern):
         See :meth:`RandomPattern.generate` for details.
 
         """
-        dims = range(len(bsca.size))
-        randint = self.random.standard.randint
-        if self.size is None:
-            rnd_vec = [randint(1, bsca.size[i]) for i in dims]
-            self.size = np.asarray(rnd_vec)
-        if self.pos is None:
-            rnd_vec = [randint(0, bsca.size[i]) for i in dims]
-            self.pos = np.asarray(rnd_vec)
-        for i in range(len(self.pos)):
-            coord, width, side = self.pos[i], self.size[i], bsca.size[i]
-            if coord + width >= side:
-                self.pos[i] = side - width
-            self.pos[i] = max(0, self.pos[i])
+        self._prepare_area(bsca.size)
         indices = np.arange(0, bsca.cells_num)
         coords = bsca.index_to_coord(indices)
         area = None
-        for i in dims:
+        for i in range(len(bsca.size)):
             condition = (coords[i] >= self.pos[i])
             condition &= (coords[i] < self.pos[i] + self.size[i])
             if area is None:
@@ -210,6 +219,11 @@ class PrimordialSoup(RandomPattern):
         Dictionary with mixed values. May contain descriptor classes.
 
     """
+
+    def __init__(self, vals):
+        """Initialize class."""
+        self.size = None
+        super(PrimordialSoup, self).__init__(vals)
 
     def generate(self, cells, bsca):
         """
