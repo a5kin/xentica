@@ -13,9 +13,9 @@ class TestLocalRandom(unittest.TestCase):
     def test_standard_random(self):
         """Test built-in random works."""
         rng = LocalRandom()
-        val = rng.std.random()
+        val = rng.standard.random()
         for _ in range(10):
-            new_val = rng.std.random()
+            new_val = rng.standard.random()
             self.assertNotEqual(val, new_val,
                                 "Not a random sequence: numbers repeating.")
             val = new_val
@@ -23,7 +23,7 @@ class TestLocalRandom(unittest.TestCase):
     def test_numpy_rand(self):
         """Test ``numpy`` random works."""
         rng = LocalRandom()
-        val = rng.np.rand(11,)
+        val = rng.numpy.rand(11,)
         for i in range(10):
             self.assertNotEqual(val[i], val[i + 1],
                                 "Not a random sequence: numbers repeating.")
@@ -32,7 +32,7 @@ class TestLocalRandom(unittest.TestCase):
         """Test built-in random with seed."""
         rng = LocalRandom(TEST_SEED)
         sequence_valid = [22, 15, 21, 23, 14, 14, 11, 20, 17, 23]
-        sequence_generated = [rng.std.randint(11, 23) for i in range(10)]
+        sequence_generated = [rng.standard.randint(11, 23) for i in range(10)]
         self.assertListEqual(sequence_valid, sequence_generated,
                              "Wrong sequence for seed '%s'." % TEST_SEED)
 
@@ -40,7 +40,7 @@ class TestLocalRandom(unittest.TestCase):
         """Test ``numpy`` random with seed."""
         rng = LocalRandom(TEST_SEED)
         sequence_valid = [19, 16, 22, 19, 15, 22, 20, 20, 13, 15]
-        sequence_generated = list(rng.np.randint(11, 23, (10, )))
+        sequence_generated = list(rng.numpy.randint(11, 23, (10, )))
         self.assertListEqual(sequence_valid, sequence_generated,
                              "Wrong sequence for seed '%s'." % TEST_SEED)
 

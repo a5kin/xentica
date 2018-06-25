@@ -163,11 +163,12 @@ class BigBang(RandomPattern):
 
         """
         dims = range(len(bsca.size))
+        randint = self.random.standard.randint
         if self.size is None:
-            rnd_vec = [self.random.std.randint(1, bsca.size[i]) for i in dims]
+            rnd_vec = [randint(1, bsca.size[i]) for i in dims]
             self.size = np.asarray(rnd_vec)
         if self.pos is None:
-            rnd_vec = [self.random.std.randint(0, bsca.size[i]) for i in dims]
+            rnd_vec = [randint(0, bsca.size[i]) for i in dims]
             self.pos = np.asarray(rnd_vec)
         for i in range(len(self.pos)):
             coord, width, side = self.pos[i], self.size[i], bsca.size[i]

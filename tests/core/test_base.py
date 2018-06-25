@@ -101,11 +101,11 @@ class TestCellularAutomaton(unittest.TestCase):
         ca1.save("test.ca")
         ca2 = GameOfLife(GOLExperiment)
         ca2.load("test.ca")
-        self.assertEqual(ca1.random.std.randint(1, 1000),
-                         ca2.random.std.randint(1, 1000),
+        self.assertEqual(ca1.random.standard.randint(1, 1000),
+                         ca2.random.standard.randint(1, 1000),
                          "Wrong standard RNG state.")
-        self.assertEqual(ca1.random.np.randint(1, 1000),
-                         ca2.random.np.randint(1, 1000),
+        self.assertEqual(ca1.random.numpy.randint(1, 1000),
+                         ca2.random.numpy.randint(1, 1000),
                          "Wrong numpy RNG state.")
         os.remove("test.ca")
 

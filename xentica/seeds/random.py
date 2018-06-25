@@ -12,7 +12,7 @@ import random
 import functools
 import operator
 
-import numpy
+import numpy as np
 
 __all__ = ['LocalRandom', 'RandInt', ]
 
@@ -29,7 +29,7 @@ class LocalRandom:
 
         random = LocalRandom()
         # get random number from standard stream
-        val = random.std.randint(1, 10)
+        val = random.standard.randint(1, 10)
         # get 100 random numbers from NumPy stream
         vals = random.numpy.randint(1, 10, 100)
 
@@ -37,9 +37,9 @@ class LocalRandom:
 
     def __init__(self, seed=None):
         """Initialize local random streams."""
-        self.std = random.Random(seed)
-        np_seed = self.std.getrandbits(32)
-        self.np = numpy.random.RandomState(np_seed)
+        self.standard = random.Random(seed)
+        np_seed = self.standard.getrandbits(32)
+        self.numpy = np.random.RandomState(np_seed)
 
     def load(self, rng):
         """
@@ -48,8 +48,8 @@ class LocalRandom:
         :param rng: :class:`LocalRandom` instance.
 
         """
-        self.std = rng.std
-        self.np = rng.np
+        self.standard = rng.standard
+        self.numpy = rng.numpy
 
 
 class RandInt:
@@ -81,7 +81,7 @@ class RandInt:
         """
         if hasattr(instance, "size"):
             num_values = functools.reduce(operator.mul, instance.size)
-            return instance.random.np.randint(self.min_val,
-                                              self.max_val + 1,
-                                              num_values)
-        return instance.random.std.randint(self.min_val, self.max_val)
+            return instance.random.numpy.randint(self.min_val,
+                                                 self.max_val + 1,
+                                                 num_values)
+        return instance.random.standard.randint(self.min_val, self.max_val)
