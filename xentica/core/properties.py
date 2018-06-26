@@ -64,7 +64,7 @@ class Property(DeferredExpression):
 
     def __init__(self):
         """Initialize default attributes."""
-        self._bsca = None
+        self.bsca = None
         self._types = (
             # (bit_width, numpy_dtype, gpu_c_type)
             (8, np.uint8, 'char'),
@@ -167,7 +167,7 @@ class Property(DeferredExpression):
             Neighbor's index, associated to property.
 
         """
-        self._bsca = bsca
+        self.bsca = bsca
         self._buf_num = buf_num
         self._nbr_num = nbr_num
 
@@ -201,7 +201,7 @@ class Property(DeferredExpression):
         if not hasattr(value, "code"):
             value = DeferredExpression(str(value))
         code = "%s = %s;\n" % (self.var_name, value.code)
-        self._bsca.append_code(code)
+        self.bsca.append_code(code)
 
     @cached_property
     def _mem_cell(self):
@@ -213,7 +213,7 @@ class Property(DeferredExpression):
 
         """
         if self._nbr_num >= 0:
-            neighborhood = self._bsca.topology.neighborhood
+            neighborhood = self.bsca.topology.neighborhood
             return neighborhood.neighbor_state(self._nbr_num,
                                                self._buf_num, "_nx")
         offset = ""
@@ -224,24 +224,24 @@ class Property(DeferredExpression):
     @property
     def declared(self):
         """Test if the state variable is declared."""
-        if self._bsca is None:
+        if self.bsca is None:
             return False
-        return self._bsca.is_declared(self)
+        return self.bsca.is_declared(self)
 
     @property
     def coords_declared(self):
         """Test if the coordinates variables are declared."""
-        if self._bsca is None:
+        if self.bsca is None:
             return True
-        return self._bsca.coords_declared
+        return self.bsca.coords_declared
 
     def declare_once(self):
         """
         Generate C code to declare a variable holding cell's state.
 
         You must push the generated code to BSCA via
-        ``self._bsca.append_code()``, then declare necessary stuff via
-        ``self._bsca.declare()``.
+        ``self.bsca.append_code()``, then declare necessary stuff via
+        ``self.bsca.declare()``.
 
         You should also take care of skipping the whole process if
         things are already declared.
@@ -250,8 +250,8 @@ class Property(DeferredExpression):
         if self.declared:
             return
         code = "%s %s;\n" % (self.ctype, self.var_name)
-        self._bsca.append_code(code)
-        self._bsca.declare(self)
+        self.bsca.append_code(code)
+        self.bsca.declare(self)
 
 
 class IntegerProperty(Property):
@@ -306,9 +306,9 @@ class ContainerProperty(Property):
     @property
     def unpacked(self):
         """Test if inner properties are unpacked from memory."""
-        if self._bsca is None:
+        if self.bsca is None:
             return False
-        return self._bsca.is_unpacked(self)
+        return self.bsca.is_unpacked(self)
 
     def __getitem__(self, key):
         """Get property by key, emulating ``dict`` functionality."""
@@ -325,7 +325,7 @@ class ContainerProperty(Property):
 
     def set_bsca(self, bsca, buf_num, nbr_num):
         """Propagate BSCA setting to inner properties."""
-        self._bsca = bsca
+        self.bsca = bsca
         self._buf_num = buf_num
         self._nbr_num = nbr_num
         for key in self._properties.keys():
@@ -359,8 +359,8 @@ class ContainerProperty(Property):
                 obj.declare_once()
                 obj.__set__(self, val)
                 self.declare_once()
-                self._bsca.deferred_write(self)
-                self._bsca.unpack(self)
+                self.bsca.deferred_write(self)
+                self.bsca.unpack(self)
             else:
                 object.__setattr__(self, attr, val)
 
@@ -378,16 +378,16 @@ class ContainerProperty(Property):
             return
         code = ""
         if self._nbr_num >= 0:
-            neighborhood = self._bsca.topology.neighborhood
-            lattice = self._bsca.topology.lattice
-            border = self._bsca.topology.border
-            dimensions = self._bsca.topology.dimensions
+            neighborhood = self.bsca.topology.neighborhood
+            lattice = self.bsca.topology.lattice
+            border = self.bsca.topology.border
+            dimensions = self.bsca.topology.dimensions
 
             if not self.coords_declared:
                 code += lattice.index_to_coord_code("i", "_x")
                 coord_vars = ["_nx%d" % i for i in range(dimensions)]
                 code += "int %s;\n" % ", ".join(coord_vars)
-                self._bsca.declare_coords()
+                self.bsca.declare_coords()
 
             code += neighborhood.neighbor_coords(self._nbr_num, "_x", "_nx")
             is_cell_off_board = lattice.is_off_board_code("_nx")
@@ -414,8 +414,8 @@ class ContainerProperty(Property):
                     off_board_cell=border.off_board_state("_nx"),
                     neighbor_state=init_val,
                 )
-                self._bsca.append_code(code)
-                self._bsca.declare(self)
+                self.bsca.append_code(code)
+                self.bsca.declare(self)
                 return
 
         if init_val is None:
@@ -426,8 +426,8 @@ class ContainerProperty(Property):
             code += "%s %s = %s;\n" % (
                 self.ctype, self.var_name, init_val
             )
-        self._bsca.append_code(code)
-        self._bsca.declare(self)
+        self.bsca.append_code(code)
+        self.bsca.declare(self)
 
     def _unpack_state(self):
         """Unpack inner properties values from in-memory representation."""
@@ -444,8 +444,8 @@ class ContainerProperty(Property):
             val = "({val}) & {mask}".format(val=val, mask=mask)
             code += "{var} = {val};\n".format(var=prop.var_name, val=val)
             shift += prop.bit_width
-        self._bsca.append_code(code)
-        self._bsca.unpack(self)
+        self.bsca.append_code(code)
+        self.bsca.unpack(self)
 
     def deferred_write(self):
         """
@@ -467,4 +467,4 @@ class ContainerProperty(Property):
         summed_vals = " + ".join(vals)
         code = "{var} = {val};\n".format(var=self.var_name, val=summed_vals)
         code += "%s = %s;\n" % (self._mem_cell, self.var_name)
-        self._bsca.append_code(code)
+        self.bsca.append_code(code)

@@ -22,7 +22,7 @@ class BscaDetectorMixin:
     """
 
     @property
-    def _bsca(self):
+    def bsca(self):
         """
         Get a BSCA instance holding current class.
 

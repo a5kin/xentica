@@ -227,20 +227,20 @@ class RendererPlain(Renderer):
         """.format(
             x="x%d" % self.projection_axes[0],
             y="x%d" % self.projection_axes[1],
-            w=self._bsca.topology.lattice.width_prefix,
+            w=self.bsca.topology.lattice.width_prefix,
             i0=self.projection_axes[0],
             i1=self.projection_axes[1],
         )
         # sum over projected dimensions
         c_for = ""
-        for i in range(self._bsca.topology.dimensions):
+        for i in range(self.bsca.topology.dimensions):
             if i in self.projection_axes:
                 continue
             code += "num_cells_projected *= {w}{i};\n".format(
-                i=i, w=self._bsca.topology.lattice.width_prefix
+                i=i, w=self.bsca.topology.lattice.width_prefix
             )
             c_for += "for (int x{i} = 0; x{i} < {w}{i}; x{i}++) {{\n".format(
-                i=i, w=self._bsca.topology.lattice.width_prefix
+                i=i, w=self.bsca.topology.lattice.width_prefix
             )
         code += c_for
         code += """
@@ -250,12 +250,12 @@ class RendererPlain(Renderer):
             g += c.y;
             b += c.z;
         """.format(
-            coord_to_index=self._bsca.topology.lattice.coord_to_index_code("x")
+            coord_to_index=self.bsca.topology.lattice.coord_to_index_code("x")
         )
-        code += "}" * (self._bsca.topology.dimensions - 2)
+        code += "}" * (self.bsca.topology.dimensions - 2)
         # calculate average
         by_smooth_factor = ""
-        if self._bsca.is_constant("SMOOTH_FACTOR"):
+        if self.bsca.is_constant("SMOOTH_FACTOR"):
             by_smooth_factor = "/ SMOOTH_FACTOR"
         code += """
             img[i * 3] = r / num_cells_projected {by_smooth_factor};

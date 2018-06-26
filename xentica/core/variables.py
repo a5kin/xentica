@@ -109,7 +109,7 @@ class DeferredExpression:
                     if isinstance(self_var, Variable):
                         self_var.declare_once()
                     code = "%s %s= %s;\n" % (self_var.var_name, oper, value)
-                    self_var._bsca.append_code(code)
+                    self_var.bsca.append_code(code)
                     return self
                 return op_func
 
@@ -144,7 +144,7 @@ class Constant(BscaDetectorMixin):
     ``BSCA.define_constant()`` in order to generate correct C code::
 
         const = Constant("C_NAME", "bsca_var")
-        self._bsca.define_constant(const)
+        self.bsca.define_constant(const)
 
     :param name:
         Name to use in ``#define``.
@@ -220,9 +220,9 @@ class Variable(DeferredExpression, BscaDetectorMixin):
             c = "%s %s = %s;\n" % (
                 self.var_type, self.var_name, self._init_val
             )
-            self._bsca.append_code(c)
+            self.bsca.append_code(c)
             self._declared = True
-            setattr(self._bsca, self.var_name, self)
+            setattr(self.bsca, self.var_name, self)
 
     def __str__(self):
         """Return a variable name to use in mixed expressions."""
@@ -237,7 +237,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
         """Assign a new value to variable (doesn't work properly now)."""
         self.declare_once()
         code = "%s = %s;\n" % (self.var_name, value)
-        self._bsca.append_code(code)
+        self.bsca.append_code(code)
 
     @property
     def code(self):
