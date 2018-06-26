@@ -119,11 +119,11 @@ class BSCA(type):
     """
 
     @classmethod
-    def __prepare__(self, name, bases):
+    def __prepare__(mcs, _name, _bases):
         """Preserve the order of class variables."""
         return collections.OrderedDict()
 
-    def __new__(cls, name, bases, attrs):
+    def __new__(mcs, name, bases, attrs):
         """Build new :class:`CellularAutomaton` class."""
         # prepare class itself
         keys = []
@@ -131,55 +131,56 @@ class BSCA(type):
             if key not in ('__module__', '__qualname__'):
                 keys.append(key)
         attrs['__ordered__'] = keys
-        cls._new_class = super().__new__(cls, name, bases, attrs)
-        cls._parents = [b for b in bases if isinstance(b, BSCA)]
-        if not cls._parents:
-            return cls._new_class
+        mcs._new_class = super().__new__(mcs, name, bases, attrs)
+        mcs._parents = [b for b in bases if isinstance(b, BSCA)]
+        if not mcs._parents:
+            return mcs._new_class
 
         # prepare topology
-        if hasattr(cls._new_class, 'Topology'):
-            attrs['Topology'] = cls._new_class.Topology
-        cls.topology = attrs.get('Topology', None)
-        cls._new_class.topology = cls.topology
+        if hasattr(mcs._new_class, 'Topology'):
+            attrs['Topology'] = mcs._new_class.Topology
+        mcs.topology = attrs.get('Topology', None)
+        mcs._new_class.topology = mcs.topology
 
-        if cls.topology is None:
+        if mcs.topology is None:
             raise XenticaException("No Topology class declared.")
 
         mandatory_fields = (
             'dimensions', 'lattice', 'neighborhood', 'border',
         )
-        for f in mandatory_fields:
-            if not hasattr(cls.topology, f):
-                raise XenticaException("No %s declared in Topology class." % f)
+        for field in mandatory_fields:
+            if not hasattr(mcs.topology, field):
+                msg = "No %s declared in Topology class." % field
+                raise XenticaException(msg)
 
-        cls.topology.lattice.dimensions = cls.topology.dimensions
-        cls.topology.neighborhood.dimensions = cls.topology.dimensions
-        cls.topology.border.dimensions = cls.topology.dimensions
-        cls.topology.neighborhood.topology = cls.topology
-        cls.topology.border.topology = cls.topology
+        mcs.topology.lattice.dimensions = mcs.topology.dimensions
+        mcs.topology.neighborhood.dimensions = mcs.topology.dimensions
+        mcs.topology.border.dimensions = mcs.topology.dimensions
+        mcs.topology.neighborhood.topology = mcs.topology
+        mcs.topology.border.topology = mcs.topology
 
         # scan and prepare properties
-        cls._new_class.main = ContainerProperty()
-        cls._new_class.buffers = []
-        cls._new_class.neighbors = []
-        num_neighbors = len(cls.topology.neighborhood)
+        mcs._new_class.main = ContainerProperty()
+        mcs._new_class.buffers = []
+        mcs._new_class.neighbors = []
+        num_neighbors = len(mcs.topology.neighborhood)
         for i in range(num_neighbors):
-            cls._new_class.buffers.append(ContainerProperty())
-            cls._new_class.neighbors.append(CachedNeighbor())
+            mcs._new_class.buffers.append(ContainerProperty())
+            mcs._new_class.neighbors.append(CachedNeighbor())
         attrs_items = [base_class.__dict__.items() for base_class in bases]
         attrs_items.append(attrs.items())
         restricted_names = {"main", "buffer"}
         for obj_name, obj in itertools.chain.from_iterable(attrs_items):
             if isinstance(obj, Property) and obj_name not in restricted_names:
-                cls._new_class.main[obj_name] = deepcopy(obj)
+                mcs._new_class.main[obj_name] = deepcopy(obj)
                 vname = "_cell_%s" % obj_name
-                cls._new_class.main[obj_name].var_name = vname
+                mcs._new_class.main[obj_name].var_name = vname
                 for i in range(num_neighbors):
-                    buffers = cls._new_class.buffers
+                    buffers = mcs._new_class.buffers
                     buffers[i][obj_name] = deepcopy(obj)
                     vname = "_bcell_%s%d" % (obj_name, i)
                     buffers[i][obj_name].var_name = vname
-                    neighbor = cls._new_class.neighbors[i]
+                    neighbor = mcs._new_class.neighbors[i]
                     neighbor.main[obj_name] = deepcopy(obj)
                     vname = "_dcell_%s%d" % (obj_name, i)
                     neighbor.main[obj_name].var_name = vname
@@ -187,39 +188,39 @@ class BSCA(type):
                     vname = "_dbcell_%s%d" % (obj_name, i)
                     neighbor.buffer[obj_name].var_name = vname
         # propagade BSCA to properties
-        cls._new_class.main.set_bsca(cls._new_class, 0, -1)
-        cls._new_class.main.var_name = "_cell"
+        mcs._new_class.main.set_bsca(mcs._new_class, 0, -1)
+        mcs._new_class.main.var_name = "_cell"
         for i in range(num_neighbors):
-            cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1, -1)
-            cls._new_class.buffers[i].var_name = "_bcell%i" % i
-            cls._new_class.neighbors[i].main.set_bsca(cls._new_class, 0, i)
-            cls._new_class.neighbors[i].main.var_name = "_dcell%d" % i
-            cls._new_class.neighbors[i].buffer.set_bsca(cls._new_class,
+            mcs._new_class.buffers[i].set_bsca(mcs._new_class, i + 1, -1)
+            mcs._new_class.buffers[i].var_name = "_bcell%i" % i
+            mcs._new_class.neighbors[i].main.set_bsca(mcs._new_class, 0, i)
+            mcs._new_class.neighbors[i].main.var_name = "_dcell%d" % i
+            mcs._new_class.neighbors[i].buffer.set_bsca(mcs._new_class,
                                                         i + 1, i)
-            cls._new_class.neighbors[i].buffer.var_name = "_dbcell%d" % i
+            mcs._new_class.neighbors[i].buffer.var_name = "_dbcell%d" % i
 
-        cls._new_class.dtype = cls._new_class.main.dtype
-        cls._new_class.ctype = cls._new_class.main.ctype
+        mcs._new_class.dtype = mcs._new_class.main.dtype
+        mcs._new_class.ctype = mcs._new_class.main.ctype
 
-        cls._new_class._constants = {}
+        mcs._new_class.prepare_constants(mcs._new_class)
 
         # set default renderer as needed
-        if not hasattr(cls._new_class, 'renderer'):
-            cls._new_class.renderer = RendererPlain()
+        if not hasattr(mcs._new_class, 'renderer'):
+            mcs._new_class.renderer = RendererPlain()
 
         # build CUDA source
-        source = cls._new_class.build_emit()
-        source += cls._new_class.build_absorb()
-        source += cls._new_class.build_render()
-        source = cls._new_class.build_defines() + source
-        cls._new_class.cuda_source = source
+        source = mcs._new_class.build_emit()
+        source += mcs._new_class.build_absorb()
+        source += mcs._new_class.build_render()
+        source = mcs._new_class.build_defines() + source
+        mcs._new_class.cuda_source = source
 
-        cls._new_class.index_to_coord = cls.index_to_coord
-        cls._new_class.pack_state = cls.pack_state
+        mcs._new_class.index_to_coord = mcs.index_to_coord
+        mcs._new_class.pack_state = mcs.pack_state
 
-        cls._new_class.size = (1 for i in range(cls.topology.dimensions))
+        mcs._new_class.size = (1 for i in range(mcs.topology.dimensions))
 
-        return cls._new_class
+        return mcs._new_class
 
     def index_to_coord(cls, i):
         """
@@ -230,7 +231,8 @@ class BSCA(type):
         """
         return cls.topology.lattice.index_to_coord(i, cls)
 
-    def _elementwise_kernel(self, name, args, body):
+    @staticmethod
+    def _elementwise_kernel(name, args, body):
         """
         Build elementwise kernel using template.
 
@@ -278,8 +280,8 @@ class BSCA(type):
         cls._coords_declared = False
         for func in funcs:
             func(cls)
-        for p in cls._deferred_writes:
-            p.deferred_write()
+        for prop in cls._deferred_writes:
+            prop.deferred_write()
         return cls._func_body
 
     def append_code(cls, code):
@@ -400,8 +402,8 @@ class BSCA(type):
 
         """
         defines = ""
-        for c in cls._constants.values():
-            defines += c.get_define_code()
+        for const in cls._constants.values():
+            defines += const.get_define_code()
         return defines
 
     def build_emit(cls):
@@ -440,7 +442,7 @@ class BSCA(type):
         body = cls.renderer.render_code()
         return cls._elementwise_kernel("render", args, body)
 
-    def pack_state(self, state):
+    def pack_state(cls, state):
         """
         Pack state structure into raw in-memory representation.
 
@@ -450,7 +452,7 @@ class BSCA(type):
         """
         val = 0
         shift = 0
-        for name, prop in self.main._properties.items():
+        for name, prop in cls.main._properties.items():
             val += state[name] << shift
             shift += prop.bit_width
         return val
@@ -534,6 +536,10 @@ class CellularAutomaton(metaclass=BSCA):
         self.renderer.setup_actions(self.bridge)
         # lock
         self.lock = threading.Lock()
+
+    def prepare_constants(self):
+        """Initialize constants."""
+        self._constants = {}
 
     def apply_speed(self, dval):
         """
