@@ -86,23 +86,29 @@ class DeferredExpression:
             ('round', 'round'),
         )
         for c_op, base_name in binary_ops:
-            def binary_direct(op):
+            def binary_direct(oper):
+                """Get direct binary operator magic method."""
                 def op_func(self_var, value):
-                    code = "(%s %s %s)" % (self_var, op, value)
+                    """Implement direct binary operator."""
+                    code = "(%s %s %s)" % (self_var, oper, value)
                     return DeferredExpression(code)
                 return op_func
 
-            def binary_reflected(op):
+            def binary_reflected(oper):
+                """Get reflected binary operator magic method."""
                 def op_func(self_var, value):
-                    code = "(%s %s %s)" % (value, op, self_var)
+                    """Implement reflected binary operator."""
+                    code = "(%s %s %s)" % (value, oper, self_var)
                     return DeferredExpression(code)
                 return op_func
 
-            def augmented_assign(op):
+            def augmented_assign(oper):
+                """Get augmented assign operator magic method."""
                 def op_func(self_var, value):
+                    """Implement augmented assign operator."""
                     if isinstance(self_var, Variable):
-                        self_var._declare_once()
-                    code = "%s %s= %s;\n" % (self_var.var_name, op, value)
+                        self_var.declare_once()
+                    code = "%s %s= %s;\n" % (self_var.var_name, oper, value)
                     self_var._bsca.append_code(code)
                     return self
                 return op_func
@@ -115,9 +121,11 @@ class DeferredExpression:
             setattr(self.__class__, func_name, augmented_assign(c_op))
 
         for c_op, base_name in unary_ops:
-            def unary(op):
+            def unary(oper):
+                """Get unary operator magic method."""
                 def op_func(self_var):
-                    code = "(%s(%s))" % (op, self_var)
+                    """Implement unary operator."""
+                    code = "(%s(%s))" % (oper, self_var)
                     return DeferredExpression(code)
                 return op_func
 
@@ -206,7 +214,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
                     return k
         return "var%d" % abs(hash(self))
 
-    def _declare_once(self):
+    def declare_once(self):
         """Declare variable and assign initial value to it."""
         if not self._declared:
             c = "%s %s = %s;\n" % (
@@ -222,12 +230,12 @@ class Variable(DeferredExpression, BscaDetectorMixin):
 
     def __get__(self, obj, objtype):
         """Declare a variable on first use."""
-        self._declare_once()
+        self.declare_once()
         return self
 
     def __set__(self, obj, value):
         """Assign a new value to variable (doesn't work properly now)."""
-        self._declare_once()
+        self.declare_once()
         code = "%s = %s;\n" % (self.var_name, value)
         self._bsca.append_code(code)
 
