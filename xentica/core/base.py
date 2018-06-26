@@ -202,7 +202,7 @@ class BSCA(type):
         mcs._new_class.dtype = mcs._new_class.main.dtype
         mcs._new_class.ctype = mcs._new_class.main.ctype
 
-        mcs._new_class.prepare_constants(mcs._new_class)
+        mcs._new_class.constants = {}
 
         # set default renderer as needed
         if not hasattr(mcs._new_class, 'renderer'):
@@ -365,7 +365,7 @@ class BSCA(type):
             instance.
 
         """
-        cls._constants[constant.name] = deepcopy(constant)
+        cls.constants[constant.name] = deepcopy(constant)
 
     def is_constant(cls, constant):
         """
@@ -379,7 +379,7 @@ class BSCA(type):
             ``True`` if constant is defined, ``False`` otherwise.
 
         """
-        return constant in cls._constants
+        return constant in cls.constants
 
     @property
     def coords_declared(cls):
@@ -402,7 +402,7 @@ class BSCA(type):
 
         """
         defines = ""
-        for const in cls._constants.values():
+        for const in cls.constants.values():
             defines += const.get_define_code()
         return defines
 
@@ -501,6 +501,7 @@ class CellularAutomaton(metaclass=BSCA):
         """Initialize kernels, GPU arrays and other stuff."""
         # visuals
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
+        self.width, self.height, self.img_gpu = 0, 0, None
         # populate attributes from Experiment class
         for attr_name in dir(experiment_class):
             attr = getattr(experiment_class, attr_name)
@@ -515,8 +516,8 @@ class CellularAutomaton(metaclass=BSCA):
         # CUDA kernel
         self.cells_num = functools.reduce(operator.mul, self.size)
         source = self.cuda_source
-        for c in self._constants.values():
-            source = c.replace_value(source)
+        for const in self.constants.values():
+            source = const.replace_value(source)
         # print(source)
         cuda_module = SourceModule(source)
         # GPU arrays
@@ -536,10 +537,6 @@ class CellularAutomaton(metaclass=BSCA):
         self.renderer.setup_actions(self.bridge)
         # lock
         self.lock = threading.Lock()
-
-    def prepare_constants(self):
-        """Initialize constants."""
-        self._constants = {}
 
     def apply_speed(self, dval):
         """
@@ -569,8 +566,9 @@ class CellularAutomaton(metaclass=BSCA):
         :param size: tuple with width and height in pixels.
 
         """
-        self.width, self.height = w, h = size
-        self.img_gpu = gpuarray.zeros((w * h * 3), dtype=np.int32)
+        self.width, self.height = size
+        num_cells = self.width * self.height * 3
+        self.img_gpu = gpuarray.zeros((num_cells, ), dtype=np.int32)
 
     def step(self):
         """
@@ -581,6 +579,9 @@ class CellularAutomaton(metaclass=BSCA):
         """
         if self.paused:
             return
+        # pylint: disable=protected-access
+        # This is "hack" to get block/grid sizes, it's vital to us.
+        # No way to get it correctly with PyCuda right now.
         block, grid = self.cells_gpu._block, self.cells_gpu._grid
         with self.lock:
             self.emit_gpu(self.cells_gpu, np.int32(self.cells_num),
@@ -601,6 +602,12 @@ class CellularAutomaton(metaclass=BSCA):
             size. The RGB values are consecutive.
 
         """
+        # pylint: disable=protected-access
+        # This is "hack" to get block/grid sizes, it's vital to us.
+        # No way to get it correctly with PyCuda right now.
+        if self.img_gpu is None:
+            msg = "Viewport is not set, call set_viewport() before rendering."
+            raise XenticaException(msg)
         block, grid = self.img_gpu._block, self.img_gpu._grid
         with self.lock:
             args = self.renderer.get_args_vals(self)
@@ -610,18 +617,18 @@ class CellularAutomaton(metaclass=BSCA):
 
     def save(self, filename):
         """Save the CA state into ``filename`` file."""
-        with open(filename, "wb") as f:
+        with open(filename, "wb") as ca_file:
             ca_state = {
                 "cells": self.cells_gpu.get(),
                 "colors": self.colors_gpu.get(),
                 "random": self.random,
             }
-            pickle.dump(ca_state, f)
+            pickle.dump(ca_state, ca_file)
 
     def load(self, filename):
         """Load the CA state from ``filename`` file."""
-        with open(filename, "rb") as f:
-            ca_state = pickle.load(f)
+        with open(filename, "rb") as ca_file:
+            ca_state = pickle.load(ca_file)
             self.cells_gpu = gpuarray.to_gpu(ca_state['cells'])
             self.colors_gpu = gpuarray.to_gpu(ca_state['colors'])
             self.random.load(ca_state['random'])
