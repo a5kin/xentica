@@ -217,10 +217,10 @@ class Variable(DeferredExpression, BscaDetectorMixin):
     def declare_once(self):
         """Declare variable and assign initial value to it."""
         if not self._declared:
-            c = "%s %s = %s;\n" % (
+            code = "%s %s = %s;\n" % (
                 self.var_type, self.var_name, self._init_val
             )
-            self.bsca.append_code(c)
+            self.bsca.append_code(code)
             self._declared = True
             setattr(self.bsca, self.var_name, self)
 
