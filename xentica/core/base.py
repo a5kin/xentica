@@ -452,7 +452,7 @@ class BSCA(type):
         """
         val = 0
         shift = 0
-        for name, prop in cls.main._properties.items():
+        for name, prop in cls.main.properties.items():
             val += state[name] << shift
             shift += prop.bit_width
         return val

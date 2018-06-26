@@ -293,6 +293,11 @@ class ContainerProperty(Property):
         super(ContainerProperty, self).__init__()
         self._properties = OrderedDict()
 
+    @property
+    def properties(self):
+        """Get inner properties."""
+        return self._properties
+
     def values(self):
         """Iterate over properties, emulating ``dict`` functionality."""
         for p in self._properties.values():
