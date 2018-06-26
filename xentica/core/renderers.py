@@ -20,6 +20,8 @@ CA model as follows::
         # ...
 
 """
+import abc
+
 import numpy as np
 
 from xentica.core.mixins import BscaDetectorMixin
@@ -55,7 +57,8 @@ class Renderer(BscaDetectorMixin):
             ("int", "*img"),
         ]
 
-    def get_args_vals(self, bsca):
+    @staticmethod
+    def get_args_vals(bsca):
         """
         Get a list of kernel arguments values.
 
@@ -71,6 +74,7 @@ class Renderer(BscaDetectorMixin):
         args_vals = [bsca.colors_gpu, bsca.img_gpu]
         return args_vals
 
+    @abc.abstractmethod
     def render_code(self):
         """
         Generate C code for rendering.
@@ -162,7 +166,7 @@ class RendererPlain(Renderer):
         })
 
     @staticmethod
-    def move(dx, dy):
+    def move(delta_x, delta_y):
         """
         Move over game field by some delta.
 
@@ -170,8 +174,9 @@ class RendererPlain(Renderer):
         :param dy: Delta by y-axis.
 
         """
-        def func(ca, gui):
-            ca.renderer.apply_move(ca, dx, dy)
+        def func(model, _gui):
+            """Implement move over field."""
+            model.renderer.apply_move(model, delta_x, delta_y)
         return func
 
     @staticmethod
@@ -182,8 +187,9 @@ class RendererPlain(Renderer):
         :param dzoom: Delta by which field is zoomed.
 
         """
-        def func(ca, gui):
-            ca.renderer.apply_zoom(ca, dzoom)
+        def func(model, _gui):
+            """Implement field zoom."""
+            model.renderer.apply_zoom(model, dzoom)
         return func
 
     @staticmethod
@@ -195,8 +201,8 @@ class RendererPlain(Renderer):
             :class:`xentica.core.CellularAutomaton` instance.
 
         """
-        for i in range(len(args)):
-            delta = args[i]
+        for i, arg in enumerate(args):
+            delta = arg
             bsca.pos[i] = (bsca.pos[i] + delta) % bsca.size[i]
 
     @staticmethod
