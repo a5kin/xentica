@@ -175,3 +175,9 @@ class TestCellularAutomaton(unittest.TestCase):
             model.step()
         checksum = binascii.crc32(model.cells_gpu.get()[:model.cells_num])
         self.assertEqual(1117367015, checksum, "Wrong field checksum.")
+
+    def test_unset_viewport(self):
+        """Test correct exception is raised when viewport is not set."""
+        with self.assertRaises(XenticaException):
+            model = ShiftingSands(ShiftingSandsExperiment)
+            model.render()
