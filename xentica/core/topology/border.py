@@ -37,6 +37,7 @@ class Border(DimensionsMixin):
     def __init__(self):
         """Initialize common things for all borders."""
         self.topology = None
+        super(Border, self).__init__()
 
 
 class WrappedBorder(Border):
@@ -138,6 +139,7 @@ class StaticBorder(GeneratedBorder):
 
         """
         self._value = value
+        super(StaticBorder, self).__init__()
 
     def off_board_state(self, coord_prefix):
         """
