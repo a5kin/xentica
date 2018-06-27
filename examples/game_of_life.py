@@ -81,10 +81,10 @@ class GameOfLife(core.CellularAutomaton):
         pure white.
 
         """
-        r = self.main.state * 255
-        g = self.main.state * 255
-        b = self.main.state * 255
-        return (r, g, b)
+        red = self.main.state * 255
+        green = self.main.state * 255
+        blue = self.main.state * 255
+        return (red, green, blue)
 
 
 class GameOfLifeStatic(GameOfLife):
@@ -152,10 +152,10 @@ class GameOfLifeColor(GameOfLife):
     @color_effects.MovingAverage
     def color(self):
         """Calculate color as usual."""
-        r = self.main.state * self.main.red
-        g = self.main.state * self.main.green
-        b = self.main.state * self.main.blue
-        return (r, g, b)
+        red = self.main.state * self.main.red
+        green = self.main.state * self.main.green
+        blue = self.main.state * self.main.blue
+        return (red, green, blue)
 
 
 class GameOfLife6D(GameOfLife):
@@ -270,8 +270,8 @@ class GOLExperiment6D(GOLExperiment2):
 def main():
     """Run model/experiment interactively."""
     import moire
-    ca = GameOfLifeColor(GOLExperimentColor)
-    gui = moire.GUI(runnable=ca)
+    model = GameOfLifeColor(GOLExperimentColor)
+    gui = moire.GUI(runnable=model)
     gui.run()
 
 
