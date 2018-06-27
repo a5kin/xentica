@@ -268,7 +268,7 @@ class GOLExperiment6D(GOLExperiment2):
 
 
 def main():
-    # Finally, an example of how to run model/experiment interactively
+    """Run model/experiment interactively."""
     import moire
     ca = GameOfLifeColor(GOLExperimentColor)
     gui = moire.GUI(runnable=ca)

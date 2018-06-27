@@ -47,10 +47,10 @@ class ShiftingSands(core.CellularAutomaton):
     @color_effects.MovingAverage
     def color(self):
         """Render contrast black & white cells."""
-        r = self.main.state * 255
-        g = self.main.state * 255
-        b = self.main.state * 255
-        return (r, g, b)
+        red = self.main.state * 255
+        green = self.main.state * 255
+        blue = self.main.state * 255
+        return (red, green, blue)
 
 
 class ShiftingSandsExperiment(core.Experiment):
@@ -70,9 +70,10 @@ class ShiftingSandsExperiment(core.Experiment):
 
 
 def main():
+    """Run model/experiment interactively."""
     import moire
-    ca = ShiftingSands(ShiftingSandsExperiment)
-    gui = moire.GUI(runnable=ca)
+    model = ShiftingSands(ShiftingSandsExperiment)
+    gui = moire.GUI(runnable=model)
     gui.run()
 
 
