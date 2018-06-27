@@ -146,10 +146,12 @@ class OrthogonalLattice(Lattice):
 
         """
         self._define_constants_once()
+        i = 0
 
-        def wrap_format(s):
-            return s.format(x=coord_prefix, i=i,
-                            index=index_name, w=self.width_prefix)
+        def wrap_format(text):
+            """Format helper."""
+            return text.format(x=coord_prefix, i=i,
+                               index=index_name, w=self.width_prefix)
 
         for i in range(self.dimensions):
             if i == 0:
