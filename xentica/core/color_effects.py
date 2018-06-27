@@ -102,12 +102,12 @@ class MovingAverage(ColorEffect):
 
     """
 
-    def __call__(self, *args):
+    def __call__(self, self_var):
         """Implement the effect."""
         self.bsca.define_constant(Constant("FADE_IN", "fade_in"))
         self.bsca.define_constant(Constant("FADE_OUT", "fade_out"))
         self.bsca.define_constant(Constant("SMOOTH_FACTOR",
-                                            "smooth_factor"))
+                                           "smooth_factor"))
         self.bsca.fade_in = 255
         self.bsca.fade_out = 255
         self.bsca.smooth_factor = 1
@@ -123,4 +123,4 @@ class MovingAverage(ColorEffect):
             new_b = max(min(new_b, old_col.z + FADE_IN),
                         old_col.z - FADE_OUT);
         """
-        return super(MovingAverage, self).__call__(*args)
+        return super(MovingAverage, self).__call__(self_var)
