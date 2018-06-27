@@ -42,6 +42,7 @@ on access, so you can use them safely in mixed expressions::
 
 """
 import math
+import abc
 from collections import OrderedDict
 
 import numpy as np
@@ -71,6 +72,8 @@ class Property(DeferredExpression):
             (16, np.uint16, 'short'),
             (32, np.uint32, 'int'),
         )
+        self._buf_num, self._nbr_num = 1, 1
+        super(Property, self).__init__()
 
     @cached_property
     def best_type(self):
@@ -83,10 +86,10 @@ class Property(DeferredExpression):
 
         """
         _best_type = self._types[-1]
-        for t in self._types:
-            type_width = t[0]
+        for _type in self._types:
+            type_width = _type[0]
             if self.bit_width <= type_width:
-                _best_type = t
+                _best_type = _type
                 break
         return _best_type
 
@@ -138,6 +141,7 @@ class Property(DeferredExpression):
         type_width = self.best_type[0]
         return int(math.ceil(self.bit_width / type_width))
 
+    @abc.abstractmethod
     def calc_bit_width(self):
         """
         Calculate the property's bit width.
@@ -174,7 +178,7 @@ class Property(DeferredExpression):
     def __getattribute__(self, attr):
         """Implement custom logic when property is get as class attribute."""
         obj = object.__getattribute__(self, attr)
-        if hasattr(obj, '__get__'):
+        if hasattr(obj, '__get__') and attr != "__class__":
             return obj.__get__(self, type(self))
         return obj
 
@@ -292,6 +296,7 @@ class ContainerProperty(Property):
         """Initialize ``OrderedDict`` to hold other properties."""
         super(ContainerProperty, self).__init__()
         self._properties = OrderedDict()
+        self.init_val = None
 
     @property
     def properties(self):
@@ -300,8 +305,8 @@ class ContainerProperty(Property):
 
     def values(self):
         """Iterate over properties, emulating ``dict`` functionality."""
-        for p in self._properties.values():
-            yield p
+        for prop in self._properties.values():
+            yield prop
 
     @property
     def unpacked(self):
@@ -343,7 +348,8 @@ class ContainerProperty(Property):
         """Get value from VRAM and unpack it to variables."""
         obj = object.__getattribute__(self, attr)
         if isinstance(obj, Property):
-            self.declare_once(self._mem_cell)
+            self.init_val = self._mem_cell
+            self.declare_once()
             self._unpack_state()
             return obj.__get__(self, type(self))
         return obj
@@ -364,7 +370,7 @@ class ContainerProperty(Property):
             else:
                 object.__setattr__(self, attr, val)
 
-    def declare_once(self, init_val=None):
+    def declare_once(self):
         """
         Do all necessary declarations for inner properties.
 
@@ -412,19 +418,19 @@ class ContainerProperty(Property):
                     type=self.ctype, var=self.var_name,
                     is_cell_off_board=is_cell_off_board,
                     off_board_cell=border.off_board_state("_nx"),
-                    neighbor_state=init_val,
+                    neighbor_state=self.init_val,
                 )
                 self.bsca.append_code(code)
                 self.bsca.declare(self)
                 return
 
-        if init_val is None:
+        if self.init_val is None:
             code += "%s %s;\n" % (
                 self.ctype, self.var_name
             )
         else:
             code += "%s %s = %s;\n" % (
-                self.ctype, self.var_name, init_val
+                self.ctype, self.var_name, self.init_val
             )
         self.bsca.append_code(code)
         self.bsca.declare(self)
