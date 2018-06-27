@@ -24,10 +24,10 @@ class TestProperty(unittest.TestCase):
         """Test we can set property as class descriptor."""
         # really hypothetic case, just for coverage here
         prop = Property()
-        prop.r = ContainerProperty()
-        prop.r.var_name = "r"
-        prop.r = 1
-        self.assertEqual(type(prop.r).__name__, "ContainerProperty",
+        prop.cont = ContainerProperty()
+        prop.cont.var_name = "foo"
+        prop.cont = 1
+        self.assertEqual(type(prop.cont).__name__, "ContainerProperty",
                          "Wrong property's class.")
 
     def test_unbound(self):
