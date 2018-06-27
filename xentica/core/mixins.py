@@ -31,11 +31,11 @@ class BscaDetectorMixin:
         """
         frame = inspect.currentframe()
         while frame is not None:
-            for l in frame.f_locals.values():
-                if hasattr(l, "__get__"):
+            for local in frame.f_locals.values():
+                if hasattr(local, "__get__"):
                     continue
-                if isinstance(l, xentica.core.base.BSCA):
-                    return l
+                if isinstance(local, xentica.core.base.BSCA):
+                    return local
             frame = frame.f_back
         raise XenticaException("BSCA not detected")
 
@@ -47,7 +47,7 @@ class BscaDetectorMixin:
         Objects tree is scanned up to top and first instance found is returned.
 
         """
-        # TODO: detect base class by scanning inheritance tree:
+        # As an option, we can detect base class by scanning inheritance tree:
         # inspect.getclasstree(inspect.getmro(type(self)))
         frame = inspect.currentframe().f_back.f_back.f_back
         while isinstance(frame.f_locals.get('self', ''), self.base_class):
