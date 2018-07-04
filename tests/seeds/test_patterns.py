@@ -99,7 +99,7 @@ class TestBigBang(TestPatternBase):
     def test_2d(self):
         """Test all cells are inside region after generation."""
         bsca = GameOfLife(TestExperiment)
-        cells = bsca.cells_gpu.get()[:bsca.cells_num]
+        cells = bsca.gpu.arrays.cells.get()[:bsca.cells_num]
         pos = (32, 20)
         size = (10, 10)
         for i in np.where(cells == 1)[0]:

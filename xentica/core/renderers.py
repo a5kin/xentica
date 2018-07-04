@@ -71,7 +71,7 @@ class Renderer(BscaDetectorMixin):
             :class:`xentica.core.CellularAutomaton` instance.
 
         """
-        args_vals = [bsca.colors_gpu, bsca.img_gpu]
+        args_vals = [bsca.gpu.arrays.colors, bsca.gpu.arrays.img]
         return args_vals
 
     @abc.abstractmethod

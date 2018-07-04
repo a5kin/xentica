@@ -458,6 +458,70 @@ class BSCA(type):
         return val
 
 
+class GPUKernels:
+    """Class incaplulating GPU kernels."""
+
+    def __init__(self, source):
+        """
+        Initialize GPU kernels.
+
+        :param source:
+            CUDA module source code in C.
+
+        """
+        cuda_module = SourceModule(source)
+        self.emit = cuda_module.get_function("emit")
+        self.absorb = cuda_module.get_function("absorb")
+        self.render = cuda_module.get_function("render")
+
+
+class GPUArrays:
+    """Class incaplulating GPU arrays."""
+
+    def __init__(self, init_cells, init_colors):
+        """
+        Initialize GPU arrays.
+
+        :param init_cells:
+            NumPy array to put to cells' GPU array.
+        :param init_colors:
+            NumPy array to put to colors' GPU array.
+
+        """
+        self.img = None
+        self.colors = gpuarray.to_gpu(init_colors)
+        self.cells = gpuarray.to_gpu(init_cells)
+
+    def init_img(self, num_cells):
+        """
+        Initilatize image for rendering.
+
+        :param num_cells:
+            Total number of cells.
+
+        """
+        self.img = gpuarray.zeros((num_cells, ), dtype=np.int32)
+
+
+class GPU:
+    """Holder class, incapsulating GPU kernels and arrays."""
+
+    def __init__(self, source, init_cells, init_colors):
+        """
+        Initialize GPU arrays and kernels.
+
+        :param source:
+            CUDA module source code in C.
+        :param init_cells:
+            NumPy array to put to cells' GPU array.
+        :param init_colors:
+            NumPy array to put to colors' GPU array.
+
+        """
+        self.kernels = GPUKernels(source)
+        self.arrays = GPUArrays(init_cells, init_colors)
+
+
 class CellularAutomaton(metaclass=BSCA):
     """
     Base class for all Xentica models.
@@ -501,7 +565,7 @@ class CellularAutomaton(metaclass=BSCA):
         """Initialize kernels, GPU arrays and other stuff."""
         # visuals
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
-        self.width, self.height, self.img_gpu = 0, 0, None
+        self.width, self.height = 0, 0
         # populate attributes from Experiment class
         for attr_name in dir(experiment_class):
             attr = getattr(experiment_class, attr_name)
@@ -519,24 +583,20 @@ class CellularAutomaton(metaclass=BSCA):
         for const in self.constants.values():
             source = const.replace_value(source)
         # print(source)
-        cuda_module = SourceModule(source)
-        # GPU arrays
-        self.emit_gpu = cuda_module.get_function("emit")
-        self.absorb_gpu = cuda_module.get_function("absorb")
-        self.render_gpu = cuda_module.get_function("render")
+        # build seed
         init_colors = np.zeros((self.cells_num * 3, ), dtype=np.int32)
-        self.colors_gpu = gpuarray.to_gpu(init_colors)
         cells_total = self.cells_num * (len(self.buffers) + 1) + 1
         self.random = LocalRandom(experiment_class.word)
         experiment_class.seed.random = self.random
         init_cells = np.zeros((cells_total, ), dtype=self.dtype)
         experiment_class.seed.generate(init_cells, self)
-        self.cells_gpu = gpuarray.to_gpu(init_cells)
+        # initialize GPU stuff
+        self.gpu = GPU(source, init_cells, init_colors)
         # bridge
         self.bridge = MoireBridge
         self.renderer.setup_actions(self.bridge)
         # lock
-        self.lock = threading.Lock()
+        self._lock = threading.Lock()
 
     def apply_speed(self, dval):
         """
@@ -568,7 +628,7 @@ class CellularAutomaton(metaclass=BSCA):
         """
         self.width, self.height = size
         num_cells = self.width * self.height * 3
-        self.img_gpu = gpuarray.zeros((num_cells, ), dtype=np.int32)
+        self.gpu.arrays.init_img(num_cells)
 
     def step(self):
         """
@@ -582,13 +642,15 @@ class CellularAutomaton(metaclass=BSCA):
         # pylint: disable=protected-access
         # This is "hack" to get block/grid sizes, it's vital to us.
         # No way to get it correctly with PyCuda right now.
-        block, grid = self.cells_gpu._block, self.cells_gpu._grid
-        with self.lock:
-            self.emit_gpu(self.cells_gpu, np.int32(self.cells_num),
-                          block=block, grid=grid)
-            self.absorb_gpu(self.cells_gpu, self.colors_gpu,
-                            np.int32(self.cells_num),
-                            block=block, grid=grid)
+        block, grid = self.gpu.arrays.cells._block, self.gpu.arrays.cells._grid
+        with self._lock:
+            self.gpu.kernels.emit(self.gpu.arrays.cells,
+                                  np.int32(self.cells_num),
+                                  block=block, grid=grid)
+            self.gpu.kernels.absorb(self.gpu.arrays.cells,
+                                    self.gpu.arrays.colors,
+                                    np.int32(self.cells_num),
+                                    block=block, grid=grid)
             self.timestep += 1
 
     def render(self):
@@ -605,22 +667,22 @@ class CellularAutomaton(metaclass=BSCA):
         # pylint: disable=protected-access
         # This is "hack" to get block/grid sizes, it's vital to us.
         # No way to get it correctly with PyCuda right now.
-        if self.img_gpu is None:
+        if self.gpu.arrays.img is None:
             msg = "Viewport is not set, call set_viewport() before rendering."
             raise XenticaException(msg)
-        block, grid = self.img_gpu._block, self.img_gpu._grid
-        with self.lock:
+        block, grid = self.gpu.arrays.img._block, self.gpu.arrays.img._grid
+        with self._lock:
             args = self.renderer.get_args_vals(self)
             args.append(np.int32(self.width * self.height))
-            self.render_gpu(*args, block=block, grid=grid)
-            return self.img_gpu.get().astype(np.uint8)
+            self.gpu.kernels.render(*args, block=block, grid=grid)
+            return self.gpu.arrays.img.get().astype(np.uint8)
 
     def save(self, filename):
         """Save the CA state into ``filename`` file."""
         with open(filename, "wb") as ca_file:
             ca_state = {
-                "cells": self.cells_gpu.get(),
-                "colors": self.colors_gpu.get(),
+                "cells": self.gpu.arrays.cells.get(),
+                "colors": self.gpu.arrays.colors.get(),
                 "random": self.random,
             }
             pickle.dump(ca_state, ca_file)
@@ -629,6 +691,6 @@ class CellularAutomaton(metaclass=BSCA):
         """Load the CA state from ``filename`` file."""
         with open(filename, "rb") as ca_file:
             ca_state = pickle.load(ca_file)
-            self.cells_gpu = gpuarray.to_gpu(ca_state['cells'])
-            self.colors_gpu = gpuarray.to_gpu(ca_state['colors'])
+            self.gpu.arrays.cells = gpuarray.to_gpu(ca_state['cells'])
+            self.gpu.arrays.colors = gpuarray.to_gpu(ca_state['colors'])
             self.random.load(ca_state['random'])
