@@ -118,6 +118,10 @@ class BSCA(type):
 
     """
 
+    mandatory_fields = (
+        'dimensions', 'lattice', 'neighborhood', 'border',
+    )
+
     @classmethod
     def __prepare__(mcs, _name, _bases):
         """Preserve the order of class variables."""
@@ -136,68 +140,12 @@ class BSCA(type):
         if not mcs._parents:
             return mcs._new_class
 
-        # prepare topology
-        if hasattr(mcs._new_class, 'Topology'):
-            attrs['Topology'] = mcs._new_class.Topology
-        mcs.topology = attrs.get('Topology', None)
-        mcs._new_class.topology = mcs.topology
+        mcs._prepare_topology(mcs, attrs)
 
-        if mcs.topology is None:
-            raise XenticaException("No Topology class declared.")
-
-        mandatory_fields = (
-            'dimensions', 'lattice', 'neighborhood', 'border',
-        )
-        for field in mandatory_fields:
-            if not hasattr(mcs.topology, field):
-                msg = "No %s declared in Topology class." % field
-                raise XenticaException(msg)
-
-        mcs.topology.lattice.dimensions = mcs.topology.dimensions
-        mcs.topology.neighborhood.dimensions = mcs.topology.dimensions
-        mcs.topology.border.dimensions = mcs.topology.dimensions
-        mcs.topology.neighborhood.topology = mcs.topology
-        mcs.topology.border.topology = mcs.topology
-
-        # scan and prepare properties
-        mcs._new_class.main = ContainerProperty()
-        mcs._new_class.buffers = []
-        mcs._new_class.neighbors = []
-        num_neighbors = len(mcs.topology.neighborhood)
-        for i in range(num_neighbors):
-            mcs._new_class.buffers.append(ContainerProperty())
-            mcs._new_class.neighbors.append(CachedNeighbor())
-        attrs_items = [base_class.__dict__.items() for base_class in bases]
-        attrs_items.append(attrs.items())
-        restricted_names = {"main", "buffer"}
-        for obj_name, obj in itertools.chain.from_iterable(attrs_items):
-            if isinstance(obj, Property) and obj_name not in restricted_names:
-                mcs._new_class.main[obj_name] = deepcopy(obj)
-                vname = "_cell_%s" % obj_name
-                mcs._new_class.main[obj_name].var_name = vname
-                for i in range(num_neighbors):
-                    buffers = mcs._new_class.buffers
-                    buffers[i][obj_name] = deepcopy(obj)
-                    vname = "_bcell_%s%d" % (obj_name, i)
-                    buffers[i][obj_name].var_name = vname
-                    neighbor = mcs._new_class.neighbors[i]
-                    neighbor.main[obj_name] = deepcopy(obj)
-                    vname = "_dcell_%s%d" % (obj_name, i)
-                    neighbor.main[obj_name].var_name = vname
-                    neighbor.buffer[obj_name] = deepcopy(obj)
-                    vname = "_dbcell_%s%d" % (obj_name, i)
-                    neighbor.buffer[obj_name].var_name = vname
-        # propagade BSCA to properties
-        mcs._new_class.main.set_bsca(mcs._new_class, 0, -1)
-        mcs._new_class.main.var_name = "_cell"
-        for i in range(num_neighbors):
-            mcs._new_class.buffers[i].set_bsca(mcs._new_class, i + 1, -1)
-            mcs._new_class.buffers[i].var_name = "_bcell%i" % i
-            mcs._new_class.neighbors[i].main.set_bsca(mcs._new_class, 0, i)
-            mcs._new_class.neighbors[i].main.var_name = "_dcell%d" % i
-            mcs._new_class.neighbors[i].buffer.set_bsca(mcs._new_class,
-                                                        i + 1, i)
-            mcs._new_class.neighbors[i].buffer.var_name = "_dbcell%d" % i
+        mcs._new_class.main = None
+        mcs._new_class.buffers = None
+        mcs._new_class.neighbors = None
+        mcs._prepare_properties(mcs, bases, attrs)
 
         mcs._new_class.dtype = mcs._new_class.main.dtype
         mcs._new_class.ctype = mcs._new_class.main.ctype
@@ -221,6 +169,69 @@ class BSCA(type):
         mcs._new_class.size = (1 for i in range(mcs.topology.dimensions))
 
         return mcs._new_class
+
+    def _prepare_topology(cls, attrs):
+        """Prepare topology for future use."""
+        if hasattr(cls._new_class, 'Topology'):
+            attrs['Topology'] = cls._new_class.Topology
+        cls.topology = attrs.get('Topology', None)
+        cls._new_class.topology = cls.topology
+
+        if cls.topology is None:
+            raise XenticaException("No Topology class declared.")
+
+        for field in cls.mandatory_fields:
+            if not hasattr(cls.topology, field):
+                msg = "No %s declared in Topology class." % field
+                raise XenticaException(msg)
+
+        cls.topology.lattice.dimensions = cls.topology.dimensions
+        cls.topology.neighborhood.dimensions = cls.topology.dimensions
+        cls.topology.border.dimensions = cls.topology.dimensions
+        cls.topology.neighborhood.topology = cls.topology
+        cls.topology.border.topology = cls.topology
+
+    def _prepare_properties(cls, bases, attrs):
+        """Prepare main/buffers properties."""
+        cls._new_class.main = ContainerProperty()
+        cls._new_class.buffers = []
+        cls._new_class.neighbors = []
+        num_neighbors = len(cls.topology.neighborhood)
+        for i in range(num_neighbors):
+            cls._new_class.buffers.append(ContainerProperty())
+            cls._new_class.neighbors.append(CachedNeighbor())
+        attrs_items = [base_class.__dict__.items() for base_class in bases]
+        attrs_items.append(attrs.items())
+        restricted_names = {"main", "buffer"}
+        for obj_name, obj in itertools.chain.from_iterable(attrs_items):
+            if isinstance(obj, Property) and obj_name not in restricted_names:
+                cls._new_class.main[obj_name] = deepcopy(obj)
+                vname = "_cell_%s" % obj_name
+                cls._new_class.main[obj_name].var_name = vname
+                for i in range(num_neighbors):
+                    buffers = cls._new_class.buffers
+                    buffers[i][obj_name] = deepcopy(obj)
+                    vname = "_bcell_%s%d" % (obj_name, i)
+                    buffers[i][obj_name].var_name = vname
+                    neighbor = cls._new_class.neighbors[i]
+                    neighbor.main[obj_name] = deepcopy(obj)
+                    vname = "_dcell_%s%d" % (obj_name, i)
+                    neighbor.main[obj_name].var_name = vname
+                    neighbor.buffer[obj_name] = deepcopy(obj)
+                    vname = "_dbcell_%s%d" % (obj_name, i)
+                    neighbor.buffer[obj_name].var_name = vname
+
+        # propagade BSCA to properties
+        cls._new_class.main.set_bsca(cls._new_class, 0, -1)
+        cls._new_class.main.var_name = "_cell"
+        for i in range(num_neighbors):
+            cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1, -1)
+            cls._new_class.buffers[i].var_name = "_bcell%i" % i
+            cls._new_class.neighbors[i].main.set_bsca(cls._new_class, 0, i)
+            cls._new_class.neighbors[i].main.var_name = "_dcell%d" % i
+            cls._new_class.neighbors[i].buffer.set_bsca(cls._new_class,
+                                                        i + 1, i)
+            cls._new_class.neighbors[i].buffer.var_name = "_dbcell%d" % i
 
     def index_to_coord(cls, i):
         """
