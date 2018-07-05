@@ -470,7 +470,7 @@ class BSCA(type):
 
 
 class GPUKernels:
-    """Class incaplulating GPU kernels."""
+    """Class incapsulating GPU kernels."""
 
     def __init__(self, source):
         """
@@ -487,7 +487,7 @@ class GPUKernels:
 
 
 class GPUArrays:
-    """Class incaplulating GPU arrays."""
+    """Class incapsulating GPU arrays."""
 
     def __init__(self, init_cells, init_colors):
         """
