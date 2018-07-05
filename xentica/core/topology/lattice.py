@@ -16,7 +16,7 @@ All classes there are intended to be used inside ``Topology`` for
 """
 import abc
 
-from xentica.core.topology.mixins import DimensionsMixin
+from xentica.core.mixins import DimensionsMixin
 
 from xentica.core.mixins import BscaDetectorMixin
 from xentica.core.variables import Constant

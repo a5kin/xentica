@@ -17,7 +17,7 @@ All classes there are intended to be used inside ``Topology`` for
 import itertools
 import abc
 
-from xentica.core.topology.mixins import DimensionsMixin
+from xentica.core.mixins import DimensionsMixin
 
 __all__ = [
     'Neighborhood', 'OrthogonalNeighborhood',
