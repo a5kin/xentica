@@ -6,6 +6,48 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## 0.1.1 - 2018-07-XX
+### Changed
+
+- Optimization.
+  - Optimize ``BigBang``/``PrimordialSoup`` seed generation.
+- Examples.
+  - Add Shifting Sands example.
+- Refactoring.
+  - Make some private properties public.
+  - Rename ``LocalRandom`` streams.
+  - Add properties getter to ``ContainerProperty``.
+  - Move GPU stuff to separate classes.
+  - Decompose ``BSCA`` class creation into smaller methods.
+  - Move ``core.topology.mixins`` to ``core.mixins``.
+
+### Added
+
+- QA.
+  - Add pylint config.
+  - Add pylint run script.
+- Tests.
+  - Add test for non-uniform buffer interactions.
+  - Add test for unset viewport.
+
+### Fixed
+
+- Major fixes.
+  - Fix direct buffer assignments.
+  - Fix property assignments.
+  - Fix direct Variable assignments.
+- Minor fixes.
+  - Fix ``Lattice.index_to_coord()``
+  - Fix ``Experiment.seed.generate()`` arguments.
+  - Fix ``RandInt`` to generate NumPy arrays.
+- Refactoring.
+  - Fix most of ``pylint`` issues through the code.
+- Tests.
+  - Fix ``BigBang``/``PrimordialSoup`` tests.
+  - Fix checksums in tests.
+- Miscellaneous.
+  - Fix typos in docstrings.
+
 ## 0.1.0 - 2018-05-05
 ### Added
 
