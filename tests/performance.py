@@ -1,12 +1,18 @@
 """Script to run performance check."""
 import time
 
-from examples.game_of_life import GameOfLife, GOLExperiment
+from examples.game_of_life import (
+    GameOfLife, GOLExperiment
+)
+from examples.shifting_sands import (
+    ShiftingSands, ShiftingSandsExperiment
+)
 from xentica.utils.formatters import sizeof_fmt
 
 
 MODELS = [
     ("Conway's Life", GameOfLife, GOLExperiment),
+    ("Shifting Sands", ShiftingSands, ShiftingSandsExperiment),
 ]
 NUM_STEPS = 10000
 
