@@ -26,12 +26,3 @@ Border (xentica\.core\.topology\.border)
     :members:
     :undoc-members:
     :show-inheritance:
-
-Mixins (xentica\.core\.topology\.mixins)
-----------------------------------------
-
-.. automodule:: xentica.core.topology.mixins
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
