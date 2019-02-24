@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- Tests
+  - Implement full test suite with ``tox``.
+- Documentation
+  - Add separate section for testing.
+
 ## [0.1.1] - 2018-07-24
 ### Changed
 
