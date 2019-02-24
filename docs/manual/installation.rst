@@ -190,6 +190,8 @@ section, along with the info about your GPU, environment and Xentica
 version. It would help us analyze performance and plan for future
 optimizations.
 
+When planning for pull request in core Xentica repo, it is a good practice to run a full test suite with ``tox -q``. Please note, it will be accepted at minimum if everything is green =)
+
 .. _list of CUDA-enabled cards: https://developer.nvidia.com/cuda-gpus
 .. _NVIDIA CUDA Toolkit: http://docs.nvidia.com/cuda/index.html
 .. _Python 3.5+: https://www.python.org/downloads/
