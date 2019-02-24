@@ -25,6 +25,7 @@ watch some `videos`_ to decide is it worth waiting for future versions.
    :maxdepth: 2
 	      
    manual/installation
+   manual/testing
    manual/tutorial
    
 API Reference
