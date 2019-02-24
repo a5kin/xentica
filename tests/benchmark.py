@@ -18,10 +18,6 @@ NUM_STEPS = 10000
 
 
 if __name__ == "__main__":
-    title = "Xentica Benchmark"
-    print("-" * len(title))
-    print(title)
-    print("-" * len(title))
     for name, model, experiment in MODELS:
         ca = model(experiment)
         start_time = time.time()
