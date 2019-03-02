@@ -148,15 +148,16 @@ class Constant(BscaDetectorMixin):
 
     :param name:
         Name to use in ``#define``.
-    :param value:
-        String, evaluating into ``bsca.<value>``, second part of ``#define``.
+    :param value_func:
+        Function that take ``BSCA`` instance as argument and return
+        the value to be used as second part of ``#define``.
 
     """
 
-    def __init__(self, name, value):
+    def __init__(self, name, value_func):
         """Initialize the class."""
         self._name = name
-        self._value = value
+        self._value_func = value_func
         self._pattern_name = name
         self.base_class = Constant
 
@@ -173,9 +174,8 @@ class Constant(BscaDetectorMixin):
             Generated C code.
 
         """
-        # WARNING: potentially dangerous
-        val = "self._holder.%s" % self._value.split()[0]
-        return source.replace("{%s}" % self._pattern_name, str(eval(val)))
+        val = str(self._value_func(self._holder))
+        return source.replace("{%s}" % self._pattern_name, val)
 
     @property
     def name(self):
