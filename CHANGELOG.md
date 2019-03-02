@@ -5,11 +5,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
 
-- Tests
+- Exceptions.
+  - Raise exception when assigning to ``DeferredExpression``.
+  - Raise exception if ``Variable`` has no initial value.
+- QA.
+  - Disable faulty ``pylint`` issues.
+  - Disable stdout capture by ``pytest``.
+- Refactoring.
+  - Change ``Constant`` API to rid of eval.
+
+### Added
+
+- Tests.
   - Implement full test suite with ``tox``.
-- Documentation
+  - Add test for broad bit width.
+  - Add test for ``RendererPlain`` class.
+  - Add test for illegal assign to ``DeferredExpression``.
+  - Add test for ``Variable`` without init value.
+- Documentation.
   - Add separate section for testing.
+
+### Fixed
+- Minor fixes.
+  - Remove unnecessary conditions.
+  - Fix default field size.
+  - Fix minor codestyle issues.
 
 ## [0.1.1] - 2018-07-24
 ### Changed
