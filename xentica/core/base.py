@@ -166,7 +166,7 @@ class BSCA(type):
         mcs._new_class.index_to_coord = mcs.index_to_coord
         mcs._new_class.pack_state = mcs.pack_state
 
-        mcs._new_class.size = (1 for i in range(mcs.topology.dimensions))
+        mcs._new_class.size = tuple(1 for i in range(mcs.topology.dimensions))
 
         return mcs._new_class
 
