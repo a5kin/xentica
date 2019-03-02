@@ -204,8 +204,9 @@ class Variable(DeferredExpression, BscaDetectorMixin):
         super(Variable, self).__init__()
         self.base_class = Variable
         self._declared = False
-        if val is not None:
-            self._init_val = DeferredExpression(str(val))
+        if val is None:
+            raise XenticaException("Variable should have initial value.")
+        self._init_val = DeferredExpression(str(val))
 
     @cached_property
     def var_name(self):
