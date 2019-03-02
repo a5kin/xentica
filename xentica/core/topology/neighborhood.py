@@ -142,8 +142,7 @@ class OrthogonalNeighborhood(Neighborhood):
 
         """
         cell_index = self.topology.lattice.coord_to_index_code(coord_prefix)
-        if state_index + 1 > 0:
-            cell_index += " + n * " + str(state_index)
+        cell_index += " + n * " + str(state_index)
         code = "fld[{cell_index}]".format(cell_index=cell_index)
         return code
 
