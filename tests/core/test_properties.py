@@ -20,6 +20,13 @@ class TestProperty(unittest.TestCase):
         prop = Property()
         self.assertEqual(prop.bit_width, 1, "Wrong default bit width")
 
+    def test_broad_bit_width(self):
+        """Test value doesn't fit in any of standard types."""
+        prop = IntegerProperty(max_val=10e23)
+        self.assertEqual(prop.bit_width, 80, "Wrong bit width")
+        self.assertEqual(prop.width, 3, "Wrong width")
+        self.assertEqual(prop.best_type[2], "int", "Wrong type")
+
     def test_set(self):
         """Test we can set property as class descriptor."""
         # really hypothetic case, just for coverage here
