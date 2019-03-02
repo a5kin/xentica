@@ -12,11 +12,11 @@ import sys
 
 def print_title(text):
     """Print given text as title."""
-    nc, _ = shutil.get_terminal_size((80, 24))
+    cols, _ = shutil.get_terminal_size((80, 24))
     print("\033[1;37;40m")
-    print("-" * nc)
-    print((" " + text + " ").center(nc, "#"))
-    print("-" * nc + "\033[0;37;40m")
+    print("-" * cols)
+    print((" " + text + " ").center(cols, "#"))
+    print("-" * cols + "\033[0;37;40m")
 
 
 if __name__ == "__main__":

@@ -342,7 +342,6 @@ class ContainerProperty(Property):
 
     def __set__(self, obj, value):
         """Do nothing when setting as class descriptor."""
-        pass
 
     def __getattribute__(self, attr):
         """Get value from VRAM and unpack it to variables."""

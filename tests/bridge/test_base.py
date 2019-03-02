@@ -21,7 +21,6 @@ class DummyGui:
 
     def exit_app(self):
         """Do nothing on exit."""
-        pass
 
 
 class TestBridge(unittest.TestCase):
