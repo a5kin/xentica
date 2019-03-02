@@ -25,6 +25,7 @@ You may also define constants or other ``#define`` patterns with
 from cached_property import cached_property
 
 from xentica.core.mixins import BscaDetectorMixin
+from xentica.core.exceptions import XenticaException
 
 __all__ = ['DeferredExpression', 'Constant', 'Variable', 'IntegerVariable', ]
 
@@ -106,8 +107,10 @@ class DeferredExpression:
                 """Get augmented assign operator magic method."""
                 def op_func(self_var, value):
                     """Implement augmented assign operator."""
-                    if isinstance(self_var, Variable):
-                        self_var.declare_once()
+                    if not isinstance(self_var, Variable):
+                        msg = "Can't assign to DeferredExpression"
+                        raise XenticaException(msg)
+                    self_var.declare_once()
                     code = "%s %s= %s;\n" % (self_var.var_name, oper, value)
                     self_var.bsca.append_code(code)
                     return self
