@@ -1,7 +1,7 @@
 """Tests for ``xentica.core.variables`` module."""
 import unittest
 
-from xentica.core.variables import IntegerVariable
+from xentica.core.variables import Variable, IntegerVariable
 from xentica.core.exceptions import XenticaException
 from xentica import core
 
@@ -58,3 +58,8 @@ class TestVariable(unittest.TestCase):
                     """Try to assign to DeferredExpression"""
                     deferred_exp = 1 + self.intvar
                     deferred_exp += 1
+
+    def test_no_init_val(self):
+        """Test initialization without initial value."""
+        with self.assertRaises(XenticaException):
+            Variable()
