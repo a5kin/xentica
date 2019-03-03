@@ -8,8 +8,11 @@ from xentica import core
 from xentica import seeds
 from xentica.core import color_effects
 
+from .base import RegularCA, RegularExperiment
+from .base import run_simulation
 
-class ShiftingSands(core.CellularAutomaton):
+
+class ShiftingSands(RegularCA):
     """
     CA for non-uniform buffer interactions test.
 
@@ -17,16 +20,7 @@ class ShiftingSands(core.CellularAutomaton):
     surrounding values by summing them.
 
     """
-
     state = core.IntegerProperty(max_val=1)
-
-    class Topology:
-        """2D Moore neighborhood, wrapped to a 3-torus."""
-
-        dimensions = 2
-        lattice = core.OrthogonalLattice()
-        neighborhood = core.MooreNeighborhood()
-        border = core.TorusBorder()
 
     def emit(self):
         """Emit the whole value to a constant direction."""
@@ -53,13 +47,10 @@ class ShiftingSands(core.CellularAutomaton):
         return (red, green, blue)
 
 
-class ShiftingSandsExperiment(core.Experiment):
+class ShiftingSandsExperiment(RegularExperiment):
     """Vanilla experiment with randomly initialized area."""
 
     word = "LET IT SHIFT"
-    size = (640, 360, )
-    zoom = 3
-    pos = [0, 0]
     seed = seeds.patterns.BigBang(
         pos=(320, 180),
         size=(100, 100),
@@ -69,13 +60,5 @@ class ShiftingSandsExperiment(core.Experiment):
     )
 
 
-def main():
-    """Run model/experiment interactively."""
-    import moire
-    model = ShiftingSands(ShiftingSandsExperiment)
-    gui = moire.GUI(runnable=model)
-    gui.run()
-
-
 if __name__ == "__main__":
-    main()
+    run_simulation(ShiftingSands, ShiftingSandsExperiment)
