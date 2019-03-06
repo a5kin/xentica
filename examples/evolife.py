@@ -6,6 +6,7 @@
 """
 from xentica import core
 from xentica import seeds
+from xentica.tools.xmath import xmin, xmax
 from xentica.core import color_effects
 from xentica.seeds.random import RandInt
 
@@ -51,24 +52,25 @@ class EvoLife(RegularCA):
     def absorb(self):
         """Apply EvoLife dynamics."""
         # test if cell is sustained
-        num_neighbors_alive = core.IntegerVariable()
+        num_neighbors = core.IntegerVariable()
         for i in range(len(self.buffers)):
-            num_neighbors_alive += expr.min(1, self.neighbors[i].buffer.energy)
-        is_sustained = self.main.rule.is_sustained(num_neighbors_alive)
+            num_neighbors += xmin(1, self.neighbors[i].buffer.energy)
+        is_sustained = self.main.rule.is_sustained(num_neighbors)
 
         # test if cell is born
         fitnesses = [core.IntegerVariable() for _ in range(len(self.buffers))]
-        for n in range(len(self.buffers)):
-            num_parents = core.IntegerVariable()
+        num_parents = core.IntegerVariable()
+        for gene in range(len(self.buffers)):
+            num_parents *= 0  # hack for re-init variable
             for i in range(len(self.buffers)):
-                is_alive = expr.min(1, self.neighbors[i].buffer.energy)
-                is_fit = self.neighbors[i].buffer.rule.is_born(n)
+                is_alive = xmin(1, self.neighbors[i].buffer.energy)
+                is_fit = self.neighbors[i].buffer.rule.is_born(gene)
                 num_parents += is_alive * is_fit
-            fitnesses[n] = num_parents * (num_parents == n)
-        num_fit = expr.max(*fitnesses)
+            fitnesses[gene] = num_parents * (num_parents == gene)
+        num_fit = xmax(*fitnesses)
 
         # new energy value
-        self.main.energy = expr.max(0, self.main.energy - 1)
+        self.main.energy = xmax(0, self.main.energy - 1)
         self.main.energy *= is_sustained
         self.main.energy |= 255 * (num_fit > 0)
 
@@ -77,6 +79,7 @@ class EvoLife(RegularCA):
     @color_effects.MovingAverage
     def color(self):
         """Render cell's energy in monochrome."""
+        # TODO: render cell in HSV
         red = self.main.energy
         green = self.main.energy
         blue = self.main.energy
