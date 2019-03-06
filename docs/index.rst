@@ -36,6 +36,7 @@ API Reference
 
    api/xentica.core
    api/xentica.core.topology
+   api/xentica.tools
    api/xentica.seeds
    api/xentica.bridge
    api/xentica.utils
