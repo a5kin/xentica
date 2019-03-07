@@ -473,3 +473,39 @@ class ContainerProperty(Property):
         code = "{var} = {val};\n".format(var=self.var_name, val=summed_vals)
         code += "%s = %s;\n" % (self._mem_cell, self.var_name)
         self.bsca.append_code(code)
+
+
+class LifelikeRuleProperty(Property):
+    """A specific property implementing Life-like rule."""
+
+    def __init__(self):
+        """Initialize the rule."""
+        self._buf_num = 0
+        self._num_neighbors = 8  # Just Moore's case for now
+        super(LifelikeRuleProperty, self).__init__()
+
+    def calc_bit_width(self):
+        """Calculate bit width, based on number of neighbors."""
+        return (self._num_neighbors + 1) * 2
+
+    def is_sustained(self, num_neighbors):
+        """
+        Determine if cell is living or intended to death.
+
+        :param num_neighbors: Number of neighbors to test over.
+
+        :returns: ``DeferredExpression`` to calculate the bool value.
+
+        """
+        return (self >> num_neighbors) & 1
+
+    def is_born(self, num_neighbors):
+        """
+        Determine if cell could be born.
+
+        :param num_neighbors: Number of neighbors to test over.
+
+        :returns: ``DeferredExpression`` to calculate the bool value.
+
+        """
+        return (self >> (num_neighbors + self._num_neighbors + 1)) & 1
