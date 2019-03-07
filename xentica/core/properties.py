@@ -509,3 +509,16 @@ class LifelikeRuleProperty(Property):
 
         """
         return (self >> (num_neighbors + self._num_neighbors + 1)) & 1
+
+
+class RandomProperty(Property):
+    """A property yielding random value each time."""
+
+    def __init__(self):
+        self._buf_num = 0
+        super(RandomProperty, self).__init__()
+        raise NotImplementedError
+
+    def calc_bit_width(self):
+        """Really dirty 16-bit PRNG."""
+        return 16
