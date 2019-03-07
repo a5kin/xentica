@@ -6,8 +6,9 @@
 """
 from xentica import core
 from xentica import seeds
-from xentica.tools.xmath import xmin, xmax
+from xentica.tools import xmath
 from xentica.core import color_effects
+from xentica.tools.color import hsv2rgb, rgb2hsv, genome2rgb
 from xentica.seeds.random import RandInt
 
 from .base import RegularCA, RegularExperiment
@@ -54,7 +55,7 @@ class EvoLife(RegularCA):
         # test if cell is sustained
         num_neighbors = core.IntegerVariable()
         for i in range(len(self.buffers)):
-            num_neighbors += xmin(1, self.neighbors[i].buffer.energy)
+            num_neighbors += xmath.min(1, self.neighbors[i].buffer.energy)
         is_sustained = self.main.rule.is_sustained(num_neighbors)
 
         # test if cell is born
@@ -63,14 +64,14 @@ class EvoLife(RegularCA):
         for gene in range(len(self.buffers)):
             num_parents *= 0  # hack for re-init variable
             for i in range(len(self.buffers)):
-                is_alive = xmin(1, self.neighbors[i].buffer.energy)
+                is_alive = xmath.min(1, self.neighbors[i].buffer.energy)
                 is_fit = self.neighbors[i].buffer.rule.is_born(gene)
                 num_parents += is_alive * is_fit
             fitnesses[gene] = num_parents * (num_parents == gene)
-        num_fit = xmax(*fitnesses)
+        num_fit = xmath.max(*fitnesses)
 
         # new energy value
-        self.main.energy = xmax(0, self.main.energy - 1)
+        self.main.energy = xmath.max(0, self.main.energy - 1)
         self.main.energy *= is_sustained
         self.main.energy |= 255 * (num_fit > 0)
 
@@ -78,12 +79,11 @@ class EvoLife(RegularCA):
 
     @color_effects.MovingAverage
     def color(self):
-        """Render cell's energy in monochrome."""
-        # TODO: render cell in HSV
-        red = self.main.energy
-        green = self.main.energy
-        blue = self.main.energy
-        return (red, green, blue)
+        """Render cell's genome as hue/sat, cell's energy as value."""
+        red, green, blue = genome2rgb(self.main.rule)
+        hue, saturation, value = rgb2hsv(red, green, blue)
+        value = self.main.energy
+        return hsv2rgb(hue, saturation, value)
 
 
 class BigBangExperiment(RegularExperiment):
