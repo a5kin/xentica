@@ -9,6 +9,7 @@ from xentica import seeds
 from xentica.tools import xmath
 from xentica.core import color_effects
 from xentica.tools.color import hsv2rgb, rgb2hsv, genome2rgb
+from xentica.tools.genetics import genome_crossover
 from xentica.seeds.random import RandInt
 
 from .base import RegularCA, RegularExperiment
@@ -75,7 +76,11 @@ class EvoLife(RegularCA):
         self.main.energy *= is_sustained
         self.main.energy |= 255 * (num_fit > 0)
 
-        # TODO: genomes crossover
+        # neighbor's genomes crossover
+        genomes = [core.IntegerVariable() for _ in range(len(self.buffers))]
+        for i in range(len(self.buffers)):
+            genomes[i] = self.neighbors[i].buffer.rule * (fitnesses[i] > 0)
+        self.main.rule = genome_crossover(*genomes)
 
     @color_effects.MovingAverage
     def color(self):
