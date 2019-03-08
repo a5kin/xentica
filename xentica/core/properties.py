@@ -49,6 +49,7 @@ import numpy as np
 from cached_property import cached_property
 
 from xentica.core.variables import DeferredExpression
+from xentica.core.exceptions import XenticaException
 
 __all__ = ['Property', 'IntegerProperty', 'ContainerProperty', ]
 
@@ -475,14 +476,15 @@ class ContainerProperty(Property):
         self.bsca.append_code(code)
 
 
-class LifelikeRuleProperty(Property):
-    """A specific property implementing Life-like rule."""
+class TotalisticRuleProperty(Property):
+    """A specific property implementing totalistic rule."""
 
-    def __init__(self):
+    def __init__(self, outer=False):
         """Initialize the rule."""
         self._buf_num = 0
         self._num_neighbors = 8  # Just Moore's case for now
-        super(LifelikeRuleProperty, self).__init__()
+        self._outer = outer
+        super(TotalisticRuleProperty, self).__init__()
 
     def calc_bit_width(self):
         """Calculate bit width, based on number of neighbors."""
@@ -497,6 +499,9 @@ class LifelikeRuleProperty(Property):
         :returns: ``DeferredExpression`` to calculate the bool value.
 
         """
+        if not self._outer:
+            msg = "Can not get sustained value from pure totalistic rule."
+            raise XenticaException(msg)
         return (self >> num_neighbors) & 1
 
     def is_born(self, num_neighbors):
@@ -508,6 +513,9 @@ class LifelikeRuleProperty(Property):
         :returns: ``DeferredExpression`` to calculate the bool value.
 
         """
+        if not self._outer:
+            msg = "Can not get sustained value from pure totalistic rule."
+            raise XenticaException(msg)
         return (self >> (num_neighbors + self._num_neighbors + 1)) & 1
 
 

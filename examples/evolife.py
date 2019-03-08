@@ -42,7 +42,7 @@ class EvoLife(RegularCA):
 
     """
     energy = core.IntegerProperty(max_val=255)
-    rule = core.LifelikeRuleProperty()
+    rule = core.TotalisticRuleProperty(outer=True)
     rng = core.RandomProperty()
 
     def emit(self):
