@@ -43,6 +43,8 @@ core features like new lattices, borders, etc.
 from xentica.core.base import CellularAutomaton
 from xentica.core.properties import (
     IntegerProperty,
+    TotalisticRuleProperty,
+    RandomProperty,
 )
 from xentica.core.variables import (
     IntegerVariable,
@@ -61,6 +63,8 @@ from xentica.core.experiment import Experiment
 __all__ = [
     'CellularAutomaton',
     'IntegerProperty',
+    'TotalisticRuleProperty',
+    'RandomProperty',
     'IntegerVariable',
     'OrthogonalLattice',
     'MooreNeighborhood',
