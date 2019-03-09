@@ -482,13 +482,13 @@ class TotalisticRuleProperty(Property):
     def __init__(self, outer=False):
         """Initialize the rule."""
         self._buf_num = 0
-        self._num_neighbors = 8  # Just Moore's case for now
+        self._max_neighbors = 8  # Just Moore's case for now
         self._outer = outer
         super(TotalisticRuleProperty, self).__init__()
 
     def calc_bit_width(self):
         """Calculate bit width, based on number of neighbors."""
-        return (self._num_neighbors + 1) * 2
+        return (self._max_neighbors + 1) * 2
 
     def is_sustained(self, num_neighbors):
         """
@@ -500,9 +500,9 @@ class TotalisticRuleProperty(Property):
 
         """
         if not self._outer:
-            msg = "Can not get sustained value from pure totalistic rule."
+            msg = "Can not get sustained flag from pure totalistic rule."
             raise XenticaException(msg)
-        return (self >> num_neighbors) & 1
+        return (self >> (num_neighbors + self._max_neighbors + 1)) & 1
 
     def is_born(self, num_neighbors):
         """
@@ -514,9 +514,24 @@ class TotalisticRuleProperty(Property):
 
         """
         if not self._outer:
-            msg = "Can not get sustained value from pure totalistic rule."
+            msg = "Can not get born flag from pure totalistic rule."
             raise XenticaException(msg)
-        return (self >> (num_neighbors + self._num_neighbors + 1)) & 1
+        return (self >> num_neighbors) & 1
+
+    def next_val(self, cur_val, num_neighbors):
+        """
+        Calculate cell's value at the next step.
+
+        :param cur_val: Current cell's value.
+        :param num_neighbors: Number of neighbors to test over.
+
+        :returns: ``DeferredExpression`` to calculate the bool value.
+
+        """
+        if not self._outer:
+            return (self >> (num_neighbors + cur_val)) & 1
+        alive_shift = cur_val * (self._max_neighbors + 1)
+        return (self >> (num_neighbors + alive_shift)) & 1
 
 
 class RandomProperty(Property):
