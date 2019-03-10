@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- Properties.
+  - Add ``TotalisticRuleProperty``.
+  - Add ``RandomProperty``.
+- Tools.
+  - Add ``xentica.tools`` package.
+  - Add color conversion helpers module (``tools.color``)
+  - Add math functions wrappers (``tools.xmath``)
+  - Add genenome manipulation helpers (``tools.genetics``)
+- Examples.
+  - Add ``EvoLife`` example model.
 - Tests.
   - Implement full test suite with ``tox``.
   - Add test for broad bit width.
