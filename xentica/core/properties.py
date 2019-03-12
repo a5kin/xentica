@@ -43,6 +43,7 @@ on access, so you can use them safely in mixed expressions::
 """
 import math
 import abc
+import inspect
 from collections import OrderedDict
 
 import numpy as np
@@ -50,6 +51,7 @@ from cached_property import cached_property
 
 from xentica.core.variables import DeferredExpression
 from xentica.core.exceptions import XenticaException
+from xentica.tools import xmath
 
 __all__ = ['Property', 'IntegerProperty', 'ContainerProperty', ]
 
@@ -540,8 +542,25 @@ class RandomProperty(Property):
     def __init__(self):
         self._buf_num = 0
         super(RandomProperty, self).__init__()
-        raise NotImplementedError
+
+    def __get__(self, obj, objtype):
+        """Implement custom logic when property is get as class descriptor."""
+        self.declare_once()
+        self._get_next()
+        return self
 
     def calc_bit_width(self):
         """Really dirty 16-bit PRNG."""
         return 16
+
+    def _get_next(self):
+        """Generate and return next value for RNG stream."""
+        val = ((DeferredExpression(self.var_name) * 58321 + 11113)) % 65535
+        self.__set__(self, val)
+        container = inspect.currentframe().f_back.f_locals['obj']
+        self.bsca.deferred_write(container)
+
+    @property
+    def uniform(self):
+        """Get random value from uniform distribution."""
+        return xmath.float(DeferredExpression(self.var_name)) / 65535
