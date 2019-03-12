@@ -12,8 +12,8 @@ from xentica.tools.color import hsv2rgb, rgb2hsv, genome2rgb
 from xentica.tools.genetics import genome_crossover
 from xentica.seeds.random import RandInt
 
-from .base import RegularCA, RegularExperiment
-from .base import run_simulation
+from examples.base import RegularCA, RegularExperiment
+from examples.base import run_simulation
 
 
 class EvoLife(RegularCA):

@@ -8,8 +8,8 @@ from xentica import core
 from xentica import seeds
 from xentica.core import color_effects
 
-from .base import RegularCA, RegularExperiment
-from .base import run_simulation
+from examples.base import RegularCA, RegularExperiment
+from examples.base import run_simulation
 
 
 class ShiftingSands(RegularCA):
