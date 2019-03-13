@@ -1,10 +1,12 @@
 """Tests for ``xentica.core.properties`` module."""
 import unittest
+import binascii
 
 from xentica.core.properties import (
     Property, IntegerProperty, ContainerProperty
 )
 from examples.game_of_life import GameOfLife
+from examples.noisetv import NoiseTV, NoiseTVExperiment
 
 
 class TestProperty(unittest.TestCase):
@@ -52,3 +54,13 @@ class TestProperty(unittest.TestCase):
         model = GameOfLife
         props = [v for v in model.main.values()]
         self.assertEqual(len(props), 1, "Wrong number of properties")
+
+    def test_random_property(self):
+        """Test ``RandomProperty`` behavior."""
+        model = NoiseTV(NoiseTVExperiment)
+        for _ in range(100):
+            model.step()
+        cells = model.gpu.arrays.cells.get()[:model.cells_num]
+        checksum = binascii.crc32(cells)
+        self.assertEqual(2773894957, checksum, "Wrong field checksum.")
+
