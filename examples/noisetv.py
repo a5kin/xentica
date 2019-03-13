@@ -19,7 +19,7 @@ class NoiseTV(RegularCA):
 
     def absorb(self):
         """Make some noise... well not exactly."""
-        self.main.rng  # this will render next RNG value
+        return self.main.rng  # this will render next RNG value
 
     @color_effects.MovingAverage
     def color(self):

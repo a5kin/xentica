@@ -63,4 +63,3 @@ class TestProperty(unittest.TestCase):
         cells = model.gpu.arrays.cells.get()[:model.cells_num]
         checksum = binascii.crc32(cells)
         self.assertEqual(2773894957, checksum, "Wrong field checksum.")
-
