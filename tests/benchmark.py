@@ -7,14 +7,18 @@ from examples.game_of_life import (
 from examples.shifting_sands import (
     ShiftingSands, ShiftingSandsExperiment
 )
+from examples.noisetv import (
+    NoiseTV, NoiseTVExperiment,
+)
 from xentica.utils.formatters import sizeof_fmt
 
 
 MODELS = [
     ("Conway's Life", GameOfLife, GOLExperiment),
     ("Shifting Sands", ShiftingSands, ShiftingSandsExperiment),
+    ("Noise TV", NoiseTV, NoiseTVExperiment),
 ]
-NUM_STEPS = 10000
+NUM_STEPS = 100000
 
 
 if __name__ == "__main__":
