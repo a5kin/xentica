@@ -9,19 +9,25 @@ class Xmath:
     @staticmethod
     def min(*args):
         """Calculate the minimum over list of args."""
-        raise NotImplementedError
+        expr = str(args[0])
+        for arg in args[1:]:
+            expr = "(({a}) < ({b})) ? ({a}) : ({b})".format(a=expr, b=arg)
+        return DeferredExpression(expr)
 
     @staticmethod
     def max(*args):
         """Calculate the maximum over list of args."""
-        raise NotImplementedError
+        expr = str(args[0])
+        for arg in args[1:]:
+            expr = "(({a}) > ({b})) ? ({a}) : ({b})".format(a=expr, b=arg)
+        return DeferredExpression(expr)
 
     @staticmethod
     def float(val):
         """Cast value to float."""
-        return DeferredExpression("((float) (%s))" % val)
+        return DeferredExpression("(float) (%s)" % val)
 
     @staticmethod
     def int(val):
         """Cast value to int."""
-        return DeferredExpression("((int) (%s))" % val)
+        return DeferredExpression("(int) (%s)" % val)
