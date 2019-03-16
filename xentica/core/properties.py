@@ -49,7 +49,7 @@ from collections import OrderedDict
 import numpy as np
 from cached_property import cached_property
 
-from xentica.core.variables import DeferredExpression
+from xentica.core.expressions import DeferredExpression
 from xentica.core.exceptions import XenticaException
 from xentica.tools import xmath
 
@@ -200,14 +200,14 @@ class Property(DeferredExpression):
     def __get__(self, obj, objtype):
         """Implement custom logic when property is get as class descriptor."""
         self.declare_once()
-        return DeferredExpression(self.var_name)
+        return self
 
     def __set__(self, obj, value):
         """Implement custom logic when property is set as class descriptor."""
+        if isinstance(value, Property) and not hasattr(value, "var_name"):
+            return
         self.declare_once()
-        if not hasattr(value, "code"):
-            value = DeferredExpression(str(value))
-        code = "%s = %s;\n" % (self.var_name, value.code)
+        code = "%s = %s;\n" % (self, value)
         self.bsca.append_code(code)
 
     @cached_property
@@ -259,6 +259,10 @@ class Property(DeferredExpression):
         code = "%s %s;\n" % (self.ctype, self.var_name)
         self.bsca.append_code(code)
         self.bsca.declare(self)
+
+    def __str__(self):
+        """Return a variable name to use in mixed expressions."""
+        return self.var_name
 
 
 class IntegerProperty(Property):
@@ -519,6 +523,11 @@ class TotalisticRuleProperty(Property):
             msg = "Can not get born flag from pure totalistic rule."
             raise XenticaException(msg)
         return (self >> num_neighbors) & 1
+
+    def __get__(self, obj, objtype):
+        """Declare and return self when get as class descriptor."""
+        self.declare_once()
+        return self
 
     def next_val(self, cur_val, num_neighbors):
         """
