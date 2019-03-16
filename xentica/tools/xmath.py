@@ -1,6 +1,6 @@
 """Module with bindings to CUDA math functions."""
 
-from xentica.core.variables import DeferredExpression
+from xentica.core.expressions import DeferredExpression
 
 
 class Xmath:
