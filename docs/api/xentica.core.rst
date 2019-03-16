@@ -35,6 +35,14 @@ Variables (xentica\.core\.variables)
     :undoc-members:
     :show-inheritance:
 
+Expressions (xentica\.core\.expressions)
+------------------------------------
+
+.. automodule:: xentica.core.expressions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Color Effects (xentica\.core\.color\_effects)
 ---------------------------------------------
 
