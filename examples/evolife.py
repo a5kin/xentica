@@ -80,7 +80,8 @@ class EvoLife(RegularCA):
         genomes = [core.IntegerVariable() for _ in range(len(self.buffers))]
         for i in range(len(self.buffers)):
             genomes[i] = self.neighbors[i].buffer.rule * (fitnesses[i] > 0)
-        self.main.rule = genome_crossover(*genomes)
+        num_genes = self.main.rule.bit_width
+        self.main.rule = genome_crossover(self.main, num_genes, *genomes)
 
     @color_effects.MovingAverage
     def color(self):
@@ -99,7 +100,7 @@ class BigBangExperiment(RegularExperiment):
         pos=(320, 180),
         size=(100, 100),
         vals={
-            "energy": RandInt(0, 1) * RandInt(1, 255),
+            "energy": RandInt(0, 1),
             "rule": RandInt(0, 2 ** 17 - 1),
             "rng": RandInt(0, 2 ** 16 - 1)
         }
