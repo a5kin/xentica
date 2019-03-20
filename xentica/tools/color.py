@@ -17,40 +17,38 @@ def hsv2rgb(hue, sat, val):
 
     """
     if isinstance(hue, DeferredExpression):
-        f = core.FloatVariable(hue * 6)
-        hi = core.IntegerVariable(xmath.int(f))
-        f -= hi
-        s = core.FloatVariable(sat)
-        v = core.FloatVariable(val)
-        p = core.FloatVariable(v * (1 - s))
-        q = core.FloatVariable(v * (1 - s * f))
-        t = core.FloatVariable(v * (1 - s * (1 - f)))
+        hue_f = core.FloatVariable(hue * 6)
+        hue_i = core.IntegerVariable(xmath.int(hue_f))
+        hue_f -= hue_i
+        sat = core.FloatVariable(sat)
+        val = core.FloatVariable(val)
+        grad_p = core.FloatVariable(val * (1 - sat))
+        grad_q = core.FloatVariable(val * (1 - sat * hue_f))
+        grad_t = core.FloatVariable(val * (1 - sat * (1 - hue_f)))
     else:
-        f = hue * 6
-        hi = int(f)
-        f -= hi
-        s = sat
-        v = val
-        p = v * (1 - s)
-        q = v * (1 - s * f)
-        t = v * (1 - s * (1 - f))
+        hue_f = hue * 6
+        hue_i = int(hue_f)
+        hue_f -= hue_i
+        grad_p = val * (1 - sat)
+        grad_q = val * (1 - sat * hue_f)
+        grad_t = val * (1 - sat * (1 - hue_f))
 
-    r = (hi == 0 | hi >= 5) * v
-    r = r + (hi == 1) * q
-    r = r + (hi == 2 | hi == 3) * p
-    r = r + (hi == 4) * t
+    red = (hue_i == 0 | hue_i >= 5) * val
+    red = red + (hue_i == 1) * grad_q
+    red = red + (hue_i == 2 | hue_i == 3) * grad_p
+    red = red + (hue_i == 4) * grad_t
 
-    g = (hi == 0 | hi >= 6) * t
-    g = g + (hi == 1 | hi == 2) * v
-    g = g + (hi == 3) * q
-    g = g + (hi == 4 | hi == 5) * p
+    green = (hue_i == 0 | hue_i >= 6) * grad_t
+    green = green + (hue_i == 1 | hue_i == 2) * val
+    green = green + (hue_i == 3) * grad_q
+    green = green + (hue_i == 4 | hue_i == 5) * grad_p
 
-    b = (hi == 0 | hi == 1 | hi >= 6) * p
-    b = b + (hi == 2) * t
-    b = b + (hi == 3 | hi == 4) * v
-    b = b + (hi == 5) * q
+    blue = (hue_i == 0 | hue_i == 1 | hue_i >= 6) * grad_p
+    blue = blue + (hue_i == 2) * grad_t
+    blue = blue + (hue_i == 3 | hue_i == 4) * val
+    blue = blue + (hue_i == 5) * grad_q
 
-    return (r, g, b)
+    return (red, green, blue)
 
 
 def genome2rgb(genome, num_genes):
@@ -69,11 +67,11 @@ def genome2rgb(genome, num_genes):
     green = core.FloatVariable()
     blue = core.FloatVariable()
     for i in range(num_genes):
-        dr, dg, db = hsv2rgb(i / num_genes, 1, 1 / num_genes)
+        d_red, d_green, d_blue = hsv2rgb(i / num_genes, 1, 1 / num_genes)
         val = (genome >> i) & 1
-        red += dr * val
-        green += dg * val
-        blue += db * val
+        red += d_red * val
+        green += d_green * val
+        blue += d_blue * val
     maxval = core.FloatVariable()
     maxval += xmath.max(red, green, blue)
     red /= maxval

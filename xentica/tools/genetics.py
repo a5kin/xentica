@@ -26,7 +26,7 @@ def genome_crossover(state, num_genes, *genomes, rng_name="rng"):
     for gene in range(num_genes):
         gene_choose *= 0
         num_genomes *= 0
-        for i, genome in enumerate(genomes):
+        for genome in genomes:
             gene_choose += ((genome >> gene) & 1 & (genome > 0)) << num_genomes
             num_genomes += (genome > 0)
         rand_val = getattr(state, rng_name).uniform
