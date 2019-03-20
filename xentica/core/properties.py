@@ -522,7 +522,7 @@ class TotalisticRuleProperty(Property):
         if not self._outer:
             msg = "Can not get born flag from pure totalistic rule."
             raise XenticaException(msg)
-        return (self >> num_neighbors) & 1
+        return ((self & 0b111111110) >> num_neighbors) & 1
 
     def __get__(self, obj, objtype):
         """Declare and return self when get as class descriptor."""
