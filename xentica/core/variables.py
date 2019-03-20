@@ -28,7 +28,10 @@ from xentica.core.mixins import BscaDetectorMixin
 from xentica.core.exceptions import XenticaException
 from xentica.core.expressions import DeferredExpression
 
-__all__ = ['Constant', 'Variable', 'IntegerVariable', ]
+__all__ = [
+    'Constant', 'Variable',
+    'IntegerVariable', 'FloatVariable',
+]
 
 
 class Constant(BscaDetectorMixin):
@@ -87,12 +90,15 @@ class Variable(DeferredExpression, BscaDetectorMixin):
 
     :param val:
          Initial value for the variable.
+    :param name:
+         Fallback name to declare variable with.
 
     """
 
-    def __init__(self, val=None):
+    def __init__(self, val=None, name="var"):
         """Initialize base class features."""
         super(Variable, self).__init__()
+        self.fallback_name = name
         self.base_class = Variable
         self._declared = False
         if val is None:
@@ -105,9 +111,9 @@ class Variable(DeferredExpression, BscaDetectorMixin):
         all_vars = self._holder_frame.f_locals.items()
         for k, var in all_vars:
             if isinstance(var, self.__class__):
-                if hash(self) == hash(var):
+                if hash(self) == hash(var) and k != "self_var":
                     return k
-        return "var%d" % abs(hash(self))
+        return "%s%d" % (self.fallback_name, abs(hash(self)))
 
     def declare_once(self):
         """Declare variable and assign initial value to it."""
@@ -150,6 +156,17 @@ class IntegerVariable(Variable):
     #: C type to use in definition.
     var_type = "unsigned int"
 
-    def __init__(self, val=0):
+    def __init__(self, val="0", **kwargs):
         """Initialize variable with default value."""
-        super(IntegerVariable, self).__init__(val)
+        super(IntegerVariable, self).__init__(val, **kwargs)
+
+
+class FloatVariable(Variable):
+    """The variable intended to hold a 32-bit float."""
+
+    #: C type to use in definition.
+    var_type = "float"
+
+    def __init__(self, val="0.0f", **kwargs):
+        """Initialize variable with default value."""
+        super(FloatVariable, self).__init__(val, **kwargs)

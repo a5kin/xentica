@@ -47,7 +47,7 @@ from xentica.core.properties import (
     RandomProperty,
 )
 from xentica.core.variables import (
-    IntegerVariable,
+    IntegerVariable, FloatVariable,
 )
 from xentica.core.topology.lattice import (
     OrthogonalLattice,
@@ -66,6 +66,7 @@ __all__ = [
     'TotalisticRuleProperty',
     'RandomProperty',
     'IntegerVariable',
+    'FloatVariable',
     'OrthogonalLattice',
     'MooreNeighborhood',
     'VonNeumannNeighborhood',
