@@ -8,7 +8,7 @@ from xentica import core
 from xentica import seeds
 from xentica.tools import xmath
 from xentica.core import color_effects
-from xentica.tools.color import hsv2rgb, rgb2hsv, genome2rgb
+from xentica.tools.color import genome2rgb
 from xentica.tools.genetics import genome_crossover
 from xentica.seeds.random import RandInt
 
@@ -60,36 +60,43 @@ class EvoLife(RegularCA):
         is_sustained = self.main.rule.is_sustained(num_neighbors)
 
         # test if cell is born
-        fitnesses = [core.IntegerVariable() for _ in range(len(self.buffers))]
+        fitnesses = []
+        for i in range(len(self.buffers)):
+            fitnesses.append(core.IntegerVariable(name="fit%d" % i))
         num_parents = core.IntegerVariable()
         for gene in range(len(self.buffers)):
             num_parents *= 0  # hack for re-init variable
             for i in range(len(self.buffers)):
                 is_alive = xmath.min(1, self.neighbors[i].buffer.energy)
-                is_fit = self.neighbors[i].buffer.rule.is_born(gene)
+                is_fit = self.neighbors[i].buffer.rule.is_born(gene + 1)
                 num_parents += is_alive * is_fit
-            fitnesses[gene] = num_parents * (num_parents == gene)
-        num_fit = xmath.max(*fitnesses)
+            fitnesses[gene] += num_parents * (num_parents == (gene + 1))
+        num_fit = core.IntegerVariable()
+        num_fit += xmath.max(*fitnesses)
 
         # new energy value
-        self.main.energy = xmath.max(0, self.main.energy - 1)
+        self.main.energy = (self.main.energy - 1) * (self.main.energy > 0)
         self.main.energy *= is_sustained
         self.main.energy |= 255 * (num_fit > 0)
 
         # neighbor's genomes crossover
-        genomes = [core.IntegerVariable() for _ in range(len(self.buffers))]
+        genomes = []
         for i in range(len(self.buffers)):
-            genomes[i] = self.neighbors[i].buffer.rule * (fitnesses[i] > 0)
+            genomes.append(core.IntegerVariable(name="genome%d" % i))
+        for i in range(len(self.buffers)):
+            is_fit = self.neighbors[i].buffer.rule.is_born(num_fit)
+            genomes[i] += self.neighbors[i].buffer.rule * is_fit
         num_genes = self.main.rule.bit_width
         self.main.rule = genome_crossover(self.main, num_genes, *genomes)
 
     @color_effects.MovingAverage
     def color(self):
         """Render cell's genome as hue/sat, cell's energy as value."""
-        red, green, blue = genome2rgb(self.main.rule)
-        hue, saturation, value = rgb2hsv(red, green, blue)
-        value = self.main.energy
-        return hsv2rgb(hue, saturation, value)
+        red, green, blue = genome2rgb(self.main.rule, self.main.rule.bit_width)
+        red = xmath.int(red * self.main.energy)
+        green = xmath.int(green * self.main.energy)
+        blue = xmath.int(blue * self.main.energy)
+        return (red, green, blue, )
 
 
 class BigBangExperiment(RegularExperiment):
