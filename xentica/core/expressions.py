@@ -87,7 +87,7 @@ class DeferredExpression:
                     self_var.declare_once()
                     code = "%s %s= %s;\n" % (self_var.var_name, oper, value)
                     self_var.bsca.append_code(code)
-                    return self
+                    return self_var
                 return op_func
 
             func_name = "__%s__" % base_name
