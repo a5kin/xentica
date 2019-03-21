@@ -508,7 +508,8 @@ class TotalisticRuleProperty(Property):
         if not self._outer:
             msg = "Can not get sustained flag from pure totalistic rule."
             raise XenticaException(msg)
-        return (self >> (num_neighbors + self._max_neighbors + 1)) & 1
+        mask = (0b111111110 << 9)
+        return ((self & mask) >> (num_neighbors + self._max_neighbors + 1)) & 1
 
     def is_born(self, num_neighbors):
         """
