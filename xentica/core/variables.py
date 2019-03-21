@@ -113,7 +113,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
             if isinstance(var, self.__class__):
                 if hash(self) == hash(var) and k != "self_var":
                     return k
-        return "%s%d" % (self.fallback_name, abs(hash(self)))
+        return self.fallback_name
 
     def declare_once(self):
         """Declare variable and assign initial value to it."""

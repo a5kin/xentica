@@ -87,6 +87,10 @@ class DeferredExpression:
                     self_var.declare_once()
                     code = "%s %s= %s;\n" % (self_var.var_name, oper, value)
                     self_var.bsca.append_code(code)
+                    has_fallback = hasattr(self_var, "fallback_name")
+                    is_default = self_var.fallback_name == "var"
+                    if has_fallback and is_default:
+                        self_var.fallback_name = self.var_name
                     return self_var
                 return op_func
 
