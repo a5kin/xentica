@@ -4,7 +4,8 @@ from xentica import core
 from xentica.tools import xmath
 
 
-def genome_crossover(state, num_genes, *genomes, rng_name="rng"):
+def genome_crossover(state, num_genes, *genomes,
+                     mutation_prob=0, rng_name="rng"):
     """
     Crossover given genomes in stochastic way.
 
@@ -14,6 +15,8 @@ def genome_crossover(state, num_genes, *genomes, rng_name="rng"):
         Genome length, assuming all genomes has same number of genes.
     :param genomes:
         A list of genomes (integers) to crossover
+    :param mutation_prob:
+        Probability of single gene mutation.
     :param rng_name:
         Name of ``RandomProperty``.
 
@@ -31,5 +34,9 @@ def genome_crossover(state, num_genes, *genomes, rng_name="rng"):
             num_genomes += (genome > 0)
         rand_val = getattr(state, rng_name).uniform
         winner_gene = xmath.int(rand_val * num_genomes)
-        new_genome += ((gene_choose >> winner_gene) & 1) << gene
+        new_gene = ((gene_choose >> winner_gene) & 1)
+        is_mutated = 0
+        if mutation_prob > 0:
+            is_mutated = getattr(state, rng_name).uniform < mutation_prob
+        new_genome += (new_gene ^ is_mutated) << gene
     return new_genome
