@@ -87,6 +87,7 @@ class EvoLife(RegularCA):
             is_fit = self.neighbors[i].buffer.rule.is_born(num_fit)
             genomes[i] += self.neighbors[i].buffer.rule * is_fit
         num_genes = self.main.rule.bit_width
+        genomes.append(self.main.rule)
         self.main.rule = genome_crossover(self.main, num_genes, *genomes)
 
     @color_effects.MovingAverage
@@ -108,7 +109,7 @@ class BigBangExperiment(RegularExperiment):
         size=(100, 100),
         vals={
             "energy": RandInt(0, 1),
-            "rule": RandInt(0, 2 ** 17 - 1),
+            "rule": RandInt(0, 2 ** 18 - 1),
             "rng": RandInt(0, 2 ** 16 - 1)
         }
     )
