@@ -74,6 +74,7 @@ class Property(DeferredExpression):
             (8, np.uint8, 'char'),
             (16, np.uint16, 'short'),
             (32, np.uint32, 'int'),
+            (64, np.uint64, 'long'),
         )
         self._buf_num, self._nbr_num = 1, 1
         super(Property, self).__init__()
@@ -471,7 +472,11 @@ class ContainerProperty(Property):
         for prop in self._properties.values():
             prop.declare_once()
             mask = 2 ** prop.bit_width - 1
-            val = "({val} & {mask})".format(val=prop.var_name, mask=mask)
+            val = "(({ctype}) {val} & {mask})".format(
+                ctype=self.ctype,
+                val=prop.var_name,
+                mask=mask
+            )
             if shift > 0:
                 val = "({val} << {shift})".format(val=val, shift=shift)
             vals.append(val)
