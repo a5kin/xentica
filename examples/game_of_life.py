@@ -137,13 +137,11 @@ class GameOfLifeColor(GameOfLife):
         """
         GameOfLife.absorb(self)
         red_sum = core.IntegerVariable()
-        for i in range(len(self.buffers)):
-            red_sum += self.neighbors[i].buffer.red + 1
         green_sum = core.IntegerVariable()
-        for i in range(len(self.buffers)):
-            green_sum += self.neighbors[i].buffer.green + 1
         blue_sum = core.IntegerVariable()
         for i in range(len(self.buffers)):
+            red_sum += self.neighbors[i].buffer.red + 1
+            green_sum += self.neighbors[i].buffer.green + 1
             blue_sum += self.neighbors[i].buffer.blue + 1
         self.main.red = red_sum * self.main.state
         self.main.green = green_sum * self.main.state
