@@ -99,8 +99,22 @@ class RandomPattern:
 
     def __init__(self, vals):
         """Initialize class."""
-        self.random = LocalRandom()
+        self._random = LocalRandom()
         self.vals = ValDict(vals, self)
+
+    @property
+    def random(self):
+        """Get random stream."""
+        return self._random
+
+    @random.setter
+    def random(self, val):
+        """Set random stream."""
+        self._random = val
+
+    def __add__(self, other):
+        """Return a chained pattern."""
+        return ChainedPattern(self, other)
 
     @abc.abstractmethod
     def generate(self, cells, bsca):
@@ -123,6 +137,30 @@ class RandomPattern:
             Function packing state into single integer.
 
         """
+
+
+class ChainedPattern(RandomPattern):
+    """The join of two other patterns."""
+
+    def __init__(self, pattern1, pattern2):
+        self._pattern1 = pattern1
+        self._pattern2 = pattern2
+
+    @RandomPattern.random.setter
+    def random(self, val):
+        """Set random stream."""
+        self._pattern1.random = val
+        self._pattern2.random = val
+
+    def generate(self, cells, bsca):
+        """
+        Generate two patterns sequentially.
+
+        See :meth:`RandomPattern.generate` for details.
+
+        """
+        self._pattern1.generate(cells, bsca)
+        self._pattern2.generate(cells, bsca)
 
 
 class BigBang(RandomPattern):

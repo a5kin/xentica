@@ -103,16 +103,22 @@ class EvoLife(RegularCA):
 class BigBangExperiment(RegularExperiment):
     """Default experiment for legacy EvoLife."""
 
-    word = "BANG! BANG! BANG!"
-    seed = seeds.patterns.BigBang(
+    word = "BANG! BANG! BANG! ON THE WALL FROM DUSK TILL DAWN"
+    seed_main = seeds.patterns.BigBang(
         pos=(320, 180),
         size=(100, 100),
         vals={
             "energy": RandInt(0, 1),
             "rule": RandInt(0, 2 ** 18 - 1),
+        }
+    )
+    seed_rng = seeds.patterns.PrimordialSoup(
+        vals={
             "rng": RandInt(0, 2 ** 16 - 1)
         }
     )
+    # chain ordering matters, since areas are rewriting each other in order
+    seed = seed_rng + seed_main
 
 
 if __name__ == "__main__":
