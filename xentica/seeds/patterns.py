@@ -145,6 +145,7 @@ class ChainedPattern(RandomPattern):
     def __init__(self, pattern1, pattern2):
         self._pattern1 = pattern1
         self._pattern2 = pattern2
+        super(ChainedPattern, self).__init__({})
 
     @RandomPattern.random.setter
     def random(self, val):
