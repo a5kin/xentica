@@ -31,3 +31,8 @@ class Xmath:
     def int(val):
         """Cast value to int."""
         return DeferredExpression("((int) (%s))" % val)
+
+    @staticmethod
+    def popc(val):
+        """Count the number of bits that are set to 1 in a 32 bit integer."""
+        return DeferredExpression("(__popc(%s))" % val)
