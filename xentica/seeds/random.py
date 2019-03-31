@@ -14,6 +14,8 @@ import operator
 
 import numpy as np
 
+from xentica.core.expressions import PatternExpression
+
 __all__ = ['LocalRandom', 'RandInt', ]
 
 
@@ -52,7 +54,7 @@ class LocalRandom:
         self.numpy = rng.numpy
 
 
-class RandInt:
+class RandInt(PatternExpression):
     """
     Class, generating a sequence of random integers in some interval.
 
@@ -67,6 +69,7 @@ class RandInt:
 
     def __init__(self, min_val, max_val):
         """Initialize the random sequence."""
+        super(RandInt, self).__init__()
         self.min_val = min_val
         self.max_val = max_val
 
