@@ -38,5 +38,6 @@ def genome_crossover(state, num_genes, *genomes,
         is_mutated = 0
         if mutation_prob > 0:
             is_mutated = getattr(state, rng_name).uniform < mutation_prob
+            is_mutated = is_mutated * (gene_choose > 0)
         new_genome += (new_gene ^ is_mutated) << gene
     return new_genome
