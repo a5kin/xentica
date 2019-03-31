@@ -15,6 +15,10 @@ from xentica.seeds.random import RandInt
 from examples.base import RegularCA, RegularExperiment
 from examples.base import run_simulation
 
+DEATH_SPEED = 15
+MAX_GENES = 9
+MUTATION_PROB = 0
+
 
 class EvoLife(RegularCA):
     """
@@ -75,9 +79,10 @@ class EvoLife(RegularCA):
         num_fit += xmath.max(*fitnesses)
 
         # new energy value
-        self.main.energy = (self.main.energy - 1) * (self.main.energy > 0)
+        self.main.energy = (self.main.energy - DEATH_SPEED) * \
+                           (self.main.energy > DEATH_SPEED)
         self.main.energy *= is_sustained
-        self.main.energy |= 255 * (num_fit > 0)
+        self.main.energy |= 255 * (num_fit > 0) * (self.main.energy == 0)
 
         # neighbor's genomes crossover
         genomes = []
@@ -88,7 +93,9 @@ class EvoLife(RegularCA):
             genomes[i] += self.neighbors[i].buffer.rule * is_fit
         num_genes = self.main.rule.bit_width
         genomes.append(self.main.rule)
-        self.main.rule = genome_crossover(self.main, num_genes, *genomes)
+        self.main.rule = genome_crossover(self.main, num_genes, *genomes,
+                                          mutation_prob=MUTATION_PROB)
+        self.main.energy *= xmath.popc(self.main.rule) <= MAX_GENES
 
     @color_effects.MovingAverage
     def color(self):
@@ -100,16 +107,35 @@ class EvoLife(RegularCA):
         return (red, green, blue, )
 
 
-class BigBangExperiment(RegularExperiment):
-    """Default experiment for legacy EvoLife."""
+class CrossbreedingExperiment(RegularExperiment):
+    """Classic experiment for legacy EvoLife, where 'Bliambas' may form."""
 
     word = "BANG! BANG! BANG! ON THE WALL FROM DUSK TILL DAWN"
-    seed_main = seeds.patterns.BigBang(
+    seed_main1 = seeds.patterns.BigBang(
         pos=(320, 180),
         size=(100, 100),
         vals={
-            "energy": RandInt(0, 1),
-            "rule": RandInt(0, 2 ** 18 - 1),
+            "energy": RandInt(0, 1) * RandInt(0, 255),
+            "rule": 0b111100000111101000,
+            "rng": RandInt(0, 2 ** 16 - 1)
+        }
+    )
+    seed_main2 = seeds.patterns.BigBang(
+        pos=(0, 0),
+        size=(640, 20),
+        vals={
+            "energy": RandInt(0, 1) * RandInt(0, 255),
+            "rule": 0b000001100000001000,
+            "rng": RandInt(0, 2 ** 16 - 1)
+        }
+    )
+    seed_main3 = seeds.patterns.BigBang(
+        pos=(0, 0),
+        size=(20, 360),
+        vals={
+            "energy": RandInt(0, 1) * RandInt(0, 255),
+            "rule": 0b000001100000001000,
+            "rng": RandInt(0, 2 ** 16 - 1)
         }
     )
     seed_rng = seeds.patterns.PrimordialSoup(
@@ -118,8 +144,8 @@ class BigBangExperiment(RegularExperiment):
         }
     )
     # chain ordering matters, since areas are rewriting each other in order
-    seed = seed_rng + seed_main
+    seed = seed_rng + seed_main1 + seed_main2 + seed_main3
 
 
 if __name__ == "__main__":
-    run_simulation(EvoLife, BigBangExperiment)
+    run_simulation(EvoLife, CrossbreedingExperiment)
