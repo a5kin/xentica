@@ -10,6 +10,7 @@ from xentica.tools import xmath
 from xentica.core import color_effects
 from xentica.tools.color import genome2rgb
 from xentica.tools.genetics import genome_crossover
+from xentica.tools.rules import LifeLike
 from xentica.seeds.random import RandInt
 
 from examples.base import RegularCA, RegularExperiment
@@ -116,25 +117,25 @@ class CrossbreedingExperiment(RegularExperiment):
         size=(100, 100),
         vals={
             "energy": RandInt(0, 1) * RandInt(0, 255),
-            "rule": 0b111100000111101000,
+            "rule": LifeLike.golly2int("B35678/S5678"),
             "rng": RandInt(0, 2 ** 16 - 1)
         }
     )
     seed_main2 = seeds.patterns.BigBang(
         pos=(0, 0),
-        size=(640, 20),
+        size=(640, 200),
         vals={
             "energy": RandInt(0, 1) * RandInt(0, 255),
-            "rule": 0b000001100000001000,
+            "rule": LifeLike.golly2int("B3/S23"),
             "rng": RandInt(0, 2 ** 16 - 1)
         }
     )
     seed_main3 = seeds.patterns.BigBang(
         pos=(0, 0),
-        size=(20, 360),
+        size=(200, 360),
         vals={
             "energy": RandInt(0, 1) * RandInt(0, 255),
-            "rule": 0b000001100000001000,
+            "rule": LifeLike.golly2int("B3/S23"),
             "rng": RandInt(0, 2 ** 16 - 1)
         }
     )
