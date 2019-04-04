@@ -13,6 +13,7 @@ from examples.game_of_life import (
     GOLExperiment, GOLExperiment2, GOLExperimentColor,
 )
 from examples.shifting_sands import ShiftingSands, ShiftingSandsExperiment
+from examples.evolife import EvoLife, CrossbreedingExperiment
 
 
 class TestCellularAutomaton(unittest.TestCase):
@@ -189,3 +190,12 @@ class TestCellularAutomaton(unittest.TestCase):
         with self.assertRaises(XenticaException):
             model = ShiftingSands(ShiftingSandsExperiment)
             model.render()
+
+    def test_genetics_general(self):
+        """Test general genetics stuff."""
+        model = EvoLife(CrossbreedingExperiment)
+        for _ in range(self.num_steps):
+            model.step()
+        cells = model.gpu.arrays.cells.get()[:model.cells_num]
+        checksum = binascii.crc32(cells)
+        self.assertEqual(3142230500, checksum, "Wrong field checksum.")
