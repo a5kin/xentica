@@ -62,7 +62,7 @@ class ColorEffect(BscaDetectorMixin):
         self.func = func
         self.effect = ""
 
-    def __call__(self, self_var):
+    def __call__(self):
         """
         Implement the color decorator.
 
@@ -70,7 +70,7 @@ class ColorEffect(BscaDetectorMixin):
         ``super`` result, like shown in the example above.
 
         """
-        red, green, blue = self.func(self_var)
+        red, green, blue = self.func(self.bsca)
         code = """
             int new_r = %s;
             int new_g = %s;
@@ -78,7 +78,7 @@ class ColorEffect(BscaDetectorMixin):
             %s
             col[i] = make_int3(new_r, new_g, new_b);
         """ % (red, green, blue, self.effect)
-        self_var.append_code(code)
+        self.bsca.append_code(code)
 
 
 class MovingAverage(ColorEffect):
@@ -102,7 +102,7 @@ class MovingAverage(ColorEffect):
 
     """
 
-    def __call__(self, self_var):
+    def __call__(self):
         """Implement the effect."""
         self.bsca.define_constant(Constant("FADE_IN",
                                            lambda x: x.fade_in))
@@ -125,4 +125,4 @@ class MovingAverage(ColorEffect):
             new_b = max(min(new_b, old_col.z + FADE_IN),
                         old_col.z - FADE_OUT);
         """
-        return super(MovingAverage, self).__call__(self_var)
+        return super(MovingAverage, self).__call__()
