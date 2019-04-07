@@ -51,12 +51,13 @@ from cached_property import cached_property
 
 from xentica.core.expressions import DeferredExpression
 from xentica.core.exceptions import XenticaException
+from xentica.core.mixins import BscaDetectorMixin
 from xentica.tools import xmath
 
 __all__ = ['Property', 'IntegerProperty', 'ContainerProperty', ]
 
 
-class Property(DeferredExpression):
+class Property(DeferredExpression, BscaDetectorMixin):
     """
     Base class for all properties.
 
@@ -68,7 +69,6 @@ class Property(DeferredExpression):
 
     def __init__(self):
         """Initialize default attributes."""
-        self.bsca = None
         self._types = (
             # (bit_width, numpy_dtype, gpu_c_type)
             (8, np.uint8, 'char'),
@@ -159,25 +159,25 @@ class Property(DeferredExpression):
         """
         return 1  # default, just for consistency
 
-    def set_bsca(self, bsca, buf_num, nbr_num):
-        """
-        Set up a reference to BSCA instance.
+    @property
+    def buf_num(self):
+        """Get buffer's index, associated to property."""
+        return self._buf_num
 
-        Do not override this method, it is cruicial to inner framework
-        mechanics.
+    @buf_num.setter
+    def buf_num(self, val):
+        """Set buffer's index, associated to property."""
+        self._buf_num = val
 
-        :param bsca:
-            :class:`CellularAutomaton <xentica.core.base.CellularAutomaton>`
-            instance.
-        :param buf_num:
-            Buffer's index, associated to property.
-        :param nbr_num:
-            Neighbor's index, associated to property.
+    @property
+    def nbr_num(self):
+        """Get neighbor's index, associated to property."""
+        return self._nbr_num
 
-        """
-        self.bsca = bsca
-        self._buf_num = buf_num
-        self._nbr_num = nbr_num
+    @nbr_num.setter
+    def nbr_num(self, val):
+        """Set neighbor's index, associated to property."""
+        self._nbr_num = val
 
     def __getattribute__(self, attr):
         """Implement custom logic when property is get as class attribute."""
@@ -336,13 +336,19 @@ class ContainerProperty(Property):
         """Calculate bit width as sum of inner properties' bit widths."""
         return sum([p.bit_width for p in self._properties.values()])
 
-    def set_bsca(self, bsca, buf_num, nbr_num):
-        """Propagate BSCA setting to inner properties."""
-        self.bsca = bsca
-        self._buf_num = buf_num
-        self._nbr_num = nbr_num
+    @Property.buf_num.setter
+    def buf_num(self, val):
+        """Set buffer's index, and propagade to inner properties."""
+        self._buf_num = val
         for key in self._properties.keys():
-            self[key].set_bsca(bsca, buf_num, nbr_num)
+            self[key].buf_num = val
+
+    @Property.nbr_num.setter
+    def nbr_num(self, val):
+        """Set neighbor's index, and propagade to inner properties."""
+        self._nbr_num = val
+        for key in self._properties.keys():
+            self[key].nbr_num = val
 
     def __get__(self, obj, objtype):
         """Return self reference when getting as class descriptor."""
