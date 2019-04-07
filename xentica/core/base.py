@@ -109,12 +109,8 @@ class BSCA(type):
     """
     Meta-class for :class:`CellularAutomaton`.
 
-    Performs all necessary stuff to generate GPU kernels given class
-    definition.
-
-    It is also preparing ``main``, ``buffers`` and ``neighbors`` class
-    variables being used in ``emit()``, ``absorb()`` and ``color()``
-    methods.
+    Prepares ``main``, ``buffers`` and ``neighbors`` class variables
+    being used in ``emit()``, ``absorb()`` and ``color()`` methods.
 
     """
 
@@ -135,47 +131,37 @@ class BSCA(type):
             if key not in ('__module__', '__qualname__'):
                 keys.append(key)
         attrs['__ordered__'] = keys
-        mcs._new_class = super().__new__(mcs, name, bases, attrs)
+        new_class = super().__new__(mcs, name, bases, attrs)
         mcs._parents = [b for b in bases if isinstance(b, BSCA)]
         if not mcs._parents:
-            return mcs._new_class
+            return new_class
 
-        mcs._prepare_topology(mcs, attrs)
+        mcs._prepare_topology(new_class, attrs)
 
-        mcs._new_class.main = None
-        mcs._new_class.buffers = None
-        mcs._new_class.neighbors = None
-        mcs._prepare_properties(mcs, bases, attrs)
+        new_class.main = None
+        new_class.buffers = None
+        new_class.neighbors = None
+        mcs._prepare_properties(new_class, bases, attrs)
 
-        mcs._new_class.dtype = mcs._new_class.main.dtype
-        mcs._new_class.ctype = mcs._new_class.main.ctype
+        new_class.dtype = new_class.main.dtype
+        new_class.ctype = new_class.main.ctype
 
-        mcs._new_class.constants = {}
+        new_class.constants = {}
 
         # set default renderer as needed
-        if not hasattr(mcs._new_class, 'renderer'):
-            mcs._new_class.renderer = RendererPlain()
+        if not hasattr(new_class, 'renderer'):
+            new_class.renderer = RendererPlain()
 
-        # build CUDA source
-        source = mcs._new_class.build_emit()
-        source += mcs._new_class.build_absorb()
-        source += mcs._new_class.build_render()
-        source = mcs._new_class.build_defines() + source
-        mcs._new_class.cuda_source = source
+        num_dimensions = new_class.topology.dimensions
+        new_class.size = tuple(1 for i in range(num_dimensions))
 
-        mcs._new_class.index_to_coord = mcs.index_to_coord
-        mcs._new_class.pack_state = mcs.pack_state
-
-        mcs._new_class.size = tuple(1 for i in range(mcs.topology.dimensions))
-
-        return mcs._new_class
+        return new_class
 
     def _prepare_topology(cls, attrs):
         """Prepare topology for future use."""
-        if hasattr(cls._new_class, 'Topology'):
-            attrs['Topology'] = cls._new_class.Topology
-        cls.topology = attrs.get('Topology', None)
-        cls._new_class.topology = cls.topology
+        if hasattr(cls, 'Topology'):
+            attrs['Topology'] = cls.Topology
+        cls.topology = attrs.get('Topology')
 
         if cls.topology is None:
             raise XenticaException("No Topology class declared.")
@@ -185,6 +171,9 @@ class BSCA(type):
                 msg = "No %s declared in Topology class." % field
                 raise XenticaException(msg)
 
+        cls.topology.lattice = deepcopy(cls.topology.lattice)
+        cls.topology.neighborhood = deepcopy(cls.topology.neighborhood)
+        cls.topology.border = deepcopy(cls.topology.border)
         cls.topology.lattice.dimensions = cls.topology.dimensions
         cls.topology.neighborhood.dimensions = cls.topology.dimensions
         cls.topology.border.dimensions = cls.topology.dimensions
@@ -193,27 +182,27 @@ class BSCA(type):
 
     def _prepare_properties(cls, bases, attrs):
         """Prepare main/buffers properties."""
-        cls._new_class.main = ContainerProperty()
-        cls._new_class.buffers = []
-        cls._new_class.neighbors = []
+        cls.main = ContainerProperty()
+        cls.buffers = []
+        cls.neighbors = []
         num_neighbors = len(cls.topology.neighborhood)
         for i in range(num_neighbors):
-            cls._new_class.buffers.append(ContainerProperty())
-            cls._new_class.neighbors.append(CachedNeighbor())
+            cls.buffers.append(ContainerProperty())
+            cls.neighbors.append(CachedNeighbor())
         attrs_items = [base_class.__dict__.items() for base_class in bases]
         attrs_items.append(attrs.items())
         restricted_names = {"main", "buffer"}
         for obj_name, obj in itertools.chain.from_iterable(attrs_items):
             if isinstance(obj, Property) and obj_name not in restricted_names:
-                cls._new_class.main[obj_name] = deepcopy(obj)
+                cls.main[obj_name] = deepcopy(obj)
                 vname = "_cell_%s" % obj_name
-                cls._new_class.main[obj_name].var_name = vname
+                cls.main[obj_name].var_name = vname
                 for i in range(num_neighbors):
-                    buffers = cls._new_class.buffers
+                    buffers = cls.buffers
                     buffers[i][obj_name] = deepcopy(obj)
                     vname = "_bcell_%s%d" % (obj_name, i)
                     buffers[i][obj_name].var_name = vname
-                    neighbor = cls._new_class.neighbors[i]
+                    neighbor = cls.neighbors[i]
                     neighbor.main[obj_name] = deepcopy(obj)
                     vname = "_dcell_%s%d" % (obj_name, i)
                     neighbor.main[obj_name].var_name = vname
@@ -221,26 +210,31 @@ class BSCA(type):
                     vname = "_dbcell_%s%d" % (obj_name, i)
                     neighbor.buffer[obj_name].var_name = vname
 
-        # propagade BSCA to properties
-        cls._new_class.main.set_bsca(cls._new_class, 0, -1)
-        cls._new_class.main.var_name = "_cell"
+        cls.main.buf_num = 0
+        cls.main.nbr_num = -1
+        cls.main.var_name = "_cell"
         for i in range(num_neighbors):
-            cls._new_class.buffers[i].set_bsca(cls._new_class, i + 1, -1)
-            cls._new_class.buffers[i].var_name = "_bcell%i" % i
-            cls._new_class.neighbors[i].main.set_bsca(cls._new_class, 0, i)
-            cls._new_class.neighbors[i].main.var_name = "_dcell%d" % i
-            cls._new_class.neighbors[i].buffer.set_bsca(cls._new_class,
-                                                        i + 1, i)
-            cls._new_class.neighbors[i].buffer.var_name = "_dbcell%d" % i
+            cls.buffers[i].buf_num = i + 1
+            cls.buffers[i].nbr_num = -1
+            cls.buffers[i].var_name = "_bcell%i" % i
+            cls.neighbors[i].main.buf_num = 0
+            cls.neighbors[i].main.nbr_num = i
+            cls.neighbors[i].main.var_name = "_dcell%d" % i
+            cls.neighbors[i].buffer.buf_num = i + 1
+            cls.neighbors[i].buffer.nbr_num = i
+            cls.neighbors[i].buffer.var_name = "_dbcell%d" % i
 
-    def index_to_coord(cls, i):
-        """
-        Wrap ``lattice.index_to_coord`` method.
 
-        :param i: Cell's index.
+class Translator:
+    """Basic functionality for Python -> CUDA C code translation."""
 
-        """
-        return cls.topology.lattice.index_to_coord(i, cls)
+    def __init__(self):
+        self.cuda_source = ""
+        self._func_body = ""
+        self._deferred_writes = set()
+        self._declarations = set()
+        self._unpacks = set()
+        self._coords_declared = False
 
     @staticmethod
     def _elementwise_kernel(name, args, body):
@@ -273,7 +267,7 @@ class BSCA(type):
         """ % (name, arg_string, body)
         return kernel
 
-    def _translate_code(cls, *funcs):
+    def _translate_code(self, *funcs):
         """
         Translate Python method to C code by execution.
 
@@ -284,22 +278,22 @@ class BSCA(type):
             String with generated C code for elementwise kernel.
 
         """
-        cls._func_body = ""
-        cls._deferred_writes = set()
-        cls._declarations = set()
-        cls._unpacks = set()
-        cls._coords_declared = False
+        self._func_body = ""
+        self._deferred_writes = set()
+        self._declarations = set()
+        self._unpacks = set()
+        self._coords_declared = False
         for func in funcs:
-            func(cls)
-        for prop in cls._deferred_writes:
+            func()
+        for prop in self._deferred_writes:
             prop.deferred_write()
-        return cls._func_body
+        return self._func_body
 
-    def append_code(cls, code):
+    def append_code(self, code):
         """Append ``code`` to kernel's C code."""
-        cls._func_body += code
+        self._func_body += code
 
-    def deferred_write(cls, prop):
+    def deferred_write(self, prop):
         """
         Declare a property for deferred write.
 
@@ -311,9 +305,9 @@ class BSCA(type):
             subclass instance.
 
         """
-        cls._deferred_writes.add(prop)
+        self._deferred_writes.add(prop)
 
-    def declare(cls, prop):
+    def declare(self, prop):
         """
         Mark property declared.
 
@@ -322,9 +316,9 @@ class BSCA(type):
             subclass instance.
 
         """
-        cls._declarations.add(prop)
+        self._declarations.add(prop)
 
-    def unpack(cls, prop):
+    def unpack(self, prop):
         """
         Mark ``prop`` property unpacked.
 
@@ -333,9 +327,9 @@ class BSCA(type):
             subclass instance.
 
         """
-        cls._unpacks.add(prop)
+        self._unpacks.add(prop)
 
-    def is_declared(cls, prop):
+    def is_declared(self, prop):
         """
         Check if ``prop`` property is declared.
 
@@ -347,9 +341,9 @@ class BSCA(type):
             ``True`` if property is declared, ``False`` otherwise.
 
         """
-        return prop in cls._declarations
+        return prop in self._declarations
 
-    def is_unpacked(cls, prop):
+    def is_unpacked(self, prop):
         """
         Check if ``prop`` property is unpacked.
 
@@ -361,13 +355,13 @@ class BSCA(type):
             ``True`` if property is unpacked, ``False`` otherwise.
 
         """
-        return prop in cls._unpacks
+        return prop in self._unpacks
 
-    def declare_coords(cls):
+    def declare_coords(self):
         """Mark coordinate variables declared."""
-        cls._coords_declared = True
+        self._coords_declared = True
 
-    def define_constant(cls, constant):
+    def define_constant(self, constant):
         """
         Remember the constant is defined.
 
@@ -376,9 +370,9 @@ class BSCA(type):
             instance.
 
         """
-        cls.constants[constant.name] = deepcopy(constant)
+        self.constants[constant.name] = deepcopy(constant)
 
-    def is_constant(cls, constant):
+    def is_constant(self, constant):
         """
         Check if the constant is defined.
 
@@ -390,10 +384,10 @@ class BSCA(type):
             ``True`` if constant is defined, ``False`` otherwise.
 
         """
-        return constant in cls.constants
+        return constant in self.constants
 
     @property
-    def coords_declared(cls):
+    def coords_declared(self):
         """
         Check if coordinate variables are declared.
 
@@ -402,9 +396,19 @@ class BSCA(type):
             otherwise.
 
         """
-        return cls._coords_declared
+        return self._coords_declared
 
-    def build_defines(cls):
+    def build_source(self):
+        """Generate source code for GPU kernel."""
+        source = self.build_emit()
+        source += self.build_absorb()
+        source += self.build_render()
+        source = self.build_defines() + source
+        for const in self.constants.values():
+            source = const.replace_value(source)
+        self.cuda_source = source
+
+    def build_defines(self):
         """
         Generate ``#define`` section for all kernels.
 
@@ -413,11 +417,11 @@ class BSCA(type):
 
         """
         defines = ""
-        for const in cls.constants.values():
+        for const in self.constants.values():
             defines += const.get_define_code()
         return defines
 
-    def build_emit(cls):
+    def build_emit(self):
         """
         Generate ``emit()`` kernel.
 
@@ -425,11 +429,11 @@ class BSCA(type):
             String with C code for ``emit()`` kernel.
 
         """
-        args = [(cls.ctype, "*fld"), ]
-        body = cls._translate_code(cls.emit)
-        return cls._elementwise_kernel("emit", args, body)
+        args = [(self.ctype, "*fld"), ]
+        body = self._translate_code(self.emit)
+        return self._elementwise_kernel("emit", args, body)
 
-    def build_absorb(cls):
+    def build_absorb(self):
         """
         Generate ``absorb()`` kernel.
 
@@ -437,11 +441,11 @@ class BSCA(type):
             String with C code for ``absorb()`` kernel.
 
         """
-        args = [(cls.ctype, "*fld"), ("int3", "*col")]
-        body = cls._translate_code(cls.absorb, cls.color)
-        return cls._elementwise_kernel("absorb", args, body)
+        args = [(self.ctype, "*fld"), ("int3", "*col")]
+        body = self._translate_code(self.absorb, self.color)
+        return self._elementwise_kernel("absorb", args, body)
 
-    def build_render(cls):
+    def build_render(self):
         """
         Generate ``render()`` kernel.
 
@@ -449,11 +453,20 @@ class BSCA(type):
             String with C code for ``render()`` kernel.
 
         """
-        args = cls.renderer.args
-        body = cls.renderer.render_code()
-        return cls._elementwise_kernel("render", args, body)
+        args = self.renderer.args
+        body = self.renderer.render_code()
+        return self._elementwise_kernel("render", args, body)
 
-    def pack_state(cls, state):
+    def index_to_coord(self, i):
+        """
+        Wrap ``lattice.index_to_coord`` method.
+
+        :param i: Cell's index.
+
+        """
+        return self.topology.lattice.index_to_coord(i, self)
+
+    def pack_state(self, state):
         """
         Pack state structure into raw in-memory representation.
 
@@ -463,7 +476,7 @@ class BSCA(type):
         """
         val = 0
         shift = 0
-        for name, prop in cls.main.properties.items():
+        for name, prop in self.main.properties.items():
             if name in state:
                 val += state[name] << shift
             shift += prop.bit_width
@@ -534,12 +547,12 @@ class GPU:
         self.arrays = GPUArrays(init_cells, init_colors)
 
 
-class CellularAutomaton(metaclass=BSCA):
+class CellularAutomaton(Translator, metaclass=BSCA):
     """
     Base class for all Xentica models.
 
-    Compiles GPU kernels generated by :class:`BSCA` metaclass,
-    initializes necessary GPU arrays and popupates them with the seed.
+    Generates GPU kernels source code, compiles them, initializes
+    necessary GPU arrays and popupates them with the seed.
 
     After initialization, you can run step-by-step simulation and
     render the field at any moment::
@@ -575,6 +588,7 @@ class CellularAutomaton(metaclass=BSCA):
 
     def __init__(self, experiment_class):
         """Initialize kernels, GPU arrays and other stuff."""
+        super().__init__()
         # visuals
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
         self.width, self.height = 0, 0
@@ -591,10 +605,8 @@ class CellularAutomaton(metaclass=BSCA):
         self.timestep = 0
         # CUDA kernel
         self.cells_num = functools.reduce(operator.mul, self.size)
-        source = self.cuda_source
-        for const in self.constants.values():
-            source = const.replace_value(source)
-        # print(source)
+        self.build_source()
+        # print(self.cuda_source)
         # build seed
         init_colors = np.zeros((self.cells_num * 3, ), dtype=np.int32)
         cells_total = self.cells_num * (len(self.buffers) + 1) + 1
@@ -603,7 +615,7 @@ class CellularAutomaton(metaclass=BSCA):
         init_cells = np.zeros((cells_total, ), dtype=self.dtype)
         experiment_class.seed.generate(init_cells, self)
         # initialize GPU stuff
-        self.gpu = GPU(source, init_cells, init_colors)
+        self.gpu = GPU(self.cuda_source, init_cells, init_colors)
         # bridge
         self.bridge = MoireBridge
         self.renderer.setup_actions(self.bridge)
