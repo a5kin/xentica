@@ -4,6 +4,7 @@ import unittest
 from xentica.core.variables import Variable, IntegerVariable
 from xentica.core.exceptions import XenticaException
 from xentica import core
+from xentica import seeds
 
 
 class InvertCA(core.CellularAutomaton):
@@ -32,6 +33,17 @@ class InvertCA(core.CellularAutomaton):
         """Do nothing, no color processing required."""
 
 
+class InvertExperiment(core.Experiment):
+    """Test experiment for ``InvertCA``."""
+
+    size = (64, 36, )
+    seed = seeds.patterns.PrimordialSoup(
+        vals={
+            "state": seeds.random.RandInt(0, 1),
+        }
+    )
+
+
 class TestVariable(unittest.TestCase):
     """Tests for ``Variable`` class and its children."""
 
@@ -50,14 +62,15 @@ class TestVariable(unittest.TestCase):
         """Test illegal assign to ``DeferredExpression``."""
 
         with self.assertRaises(XenticaException):
-            # this class raises exception and thus unusable
-            class BrokenCA(InvertCA):  # pylint: disable=unused-variable
+            class BrokenCA(InvertCA):
                 """Class for broken expressions testing."""
 
                 def emit(self):
                     """Try to assign to DeferredExpression"""
-                    deferred_exp = 1 + self.intvar
+                    deferred_exp = 1 + self.main.state
                     deferred_exp += 1
+
+            BrokenCA(InvertExperiment)
 
     def test_no_init_val(self):
         """Test initialization without initial value."""

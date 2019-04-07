@@ -5,6 +5,7 @@ import binascii
 from xentica.core.properties import (
     Property, IntegerProperty, ContainerProperty
 )
+from xentica.core.exceptions import XenticaException
 from examples.game_of_life import GameOfLife
 from examples.noisetv import NoiseTV, NoiseTVExperiment
 
@@ -39,15 +40,17 @@ class TestProperty(unittest.TestCase):
                          "Wrong property's class.")
 
     def test_unbound(self):
-        """Test unbound ``Property`` default flags values."""
+        """Test unbound ``Property`` behavior."""
         prop = Property()
-        self.assertFalse(prop.declared,
-                         "Unbound property declared")
-        self.assertTrue(prop.coords_declared,
-                        "Unbound coords not declared")
-        cprop = ContainerProperty()
-        self.assertFalse(cprop.unpacked,
-                         "Unbound property unpacked")
+        with self.assertRaises(XenticaException):
+            self.assertFalse(prop.declared,
+                             "Unbound property declared")
+            self.assertTrue(prop.coords_declared,
+                            "Unbound coords not declared")
+        with self.assertRaises(XenticaException):
+            cprop = ContainerProperty()
+            self.assertFalse(cprop.unpacked,
+                             "Unbound property unpacked")
 
     def test_container_values(self):
         """Test iteration over CA properties."""
