@@ -34,7 +34,7 @@ class BscaDetectorMixin:
             for local in frame.f_locals.values():
                 if hasattr(local, "__get__"):
                     continue
-                if isinstance(local, xentica.core.base.BSCA):
+                if isinstance(local, xentica.core.base.CellularAutomaton):
                     return local
             frame = frame.f_back
         raise XenticaException("BSCA not detected")
