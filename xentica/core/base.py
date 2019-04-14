@@ -404,8 +404,6 @@ class Translator:
         source += self.build_absorb()
         source += self.build_render()
         source = self.build_defines() + source
-        for const in self.constants.values():
-            source = const.replace_value(source)
         self.cuda_source = source
 
     def build_defines(self):

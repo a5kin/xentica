@@ -46,34 +46,22 @@ class Constant(BscaDetectorMixin):
 
     :param name:
         Name to use in ``#define``.
-    :param value_func:
-        Function that take ``BSCA`` instance as argument and return
-        the value to be used as second part of ``#define``.
+    :param value:
+        A value for the define, it will be converted to string with
+        ``str()``.
 
     """
 
-    def __init__(self, name, value_func):
+    def __init__(self, name, value):
         """Initialize the class."""
         self._name = name
-        self._value_func = value_func
-        self._pattern_name = name
+        self._value = value
         self.base_class = Constant
 
     def get_define_code(self):
         """Get the C code for ``#define``."""
-        code = "#define %s {%s}\n" % (self._name, self._pattern_name)
+        code = "#define %s %s\n" % (self._name, str(self._value))
         return code
-
-    def replace_value(self, source):
-        """
-        Replace the constant's value in generated C code.
-
-        :param source:
-            Generated C code.
-
-        """
-        val = str(self._value_func(self._holder))
-        return source.replace("{%s}" % self._pattern_name, val)
 
     @property
     def name(self):
@@ -101,7 +89,6 @@ class Variable(DeferredExpression, BscaDetectorMixin):
         super(Variable, self).__init__()
         self.fallback_name = name
         self.base_class = Variable
-        self._declared = False
         if val is None:
             raise XenticaException("Variable should have initial value.")
         self._init_val = DeferredExpression(str(val))

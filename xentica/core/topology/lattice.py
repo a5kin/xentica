@@ -48,12 +48,11 @@ class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
 
     def _define_constants_once(self):
         """Define field size conctants in C code."""
-        def get_size(i):
-            """Get the field size of along i-th dimension."""
-            return lambda x: x.size[i]
         for i in range(self.bsca.topology.dimensions):
-            constant = Constant("%s%d" % (self.width_prefix, i),
-                                get_size(i))
+            size = 1
+            if hasattr(self.bsca, "size") and i < len(self.bsca.size):
+                size = self.bsca.size[i]
+            constant = Constant("%s%d" % (self.width_prefix, i), size)
             self.bsca.define_constant(constant)
 
     @abc.abstractmethod
