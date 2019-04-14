@@ -27,6 +27,7 @@ from cached_property import cached_property
 from xentica.core.mixins import BscaDetectorMixin
 from xentica.core.exceptions import XenticaException
 from xentica.core.expressions import DeferredExpression
+from xentica.core.base import CellularAutomaton
 
 __all__ = [
     'Constant', 'Variable',
@@ -109,20 +110,29 @@ class Variable(DeferredExpression, BscaDetectorMixin):
     def var_name(self):
         """Get variable name."""
         all_vars = self._holder_frame.f_locals.items()
+        model = None
+        bad_names = ("self_var", "obj", "cls")
         for k, var in all_vars:
+            if isinstance(var, CellularAutomaton):
+                model = var
             if isinstance(var, self.__class__):
-                if hash(self) == hash(var) and k != "self_var":
+                if hash(self) == hash(var) and k not in bad_names:
                     return k
+        if model is not None and self.fallback_name == "var":
+            for k, var in model.__class__.__dict__.items():
+                if isinstance(var, self.__class__):
+                    if hash(self) == hash(var) and k not in bad_names:
+                        return k
         return self.fallback_name
 
     def declare_once(self):
         """Declare variable and assign initial value to it."""
-        if not self._declared:
+        if not self.bsca.is_declared(self):
             code = "%s %s = %s;\n" % (
                 self.var_type, self.var_name, self._init_val
             )
             self.bsca.append_code(code)
-            self._declared = True
+            self.bsca.declare(self)
             setattr(self.bsca, self.var_name, self)
 
     def __str__(self):
@@ -137,6 +147,8 @@ class Variable(DeferredExpression, BscaDetectorMixin):
     def __set__(self, obj, value):
         """Assign a new value to variable (doesn't work properly now)."""
         self.declare_once()
+        if str(self.var_name) == str(value):
+            return
         code = "%s = %s;\n" % (self.var_name, value)
         self.bsca.append_code(code)
 
