@@ -31,6 +31,10 @@ classes of the framework.
    - ``core.IntegerProperty`` →
      :class:`xentica.core.properties.IntegerProperty`
 
+- **Parameters**
+   - ``core.Parameter`` →
+     :class:`xentica.core.parameters.Parameter`
+
 - **Variables**
    - ``core.IntegerVariable`` →
      :class:`xentica.core.variables.IntegerVariable`
@@ -49,6 +53,9 @@ from xentica.core.properties import (
 from xentica.core.variables import (
     IntegerVariable, FloatVariable,
 )
+from xentica.core.parameters import (
+    Parameter,
+)
 from xentica.core.topology.lattice import (
     OrthogonalLattice,
 )
@@ -65,6 +72,7 @@ __all__ = [
     'IntegerProperty',
     'TotalisticRuleProperty',
     'RandomProperty',
+    'Parameter',
     'IntegerVariable',
     'FloatVariable',
     'OrthogonalLattice',

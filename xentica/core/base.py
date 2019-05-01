@@ -185,6 +185,7 @@ class BSCA(type):
         cls.main = ContainerProperty()
         cls.buffers = []
         cls.neighbors = []
+        cls.meta = type('MetaParams', (object,), dict())
         num_neighbors = len(cls.topology.neighborhood)
         for i in range(num_neighbors):
             cls.buffers.append(ContainerProperty())
@@ -193,7 +194,8 @@ class BSCA(type):
         attrs_items.append(attrs.items())
         restricted_names = {"main", "buffer"}
         for obj_name, obj in itertools.chain.from_iterable(attrs_items):
-            if isinstance(obj, Property) and obj_name not in restricted_names:
+            allowed_name = obj_name not in restricted_names
+            if isinstance(obj, Property) and allowed_name:
                 cls.main[obj_name] = deepcopy(obj)
                 vname = "_cell_%s" % obj_name
                 cls.main[obj_name].var_name = vname
@@ -209,6 +211,9 @@ class BSCA(type):
                     neighbor.buffer[obj_name] = deepcopy(obj)
                     vname = "_dbcell_%s%d" % (obj_name, i)
                     neighbor.buffer[obj_name].var_name = vname
+            elif obj.__class__.__name__ == "Parameter" and allowed_name:
+                obj.name = obj_name
+                setattr(cls.meta, obj_name, obj)
 
         cls.main.buf_num = 0
         cls.main.nbr_num = -1
