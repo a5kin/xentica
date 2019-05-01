@@ -27,6 +27,14 @@ Properties (xentica\.core\.properties)
     :undoc-members:
     :show-inheritance:
 
+Parameters (xentica\.core\.parameters)
+--------------------------------------
+
+.. automodule:: xentica.core.parameters
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Variables (xentica\.core\.variables)
 ------------------------------------
 
