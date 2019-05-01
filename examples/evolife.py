@@ -16,10 +16,6 @@ from xentica.seeds.random import RandInt
 from examples.base import RegularCA, RegularExperiment
 from examples.base import run_simulation
 
-DEATH_SPEED = 15
-MAX_GENES = 9
-MUTATION_PROB = 0
-
 
 class EvoLife(RegularCA):
     """
@@ -49,6 +45,9 @@ class EvoLife(RegularCA):
     energy = core.IntegerProperty(max_val=255)
     rule = core.TotalisticRuleProperty(outer=True)
     rng = core.RandomProperty()
+    death_speed = core.Parameter(default=15)
+    max_genes = core.Parameter(default=9)
+    mutation_prob = core.Parameter(default=.0)
 
     def emit(self):
         """Broadcast the state to all neighbors."""
@@ -80,8 +79,8 @@ class EvoLife(RegularCA):
         num_fit += xmath.max(*fitnesses)
 
         # new energy value
-        self.main.energy = (self.main.energy - DEATH_SPEED) * \
-                           (self.main.energy > DEATH_SPEED)
+        self.main.energy = (self.main.energy - self.meta.death_speed) * \
+                           (self.main.energy > self.meta.death_speed)
         self.main.energy *= is_sustained
         self.main.energy |= 255 * (num_fit > 0) * (self.main.energy == 0)
 
@@ -94,9 +93,11 @@ class EvoLife(RegularCA):
             genomes[i] += self.neighbors[i].buffer.rule * is_fit
         num_genes = self.main.rule.bit_width
         genomes.append(self.main.rule)
-        self.main.rule = genome_crossover(self.main, num_genes, *genomes,
-                                          mutation_prob=MUTATION_PROB)
-        self.main.energy *= xmath.popc(self.main.rule) <= MAX_GENES
+        self.main.rule = genome_crossover(
+            self.main, num_genes, *genomes,
+            mutation_prob=self.meta.mutation_prob
+        )
+        self.main.energy *= xmath.popc(self.main.rule) <= self.meta.max_genes
 
     @color_effects.MovingAverage
     def color(self):
