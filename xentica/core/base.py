@@ -601,6 +601,9 @@ class CellularAutomaton(Translator, metaclass=BSCA):
             if (not callable(attr) and not attr_name.startswith("__")):
                 if attr_name == 'seed':
                     continue
+                if hasattr(self.meta, attr_name):
+                    setattr(self.meta, attr_name, attr)
+                    continue
                 setattr(self, attr_name, attr)
         # default simulation values
         self.speed = 1
