@@ -149,5 +149,12 @@ class CrossbreedingExperiment(RegularExperiment):
     seed = seed_rng + seed_main1 + seed_main2 + seed_main3
 
 
+class CrossbreedingExperiment2(CrossbreedingExperiment):
+    """Same crossbreeding experiment with different meta-parameters."""
+    death_speed = 23
+    max_genes = 11
+    mutation_prob = 0.001
+
+
 if __name__ == "__main__":
-    run_simulation(EvoLife, CrossbreedingExperiment)
+    run_simulation(EvoLife, CrossbreedingExperiment2)
