@@ -8,7 +8,7 @@ from xentica import core
 from xentica import seeds
 from xentica.tools import xmath
 from xentica.core import color_effects
-from xentica.tools.color import genome2rgb
+from xentica.tools.color import GenomeColor
 from xentica.tools.genetics import genome_crossover
 from xentica.tools.rules import LifeLike
 from xentica.seeds.random import RandInt
@@ -102,7 +102,9 @@ class EvoLife(RegularCA):
     @color_effects.MovingAverage
     def color(self):
         """Render cell's genome as hue/sat, cell's energy as value."""
-        red, green, blue = genome2rgb(self.main.rule, self.main.rule.bit_width)
+        # red, green, blue = GenomeColor.modular(self.main.rule, 360)
+        red, green, blue = GenomeColor.positional(self.main.rule,
+                                                  self.main.rule.bit_width)
         red = xmath.int(red * self.main.energy)
         green = xmath.int(green * self.main.energy)
         blue = xmath.int(blue * self.main.energy)
