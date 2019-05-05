@@ -238,7 +238,9 @@ class GOLExperimentColor(GOLExperiment):
 
     """
 
+    fade_in = 255
     fade_out = 10
+    smooth_factor = 1
     seed = seeds.patterns.PrimordialSoup(
         vals={
             "state": seeds.random.RandInt(0, 1),
