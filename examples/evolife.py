@@ -128,9 +128,11 @@ class CrossbreedingExperiment(RegularExperiment):
         pos=(0, 0),
         size=(640, 200),
         vals={
-            "energy": RandInt(0, 1) * RandInt(0, 255),
+            # you may use unary operators
+            "energy": +RandInt(0, 1) * RandInt(0, 255),
             "rule": LifeLike.golly2int("B3/S23"),
-            "rng": RandInt(0, 2 ** 16 - 1)
+            # as well as reflected expressions
+            "rng": 0 + RandInt(0, 2 ** 16 - 1)
         }
     )
     seed_main3 = seeds.patterns.BigBang(
