@@ -150,7 +150,7 @@ class PatternExpression:
             'rshift', 'lshift', 'and', 'xor', 'or',
         )
         unary_ops = (
-            'neg', 'invert',
+            'neg', 'pos', 'invert',
         )
         for binary_op in binary_ops:
             def binary_direct(oper):
@@ -180,7 +180,7 @@ class PatternExpression:
                     return PatternExpression(self_var, None, oper)
                 return op_func
 
-            func_name = "__%s__" % binary_op
+            func_name = "__%s__" % unary_op
             setattr(self.__class__, func_name, unary(unary_op))
 
     def __get__(self, instance, owner):
