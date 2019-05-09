@@ -54,11 +54,6 @@ class BscaDetectorMixin:
             frame = frame.f_back
         return frame
 
-    @property
-    def _holder(self):
-        """Get an instance from a frame found by :meth:`_holder_frame`."""
-        return self._holder_frame.f_locals['self']
-
 
 class DimensionsMixin:
     """
