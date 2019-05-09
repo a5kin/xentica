@@ -183,6 +183,15 @@ class PatternExpression:
             func_name = "__%s__" % unary_op
             setattr(self.__class__, func_name, unary(unary_op))
 
+    def __pos__(self):
+        """Placeholder for unary ``+``."""
+
+    def __neg__(self):
+        """Placeholder for unary ``-``."""
+
+    def __invert__(self):
+        """Placeholder for unary ``~``."""
+
     def __get__(self, instance, owner):
         """Apply function to the operands."""
         is_expr1 = isinstance(self.arg1, PatternExpression)
