@@ -239,6 +239,7 @@ class Translator:
         self._deferred_writes = set()
         self._declarations = set()
         self._unpacks = set()
+        self._params = {}
         self._coords_declared = False
 
     @staticmethod
@@ -287,6 +288,10 @@ class Translator:
         self._deferred_writes = set()
         self._declarations = set()
         self._unpacks = set()
+        self._params = {}
+        self._emit_params = []
+        self._absorb_params = []
+        self._render_params = []
         self._coords_declared = False
         for func in funcs:
             func()
@@ -377,19 +382,42 @@ class Translator:
         """
         self.constants[constant.name] = deepcopy(constant)
 
-    def is_constant(self, constant):
+    def is_constant(self, constant_name):
         """
         Check if the constant is defined.
 
-        :param constant:
-            :class:`Constant <xentica.core.variables.Constant>`
-            instance.
+        :param constant_name:
+            The name of the defined constant.
 
         :returns:
             ``True`` if constant is defined, ``False`` otherwise.
 
         """
-        return constant in self.constants
+        return constant_name in self.constants
+
+    def define_parameter(self, param):
+        """
+        Remember the parameter is defined.
+
+        :param param:
+            :class:`Parameter <xentica.core.parameters.Parameter>`
+            instance.
+
+        """
+        self._params[param.name] = param
+
+    def is_parameter(self, param_name):
+        """
+        Check if the parameter is defined.
+
+        :param param:
+            The name of the defined parameter.
+
+        :returns:
+            ``True`` if parameter is defined, ``False`` otherwise.
+
+        """
+        return param_name in self._params
 
     @property
     def coords_declared(self):
@@ -434,6 +462,8 @@ class Translator:
         """
         args = [(self.ctype, "*fld"), ]
         body = self._translate_code(self.emit)
+        self._emit_params = [param for param in self._params.values()]
+        args += [(param.ctype, param.name) for param in self._emit_params]
         return self._elementwise_kernel("emit", args, body)
 
     def build_absorb(self):
@@ -446,6 +476,8 @@ class Translator:
         """
         args = [(self.ctype, "*fld"), ("int3", "*col")]
         body = self._translate_code(self.absorb, self.color)
+        self._absorb_params = [param for param in self._params.values()]
+        args += [(param.ctype, param.name) for param in self._absorb_params]
         return self._elementwise_kernel("absorb", args, body)
 
     def build_render(self):
@@ -458,6 +490,8 @@ class Translator:
         """
         args = self.renderer.args
         body = self.renderer.render_code()
+        self._render_params = [param for param in self._params.values()]
+        args += [(param.ctype, param.name) for param in self._render_params]
         return self._elementwise_kernel("render", args, body)
 
     def index_to_coord(self, i):
@@ -674,12 +708,16 @@ class CellularAutomaton(Translator, metaclass=BSCA):
         # No way to get it correctly with PyCuda right now.
         block, grid = self.gpu.arrays.cells._block, self.gpu.arrays.cells._grid
         with self._lock:
+            args = [param for param in self._emit_params]
             self.gpu.kernels.emit(self.gpu.arrays.cells,
                                   np.int32(self.cells_num),
+                                  *args,
                                   block=block, grid=grid)
+            args = [param for param in self._absorb_params]
             self.gpu.kernels.absorb(self.gpu.arrays.cells,
                                     self.gpu.arrays.colors,
                                     np.int32(self.cells_num),
+                                    *args,
                                     block=block, grid=grid)
             self.timestep += 1
 
@@ -704,6 +742,7 @@ class CellularAutomaton(Translator, metaclass=BSCA):
         with self._lock:
             args = self.renderer.get_args_vals(self)
             args.append(np.int32(self.width * self.height))
+            args += [param for param in self._render_params]
             self.gpu.kernels.render(*args, block=block, grid=grid)
             return self.gpu.arrays.img.get().astype(np.uint8)
 

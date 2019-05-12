@@ -91,13 +91,20 @@ class Parameter(BscaDetectorMixin):
         """Set parameter's name."""
         self._name = val
 
+    def _declare_interactive(self):
+        """Do necessary stuff to declare interactive parameter."""
+        if self.bsca.is_parameter(self):
+            return
+        self.bsca.define_parameter(self)
+
     def _declare_once(self):
         """Do necessary stuff to declare parameter when it's mentioned."""
+        if self._interactive:
+            self._declare_interactive()
+            return
         if self._declared:
             return
         self._declared = True
-        if self._interactive:
-            raise NotImplementedError
         self.bsca.define_constant(Constant(self.name, self._value))
 
     def __get__(self, obj, objtype):
