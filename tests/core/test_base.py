@@ -11,6 +11,7 @@ from xentica.core.properties import IntegerProperty
 from examples.game_of_life import (
     GameOfLife, GameOfLifeStatic, GameOfLifeColor, GameOfLife6D,
     GOLExperiment, GOLExperiment2, GOLExperimentColor,
+    LifelikeCA, DiamoebaExperiment,
 )
 from examples.shifting_sands import ShiftingSands, ShiftingSandsExperiment
 from examples.evolife import EvoLife, CrossbreedingExperiment2
@@ -199,3 +200,12 @@ class TestCellularAutomaton(unittest.TestCase):
         cells = model.gpu.arrays.cells.get()[:model.cells_num]
         checksum = binascii.crc32(cells)
         self.assertEqual(2601589301, checksum, "Wrong field checksum.")
+
+    def test_interactive(self):
+        """Test CA with interactive parameter works correctly."""
+        model = LifelikeCA(DiamoebaExperiment)
+        for _ in range(self.num_steps):
+            model.step()
+        cells = model.gpu.arrays.cells.get()[:model.cells_num]
+        checksum = binascii.crc32(cells)
+        self.assertEqual(4016906756, checksum, "Wrong field checksum.")
