@@ -7,6 +7,7 @@ Experiment classes included.
 from xentica import core
 from xentica import seeds
 from xentica.core import color_effects
+from xentica.tools.rules import LifeLike
 
 
 class GameOfLife(core.CellularAutomaton):
@@ -177,6 +178,29 @@ class GameOfLife6D(GameOfLife):
         neighborhood = core.VonNeumannNeighborhood()
 
 
+class LifelikeCA(GameOfLife):
+    """Lifelike CA with a flexible rule that could be changed at runtime."""
+    rule = core.Parameter(
+        default=LifeLike.golly2int("B3/S23"),
+        interactive=True,
+    )
+
+    def absorb(self):
+        """Implement parent's clone with a rule as a parameter."""
+        neighbors_alive = core.IntegerVariable()
+        for i in range(len(self.buffers)):
+            neighbors_alive += self.neighbors[i].buffer.state
+        is_born = (self.rule >> neighbors_alive) & 1
+        is_sustain = (self.rule >> 9 >> neighbors_alive) & 1
+        self.main.state = is_born | is_sustain & self.main.state
+
+    def step(self):
+        """Change the rule interactively after some time passed."""
+        if self.timestep == 23:
+            self.rule = LifeLike.golly2int("B3/S23")
+        super(LifelikeCA, self).step()
+
+
 class GOLExperiment(core.Experiment):
     """
     Particular experiment for the vanilla Game of Life.
@@ -265,6 +289,11 @@ class GOLExperiment6D(GOLExperiment2):
     """
 
     size = (640, 360, 3, 3, 3, 3)
+
+
+class DiamoebaExperiment(GOLExperiment):
+    """Experiment with interactive rule."""
+    rule = LifeLike.golly2int("B35678/S5678")
 
 
 def main():
