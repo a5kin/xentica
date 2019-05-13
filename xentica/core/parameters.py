@@ -119,7 +119,7 @@ class Parameter(BscaDetectorMixin):
 
     def _declare_interactive(self):
         """Do necessary stuff to declare interactive parameter."""
-        if self.bsca.is_parameter(self):
+        if self.bsca.is_parameter(self.name):
             return
         self.bsca.define_parameter(self)
 
