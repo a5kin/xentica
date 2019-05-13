@@ -54,6 +54,7 @@ The example of parameters usage::
     model = LifelikeCA(DiamoebaExperiment)
 
 """
+import numpy as np
 
 from xentica.core.variables import Constant
 from xentica.core.mixins import BscaDetectorMixin
@@ -80,6 +81,21 @@ class Parameter(BscaDetectorMixin):
         self._interactive = interactive
         self._declared = False
         self._name = "param" + str(id(self))
+        self._ctypes = {
+            int: 'int',
+            float: 'float',
+            bool: 'bool',
+        }
+        self._dtypes = {
+            int: np.int32,
+            float: np.float32,
+            bool: bool,
+        }
+
+    @property
+    def value(self):
+        """Get parameter's value directly."""
+        return self._value
 
     @property
     def name(self):
@@ -90,6 +106,16 @@ class Parameter(BscaDetectorMixin):
     def name(self, val):
         """Set parameter's name."""
         self._name = val
+
+    @property
+    def ctype(self):
+        """Get parameter's C type."""
+        return self._ctypes.get(type(self._value), 'int32')
+
+    @property
+    def dtype(self):
+        """Get parameter's NumPy type."""
+        return self._dtypes.get(type(self._value), np.int32)
 
     def _declare_interactive(self):
         """Do necessary stuff to declare interactive parameter."""

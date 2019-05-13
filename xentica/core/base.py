@@ -240,6 +240,9 @@ class Translator:
         self._declarations = set()
         self._unpacks = set()
         self._params = {}
+        self._emit_params = []
+        self._absorb_params = []
+        self._render_params = []
         self._coords_declared = False
 
     @staticmethod
@@ -289,9 +292,6 @@ class Translator:
         self._declarations = set()
         self._unpacks = set()
         self._params = {}
-        self._emit_params = []
-        self._absorb_params = []
-        self._render_params = []
         self._coords_declared = False
         for func in funcs:
             func()
@@ -490,8 +490,6 @@ class Translator:
         """
         args = self.renderer.args
         body = self.renderer.render_code()
-        self._render_params = [param for param in self._params.values()]
-        args += [(param.ctype, param.name) for param in self._render_params]
         return self._elementwise_kernel("render", args, body)
 
     def index_to_coord(self, i):
@@ -636,7 +634,7 @@ class CellularAutomaton(Translator, metaclass=BSCA):
                 if attr_name == 'seed':
                     continue
                 if hasattr(self.meta, attr_name):
-                    setattr(self.meta, attr_name, attr)
+                    self.meta.__dict__[attr_name].__set__(self, attr)
                     continue
                 setattr(self, attr_name, attr)
         # default simulation values
@@ -708,16 +706,16 @@ class CellularAutomaton(Translator, metaclass=BSCA):
         # No way to get it correctly with PyCuda right now.
         block, grid = self.gpu.arrays.cells._block, self.gpu.arrays.cells._grid
         with self._lock:
-            args = [param for param in self._emit_params]
+            args = [param.dtype(param.value) for param in self._emit_params]
             self.gpu.kernels.emit(self.gpu.arrays.cells,
-                                  np.int32(self.cells_num),
                                   *args,
+                                  np.int32(self.cells_num),
                                   block=block, grid=grid)
-            args = [param for param in self._absorb_params]
+            args = [param.dtype(param.value) for param in self._absorb_params]
             self.gpu.kernels.absorb(self.gpu.arrays.cells,
                                     self.gpu.arrays.colors,
-                                    np.int32(self.cells_num),
                                     *args,
+                                    np.int32(self.cells_num),
                                     block=block, grid=grid)
             self.timestep += 1
 
@@ -741,8 +739,8 @@ class CellularAutomaton(Translator, metaclass=BSCA):
         block, grid = self.gpu.arrays.img._block, self.gpu.arrays.img._grid
         with self._lock:
             args = self.renderer.get_args_vals(self)
+            args += [param.dtype(param.value) for param in self._render_params]
             args.append(np.int32(self.width * self.height))
-            args += [param for param in self._render_params]
             self.gpu.kernels.render(*args, block=block, grid=grid)
             return self.gpu.arrays.img.get().astype(np.uint8)
 
