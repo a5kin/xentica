@@ -3,7 +3,8 @@ import unittest
 import binascii
 
 from xentica.core.properties import (
-    Property, IntegerProperty, ContainerProperty
+    Property, IntegerProperty, ContainerProperty,
+    TotalisticRuleProperty,
 )
 from xentica.core.exceptions import XenticaException
 from examples.game_of_life import GameOfLife
@@ -67,3 +68,25 @@ class TestProperty(unittest.TestCase):
         cells = model.gpu.arrays.cells.get()[:model.cells_num]
         checksum = binascii.crc32(cells)
         self.assertEqual(2773894957, checksum, "Wrong field checksum.")
+
+    def test_pure_totalistic(self):
+        """Test pure totalistic rule behavior."""
+        prop = TotalisticRuleProperty(outer=False)
+        with self.assertRaises(XenticaException):
+            prop.is_sustained(8)
+        with self.assertRaises(XenticaException):
+            prop.is_born(8)
+        prop.var_name = "rule"
+        correct_exp = "((rule >> 4) & 1)"
+        self.assertEqual(str(prop.next_val(1, 3)), correct_exp)
+
+    def test_outer_totalistic(self):
+        """Test outer totalistic rule behavior."""
+        prop = TotalisticRuleProperty(outer=True)
+        prop.var_name = "rule"
+        correct_exp = "(((rule & 261120) >> 17) & 1)"
+        self.assertEqual(str(prop.is_sustained(8)), correct_exp)
+        correct_exp = "(((rule & 510) >> 8) & 1)"
+        self.assertEqual(str(prop.is_born(8)), correct_exp)
+        correct_exp = "((rule >> 12) & 1)"
+        self.assertEqual(str(prop.next_val(1, 3)), correct_exp)
