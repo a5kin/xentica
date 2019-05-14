@@ -230,15 +230,11 @@ class Property(DeferredExpression, BscaDetectorMixin):
     @property
     def declared(self):
         """Test if the state variable is declared."""
-        if self.bsca is None:
-            return False
         return self.bsca.is_declared(self)
 
     @property
     def coords_declared(self):
         """Test if the coordinates variables are declared."""
-        if self.bsca is None:
-            return True
         return self.bsca.coords_declared
 
     def declare_once(self):
@@ -317,8 +313,6 @@ class ContainerProperty(Property):
     @property
     def unpacked(self):
         """Test if inner properties are unpacked from memory."""
-        if self.bsca is None:
-            return False
         return self.bsca.is_unpacked(self)
 
     def __getitem__(self, key):

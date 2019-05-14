@@ -45,6 +45,7 @@ class TestProperty(unittest.TestCase):
         with self.assertRaises(XenticaException):
             self.assertFalse(prop.declared,
                              "Unbound property declared")
+        with self.assertRaises(XenticaException):
             self.assertTrue(prop.coords_declared,
                             "Unbound coords not declared")
         with self.assertRaises(XenticaException):
