@@ -16,10 +16,9 @@ All classes there are intended to be used inside ``Topology`` for
 """
 import abc
 
-from xentica.core.mixins import DimensionsMixin
-
-from xentica.core.mixins import BscaDetectorMixin
+from xentica.core.mixins import DimensionsMixin, BscaDetectorMixin
 from xentica.core.variables import Constant
+from xentica.core.exceptions import XenticaException
 
 __all__ = ['Lattice', 'OrthogonalLattice', ]
 
@@ -48,10 +47,13 @@ class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
 
     def _define_constants_once(self):
         """Define field size conctants in C code."""
-        for i in range(self.bsca.topology.dimensions):
-            size = 1
-            if hasattr(self.bsca, "size") and i < len(self.bsca.size):
-                size = self.bsca.size[i]
+        num_dimensions = self.bsca.topology.dimensions
+        for i in range(num_dimensions):
+            if not hasattr(self.bsca, "size") or i >= len(self.bsca.size):
+                msg = "Wrong field's dimensionality ({} instead of {})."
+                msg = msg.format(len(self.bsca.size), num_dimensions)
+                raise XenticaException(msg)
+            size = self.bsca.size[i]
             constant = Constant("%s%d" % (self.width_prefix, i), size)
             self.bsca.define_constant(constant)
 
