@@ -205,8 +205,6 @@ class Property(DeferredExpression, BscaDetectorMixin):
 
     def __set__(self, obj, value):
         """Implement custom logic when property is set as class descriptor."""
-        if isinstance(value, Property) and not hasattr(value, "var_name"):
-            return
         self.declare_once()
         code = "%s = %s;\n" % (self, value)
         self.bsca.append_code(code)
