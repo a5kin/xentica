@@ -49,6 +49,11 @@ class EvoLife(RegularCA):
     max_genes = core.Parameter(default=9)
     mutation_prob = core.Parameter(default=.0)
 
+    def __init__(self, *args, legacy_coloring=False):
+        """Support legacy coloring as needed."""
+        self._legacy_coloring = legacy_coloring
+        super().__init__(*args)
+
     def emit(self):
         """Broadcast the state to all neighbors."""
         for i in range(len(self.buffers)):
@@ -102,9 +107,11 @@ class EvoLife(RegularCA):
     @color_effects.MovingAverage
     def color(self):
         """Render cell's genome as hue/sat, cell's energy as value."""
-        # red, green, blue = GenomeColor.modular(self.main.rule, 360)
-        red, green, blue = GenomeColor.positional(self.main.rule,
-                                                  self.main.rule.bit_width)
+        if self._legacy_coloring:
+            red, green, blue = GenomeColor.modular(self.main.rule, 360)
+        else:
+            red, green, blue = GenomeColor.positional(self.main.rule,
+                                                      self.main.rule.bit_width)
         red = xmath.int(red * self.main.energy)
         green = xmath.int(green * self.main.energy)
         blue = xmath.int(blue * self.main.energy)
