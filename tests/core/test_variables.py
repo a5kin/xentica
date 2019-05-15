@@ -54,6 +54,7 @@ class TestVariable(unittest.TestCase):
         """Test ``IntegerVariable`` initialization."""
         var = IntegerVariable()
         self.assertEqual(str(var), "var", "Wrong variable name.")
+        self.assertEqual(var.code, "var", "Wrong variable name.")
 
     def test_descriptor(self):
         """Test ``Variable`` acting as class descriptor."""
