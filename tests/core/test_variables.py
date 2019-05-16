@@ -30,6 +30,11 @@ class InvertCA(core.CellularAutomaton):
         """Invert cell's value."""
         self.intvar = self.buffers[0].state
         self.main.state = -self.intvar
+        var_list = [
+            IntegerVariable(name="self_var"),
+            IntegerVariable(),
+        ]
+        var_list[1] += 1
 
     def color(self):
         """Do nothing, no color processing required."""
@@ -52,9 +57,25 @@ class TestVariable(unittest.TestCase):
 
     def test_integer(self):
         """Test ``IntegerVariable`` initialization."""
-        var = IntegerVariable()
-        self.assertEqual(str(var), "var", "Wrong variable name.")
-        self.assertEqual(var.code, "var", "Wrong variable name.")
+        myvar1 = IntegerVariable()
+        self.assertEqual(str(myvar1), "myvar1", "Wrong variable name.")
+        self.assertEqual(myvar1.code, "myvar1", "Wrong variable name.")
+        myvar2 = IntegerVariable(1)
+        self.assertEqual(str(myvar2), "myvar2", "Wrong variable name.")
+        var_list = [
+            IntegerVariable(1, name="myvar3"),
+            IntegerVariable(name="myvar4"),
+            IntegerVariable(2),
+            IntegerVariable(),
+        ]
+        self.assertEqual(var_list[0].var_name, "myvar3",
+                         "Wrong variable name.")
+        self.assertEqual(var_list[1].var_name, "myvar4",
+                         "Wrong variable name.")
+        self.assertEqual(var_list[2].var_name, "var",
+                         "Wrong variable name.")
+        self.assertEqual(var_list[3].var_name, "var",
+                         "Wrong variable name.")
 
     def test_descriptor(self):
         """Test ``Variable`` acting as class descriptor."""
@@ -79,6 +100,8 @@ intvar = _bcell_state0;
 unsigned char _cell_state;
 _cell_state = (-(intvar));
 unsigned char _cell = fld[i];
+unsigned int var = 0;
+var += 1;
 _cell = ((unsigned char) _cell_state & 1);
 fld[i] = _cell;
 """
