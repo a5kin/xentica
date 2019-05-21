@@ -568,7 +568,8 @@ class RandomProperty(Property):
 
     def _get_next(self):
         """Generate and return next value for RNG stream."""
-        val = ((DeferredExpression(self.var_name) * 58321 + 11113)) % 65535
+        val_int = xmath.int(DeferredExpression(self.var_name))
+        val = ((val_int * 58321 + 11113)) % 65535
         self.__set__(self, val)
         container = inspect.currentframe().f_back.f_locals['obj']
         self.bsca.deferred_write(container)
