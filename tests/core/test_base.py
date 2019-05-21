@@ -201,13 +201,13 @@ class TestCellularAutomaton(unittest.TestCase):
             model.step()
         cells = model.gpu.arrays.cells.get()[:model.cells_num]
         checksum = binascii.crc32(cells)
-        self.assertEqual(3142230500, checksum, "Wrong field checksum.")
+        self.assertEqual(3351683720, checksum, "Wrong field checksum.")
         model = EvoLife(CrossbreedingExperiment2)
         for _ in range(self.num_steps):
             model.step()
         cells = model.gpu.arrays.cells.get()[:model.cells_num]
         checksum = binascii.crc32(cells)
-        self.assertEqual(2601589301, checksum, "Wrong field checksum.")
+        self.assertEqual(3791001013, checksum, "Wrong field checksum.")
 
     def test_interactive(self):
         """Test CA with interactive parameter works correctly."""

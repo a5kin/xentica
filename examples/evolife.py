@@ -83,12 +83,6 @@ class EvoLife(RegularCA):
         num_fit = core.IntegerVariable()
         num_fit += xmath.max(*fitnesses)
 
-        # new energy value
-        self.main.energy = (self.main.energy - self.meta.death_speed) * \
-                           (self.main.energy > self.meta.death_speed)
-        self.main.energy *= is_sustained
-        self.main.energy |= 255 * (num_fit > 0) * (self.main.energy == 0)
-
         # neighbor's genomes crossover
         genomes = []
         for i in range(len(self.buffers)):
@@ -97,11 +91,20 @@ class EvoLife(RegularCA):
             is_fit = self.neighbors[i].buffer.rule.is_born(num_fit)
             genomes[i] += self.neighbors[i].buffer.rule * is_fit
         num_genes = self.main.rule.bit_width
+        old_rule = core.IntegerVariable()
+        old_rule += self.main.rule
         genomes.append(self.main.rule)
         self.main.rule = genome_crossover(
             self.main, num_genes, *genomes,
             mutation_prob=self.meta.mutation_prob
         )
+
+        # new energy value
+        self.main.energy = (self.main.energy - self.meta.death_speed) * \
+                           (self.main.energy > self.meta.death_speed)
+        self.main.energy *= is_sustained | (num_fit > 0)
+        is_renew = (self.main.rule != old_rule) | (self.main.energy == 0)
+        self.main.energy |= 255 * (num_fit > 0) * is_renew
         self.main.energy *= xmath.popc(self.main.rule) <= self.meta.max_genes
 
     @color_effects.MovingAverage
