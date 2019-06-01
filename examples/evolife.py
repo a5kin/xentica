@@ -42,14 +42,14 @@ class EvoLife(RegularCA):
     - Cell cannot have more than MAX_GENES non-zero genes in ruleset.
 
     """
-    energy = core.IntegerProperty(max_val=255)
+    energy = core.IntegerProperty(max_val=255 * 2)
     rule = core.TotalisticRuleProperty(outer=True)
     rng = core.RandomProperty()
     death_speed = core.Parameter(default=15)
     max_genes = core.Parameter(default=9)
     mutation_prob = core.Parameter(default=.0)
 
-    def __init__(self, *args, legacy_coloring=False):
+    def __init__(self, *args, legacy_coloring=True):
         """Support legacy coloring as needed."""
         self._legacy_coloring = legacy_coloring
         super().__init__(*args)
@@ -65,8 +65,11 @@ class EvoLife(RegularCA):
         # test if cell is sustained
         num_neighbors = core.IntegerVariable()
         for i in range(len(self.buffers)):
-            num_neighbors += xmath.min(1, self.neighbors[i].buffer.energy)
-        is_sustained = self.main.rule.is_sustained(num_neighbors)
+            nbr_energy = self.neighbors[i].buffer.energy
+            nbr_rule = self.neighbors[i].buffer.rule
+            num_neighbors += xmath.min(1, (nbr_energy + nbr_rule))
+        is_sustained = core.IntegerVariable()
+        is_sustained += self.main.rule.is_sustained(num_neighbors)
 
         # test if cell is born
         fitnesses = []
@@ -76,7 +79,9 @@ class EvoLife(RegularCA):
         for gene in range(len(self.buffers)):
             num_parents *= 0  # hack for re-init variable
             for i in range(len(self.buffers)):
-                is_alive = xmath.min(1, self.neighbors[i].buffer.energy)
+                nbr_energy = self.neighbors[i].buffer.energy
+                nbr_rule = self.neighbors[i].buffer.rule
+                is_alive = xmath.min(1, (nbr_energy + nbr_rule))
                 is_fit = self.neighbors[i].buffer.rule.is_born(gene + 1)
                 num_parents += is_alive * is_fit
             fitnesses[gene] += num_parents * (num_parents == (gene + 1))
@@ -93,65 +98,71 @@ class EvoLife(RegularCA):
         num_genes = self.main.rule.bit_width
         old_rule = core.IntegerVariable()
         old_rule += self.main.rule
-        genomes.append(self.main.rule)
-        self.main.rule = genome_crossover(
+        old_energy = core.IntegerVariable()
+        old_energy += self.main.energy
+        new_genome = genome_crossover(
             self.main, num_genes, *genomes,
+            max_genes=self.meta.max_genes,
             mutation_prob=self.meta.mutation_prob
         )
+        self.main.rule = new_genome + self.main.rule * (new_genome == 0)
 
         # new energy value
-        self.main.energy = (self.main.energy - self.meta.death_speed) * \
-                           (self.main.energy > self.meta.death_speed)
-        self.main.energy *= is_sustained | (num_fit > 0)
-        is_renew = (self.main.rule != old_rule) | (self.main.energy == 0)
-        self.main.energy |= 255 * (num_fit > 0) * is_renew
-        self.main.energy *= xmath.popc(self.main.rule) <= self.meta.max_genes
+        self.main.energy *= 0
+        is_live = core.IntegerVariable()
+        old_live = (old_energy + old_rule) == 0
+        is_live += (old_energy < 0xff) & (old_live | is_sustained)
+        old_dead = (old_energy + old_rule) != 0
+        new_energy = old_energy + self.meta.death_speed * old_dead
+        self.main.energy = new_energy * (self.main.rule == old_rule) + \
+            self.main.energy * (self.main.rule != old_rule)
+        self.main.rule = old_rule * (self.main.rule == old_rule) + \
+            self.main.rule * (self.main.rule != old_rule)
+        self.main.energy *= is_live
+        self.main.rule *= is_live
 
     @color_effects.MovingAverage
     def color(self):
         """Render cell's genome as hue/sat, cell's energy as value."""
         if self._legacy_coloring:
-            red, green, blue = GenomeColor.modular(self.main.rule, 360)
+            red, green, blue = GenomeColor.modular(self.main.rule >> 1, 360)
         else:
             red, green, blue = GenomeColor.positional(self.main.rule,
                                                       self.main.rule.bit_width)
-        red = xmath.int(red * self.main.energy)
-        green = xmath.int(green * self.main.energy)
-        blue = xmath.int(blue * self.main.energy)
+        is_live = (self.main.rule > 0) * (self.main.energy < 255)
+        energy = (255 - self.main.energy) * is_live
+        red = xmath.int(red * energy)
+        green = xmath.int(green * energy)
+        blue = xmath.int(blue * energy)
         return (red, green, blue, )
 
 
 class CrossbreedingExperiment(RegularExperiment):
     """Classic experiment for legacy EvoLife, where 'Bliambas' may form."""
 
-    word = "BANG! BANG! BANG! ON THE WALL FROM DUSK TILL DAWN"
-    seed_main1 = seeds.patterns.BigBang(
-        pos=(320, 180),
-        size=(100, 100),
+    word = "FUTURE BREEDING MACHINE 2041"
+    size = (1920, 1080)
+    zoom = 1
+    fade_in = 18
+    fade_out = 3
+    seed_diamoeba = seeds.patterns.BigBang(
+        pos=(380, 280),
+        size=(440, 340),
         vals={
-            "energy": RandInt(0, 1) * RandInt(0, 255),
-            "rule": LifeLike.golly2int("B35678/S5678"),
+            "energy": 0,
+            "rule": LifeLike.golly2int("B35678/S5678") * RandInt(0, 1),
             "rng": RandInt(0, 2 ** 16 - 1)
         }
     )
-    seed_main2 = seeds.patterns.BigBang(
+    seed_conway = seeds.patterns.BigBang(
         pos=(0, 0),
-        size=(640, 200),
+        size=(1280, 720),
         vals={
             # you may use unary operators
-            "energy": +RandInt(0, 1) * RandInt(0, 255),
-            "rule": LifeLike.golly2int("B3/S23"),
+            "energy": 0,
+            "rule": LifeLike.golly2int("B3/S23") * RandInt(0, 1),
             # as well as reflected expressions
             "rng": 0 + RandInt(0, 2 ** 16 - 1)
-        }
-    )
-    seed_main3 = seeds.patterns.BigBang(
-        pos=(0, 0),
-        size=(200, 360),
-        vals={
-            "energy": RandInt(0, 1) * RandInt(0, 255),
-            "rule": LifeLike.golly2int("B3/S23"),
-            "rng": RandInt(0, 2 ** 16 - 1)
         }
     )
     seed_rng = seeds.patterns.PrimordialSoup(
@@ -160,14 +171,14 @@ class CrossbreedingExperiment(RegularExperiment):
         }
     )
     # chain ordering matters, since areas are rewriting each other in order
-    seed = seed_rng + seed_main1 + seed_main2 + seed_main3
+    seed = seed_rng + seed_conway + seed_diamoeba
 
 
 class CrossbreedingExperiment2(CrossbreedingExperiment):
     """Same crossbreeding experiment with different meta-parameters."""
-    death_speed = 23
-    max_genes = 11
-    mutation_prob = 0.001
+    death_speed = 25
+    max_genes = 9
+    mutation_prob = 0.0001
 
 
 if __name__ == "__main__":
