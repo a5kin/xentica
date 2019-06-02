@@ -25,11 +25,11 @@ def genome_crossover(state, num_genes, *genomes, max_genes=None,
     :returns: Single integer, a resulting genome.
 
     """
+    max_genes = max_genes or num_genes
     gene_choose = core.IntegerVariable()
     new_genome = core.IntegerVariable()
     num_genomes = core.IntegerVariable()
-    if max_genes is not None:
-        num_active = core.IntegerVariable()
+    num_active = core.IntegerVariable()
     new_gene = core.IntegerVariable()
     rand_val = getattr(state, rng_name).uniform
     start_gene = core.IntegerVariable()
@@ -46,9 +46,8 @@ def genome_crossover(state, num_genes, *genomes, max_genes=None,
         winner_gene = xmath.int(rand_val * num_genomes)
         new_gene *= 0
         new_gene += ((gene_choose >> winner_gene) & 1)
-        if max_genes is not None:
-            num_active += new_gene
-            new_gene *= num_active <= max_genes
+        num_active += new_gene
+        new_gene *= num_active <= max_genes
         is_mutated = 0
         if mutation_prob > 0:
             is_mutated = getattr(state, rng_name).uniform < mutation_prob
