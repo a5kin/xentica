@@ -181,5 +181,26 @@ class CrossbreedingExperiment2(CrossbreedingExperiment):
     mutation_prob = 0.0001
 
 
+class BigBangExperiment(RegularExperiment):
+    """Experiment, with smaller field, for quicker benchmark."""
+    death_speed = 0
+    max_genes = 9
+    seed_bang = seeds.patterns.BigBang(
+        pos=(0, 0),
+        size=(100, 100),
+        vals={
+            "energy": RandInt(0, 255),
+            "rule": RandInt(0, 2 ** 18 - 1) & 0b111111110111111110,
+            "rng": RandInt(0, 2 ** 16 - 1)
+        }
+    )
+    seed_rng = seeds.patterns.PrimordialSoup(
+        vals={
+            "rng": RandInt(0, 2 ** 16 - 1)
+        }
+    )
+    seed = seed_rng + seed_bang
+
+
 if __name__ == "__main__":
     run_simulation(EvoLife, CrossbreedingExperiment2)
