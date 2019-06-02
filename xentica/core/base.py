@@ -529,7 +529,7 @@ class GPUKernels:
             CUDA module source code in C.
 
         """
-        cuda_module = SourceModule(source)
+        cuda_module = SourceModule(source, options=["-w", ])
         self.emit = cuda_module.get_function("emit")
         self.absorb = cuda_module.get_function("absorb")
         self.render = cuda_module.get_function("render")
