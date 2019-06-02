@@ -158,9 +158,9 @@ class CrossbreedingExperiment(RegularExperiment):
         pos=(0, 0),
         size=(1280, 720),
         vals={
-            # you may use unary operators
             "energy": 0,
-            "rule": LifeLike.golly2int("B3/S23") * RandInt(0, 1),
+            # you may use unary operators
+            "rule": +RandInt(0, 1) * LifeLike.golly2int("B3/S23"),
             # as well as reflected expressions
             "rng": 0 + RandInt(0, 2 ** 16 - 1)
         }
