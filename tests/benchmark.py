@@ -10,6 +10,9 @@ from examples.shifting_sands import (
 from examples.noisetv import (
     NoiseTV, NoiseTVExperiment,
 )
+from examples.evolife import (
+    EvoLife, BigBangExperiment,
+)
 from xentica.utils.formatters import sizeof_fmt
 
 
@@ -17,6 +20,7 @@ MODELS = [
     ("Conway's Life", GameOfLife, GOLExperiment),
     ("Shifting Sands", ShiftingSands, ShiftingSandsExperiment),
     ("Noise TV", NoiseTV, NoiseTVExperiment),
+    ("EvoLife", EvoLife, BigBangExperiment),
 ]
 NUM_STEPS = 100000
 
