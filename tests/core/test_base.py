@@ -196,18 +196,24 @@ class TestCellularAutomaton(unittest.TestCase):
 
     def test_genetics_general(self):
         """Test general genetics stuff."""
-        model = EvoLife(CrossbreedingExperiment, legacy_coloring=True)
+        model = EvoLife(CrossbreedingExperiment, legacy_coloring=False)
         for _ in range(100):
             model.step()
         cells = model.gpu.arrays.cells.get()[:model.cells_num]
         checksum = binascii.crc32(cells)
         self.assertEqual(2061779088, checksum, "Wrong field checksum.")
+        img = model.gpu.arrays.colors.get()
+        checksum = binascii.crc32(img)
+        self.assertEqual(68940598, checksum, "Wrong image checksum.")
         model = EvoLife(CrossbreedingExperiment2)
         for _ in range(100):
             model.step()
         cells = model.gpu.arrays.cells.get()[:model.cells_num]
         checksum = binascii.crc32(cells)
         self.assertEqual(3381214984, checksum, "Wrong field checksum.")
+        img = model.gpu.arrays.colors.get()
+        checksum = binascii.crc32(img)
+        self.assertEqual(2253830262, checksum, "Wrong image checksum.")
 
     def test_interactive(self):
         """Test CA with interactive parameter works correctly."""
