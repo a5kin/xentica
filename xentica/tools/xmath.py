@@ -30,7 +30,7 @@ class Xmath:
     @staticmethod
     def int(val):
         """Cast value to int."""
-        return DeferredExpression("((int) (%s))" % val)
+        return DeferredExpression("((unsigned int) (%s))" % val)
 
     @staticmethod
     def popc(val):
