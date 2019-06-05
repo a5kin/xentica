@@ -30,6 +30,10 @@ classes of the framework.
 - **Properties**
    - ``core.IntegerProperty`` →
      :class:`xentica.core.properties.IntegerProperty`
+   - ``core.TotalisticRuleProperty`` →
+     :class:`xentica.core.properties.TotalisticRuleProperty`
+   - ``core.RandomProperty`` →
+     :class:`xentica.core.properties.RandomProperty`
 
 - **Parameters**
    - ``core.Parameter`` →
@@ -38,6 +42,8 @@ classes of the framework.
 - **Variables**
    - ``core.IntegerVariable`` →
      :class:`xentica.core.variables.IntegerVariable`
+   - ``core.FloatVariable`` →
+     :class:`xentica.core.variables.FloatVariable`
 
 The classes listed above are all you need to build CA models and
 experiments with Xentica, unless you are planning to implement custom
