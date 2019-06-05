@@ -12,32 +12,38 @@ lattice, neighborhood and border effects for your CA. See
 
 The logic of the model will follow Buffered State Cellular Automaton
 (BSCA) principle. In general, every cell mirrors its state in buffers
-by the number of neighbors, each buffer intended for one of
-neighbors. Then, at each step, the interaction between cells are
-performed via buffers in 2-phase emit/absorb process. More detailed
-description of BSCA principle is available in The Core section of `The
-Concept`_ document.
+by the number of neighbors, each buffer intended for one of the
+neighbors. Then, at each step, the interaction between cells is
+performed via buffers in 2-phase emit/absorb process. A more detailed
+description of the BSCA principle is available in The Core section of
+`The Concept`_ document.
+
 
 ``emit()`` describes the logic of the first phase of BSCA. At this
-phase, you should fill cell's buffers with corresponding values,
-depending on cell's main state and (optionally) on neighbors' main
-states. The most easy logic is to just copy the main state to
-buffers. It is esspecially useful when you're intending to emulate
-classic CA (like Conway's Life) with BSCA. Write access to main state
-is prohibited there.
+phase, you should fill the cell's buffers with corresponding values,
+depending on the cell's main state and (optionally) on neighbors' main
+states. The easiest logic is to just copy the main state to
+buffers. It is especially useful when you're intending to emulate
+classic CA (like Conway's Life) with BSCA. Write access to the main
+state is prohibited there.
+
 
 ``absorb()`` describes the logic of the second phase of BSCA. At this
 phase, you should set the cell's main state, depending on neighbors'
 buffered states. Write access to buffers is prohibited there.
 
+
 ``color()`` describes how to calculate cell's color from its raw
-state. See detailed instructions on it in :mod:`xentica.core.color_effects`.
+state. See detailed instructions on it in
+:mod:`xentica.core.color_effects`.
+
 
 The logic of the functions from above will be translated into C code
 at the moment of class creation. For the further instructions on how
-to use cell's main and buffered states, see
+to use the cell's main and buffered states, see
 :mod:`xentica.core.properties`, for the instructions on variables and
 expressions with them, see :mod:`xentica.core.variables`.
+
 
 A minimal example, the CA where each cell is taking the mean value of
 its neighbors each step::
