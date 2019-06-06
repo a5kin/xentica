@@ -39,10 +39,12 @@ state. See detailed instructions on it in
 
 
 The logic of the functions from above will be translated into C code
-at the moment of class creation. For the further instructions on how
-to use the cell's main and buffered states, see
+at the moment of class instance creation. For the further instructions
+on how to use the cell's main and buffered states, see
 :mod:`xentica.core.properties`, for the instructions on variables and
-expressions with them, see :mod:`xentica.core.variables`.
+expressions with them, see :mod:`xentica.core.variables`. Another
+helpful thing is meta-parameters, which are described in
+:mod:`xentica.core.parameters`.
 
 
 A minimal example, the CA where each cell is taking the mean value of
@@ -103,17 +105,17 @@ __all__ = ['context', 'BSCA', 'CellularAutomaton', 'CachedNeighbor']
 
 
 class CachedNeighbor:
-    """Utility class, intended to hold main and buffered CA state."""
+    """The utility class, intended to hold the main and buffered CA state."""
 
     def __init__(self):
-        """Initialize empty main and buffered states."""
+        """Initialize the empty main and buffered states."""
         self.main = ContainerProperty()
         self.buffer = ContainerProperty()
 
 
 class BSCA(type):
     """
-    Meta-class for :class:`CellularAutomaton`.
+    The meta-class for :class:`CellularAutomaton`.
 
     Prepares ``main``, ``buffers`` and ``neighbors`` class variables
     being used in ``emit()``, ``absorb()`` and ``color()`` methods.
@@ -164,7 +166,7 @@ class BSCA(type):
         return new_class
 
     def _prepare_topology(cls, attrs):
-        """Prepare topology for future use."""
+        """Prepare the topology for future use."""
         if hasattr(cls, 'Topology'):
             attrs['Topology'] = cls.Topology
         cls.topology = attrs.get('Topology')
@@ -237,7 +239,7 @@ class BSCA(type):
 
 
 class Translator:
-    """Basic functionality for Python -> CUDA C code translation."""
+    """The basic functionality for the Python -> CUDA C code translation."""
 
     def __init__(self):
         self.cuda_source = ""
@@ -254,7 +256,7 @@ class Translator:
     @staticmethod
     def _elementwise_kernel(name, args, body):
         """
-        Build elementwise kernel using template.
+        Build an elementwise kernel using the template.
 
         :param name:
             Kernel's name.
@@ -284,13 +286,13 @@ class Translator:
 
     def _translate_code(self, *funcs):
         """
-        Translate Python method to C code by execution.
+        Translate the Python method to C code by execution.
 
         :param funcs:
             List of functions to translate in a single context.
 
         :returns:
-            String with generated C code for elementwise kernel.
+            String with a generated C code for the elementwise kernel.
 
         """
         self._func_body = ""
@@ -306,12 +308,12 @@ class Translator:
         return self._func_body
 
     def append_code(self, code):
-        """Append ``code`` to kernel's C code."""
+        """Append ``code`` to the kernel's C code."""
         self._func_body += code
 
     def deferred_write(self, prop):
         """
-        Declare a property for deferred write.
+        Declare property for a deferred write.
 
         The property will be written into a memory at the end of C
         code generation.
@@ -325,7 +327,7 @@ class Translator:
 
     def declare(self, prop):
         """
-        Mark property declared.
+        Mark the property declared.
 
         :param prop:
             :class:`Property <xentica.core.properties.Property>`
@@ -336,7 +338,7 @@ class Translator:
 
     def unpack(self, prop):
         """
-        Mark ``prop`` property unpacked.
+        Mark the property unpacked.
 
         :param prop:
             :class:`Property <xentica.core.properties.Property>`
@@ -347,7 +349,7 @@ class Translator:
 
     def is_declared(self, prop):
         """
-        Check if ``prop`` property is declared.
+        Check if the property is declared.
 
         :param prop:
             :class:`Property <xentica.core.properties.Property>`
@@ -361,7 +363,7 @@ class Translator:
 
     def is_unpacked(self, prop):
         """
-        Check if ``prop`` property is unpacked.
+        Check if the property is unpacked.
 
         :param prop:
             :class:`Property <xentica.core.properties.Property>`
@@ -438,7 +440,7 @@ class Translator:
         return self._coords_declared
 
     def build_source(self):
-        """Generate source code for GPU kernel."""
+        """Generate a source code for the GPU kernel."""
         source = self.build_emit()
         source += self.build_absorb()
         source += self.build_render()
@@ -560,7 +562,7 @@ class GPUArrays:
 
     def init_img(self, num_cells):
         """
-        Initilatize image for rendering.
+        Initilatize the image for rendering.
 
         :param num_cells:
             Total number of cells.
@@ -590,12 +592,12 @@ class GPU:
 
 class CellularAutomaton(Translator, metaclass=BSCA):
     """
-    Base class for all Xentica models.
+    The base class for all Xentica models.
 
     Generates GPU kernels source code, compiles them, initializes
-    necessary GPU arrays and popupates them with the seed.
+    necessary GPU arrays and populates them with the seed.
 
-    After initialization, you can run step-by-step simulation and
+    After initialization, you can run a step-by-step simulation and
     render the field at any moment::
 
         from xentica import core
@@ -628,7 +630,7 @@ class CellularAutomaton(Translator, metaclass=BSCA):
     """
 
     def __init__(self, experiment_class):
-        """Initialize kernels, GPU arrays and other stuff."""
+        """Initialize kernels, GPU arrays, and other stuff."""
         super().__init__()
         # visuals
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
@@ -689,9 +691,9 @@ class CellularAutomaton(Translator, metaclass=BSCA):
 
     def set_viewport(self, size):
         """
-        Set viewport (camera) size and initialize GPU array for it.
+        Set the viewport (camera) size and initialize GPU array for it.
 
-        :param size: tuple with width and height in pixels.
+        :param size: tuple with the width and height in pixels.
 
         """
         self.width, self.height = size
