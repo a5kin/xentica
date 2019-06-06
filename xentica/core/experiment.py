@@ -1,12 +1,12 @@
 """
 The collection of classes to describe experiments for CA models.
 
-Experiment is a class with CA parameters stored as class
+The experiment is a class with CA parameters stored as class
 variables. Different models may have a different set of parameters. To
-make sure all set correct, you should inherit your experiments from
+make sure all set correctly, you should inherit your experiments from
 :class:`Experiment` class.
 
-The quick example::
+A quick example::
 
     from xentica import core, seeds
 
@@ -41,9 +41,9 @@ __all__ = ['Experiment', ]
 
 class Experiment:
     """
-    Base class for all experiments.
+    The base class for all experiments.
 
     Right now doing nothing, but will be improved in future
-    versions. So it is adviced to inherit your experiments from it.
+    versions. So it is advised to inherit your experiments from it.
 
     """
