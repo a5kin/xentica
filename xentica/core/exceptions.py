@@ -4,4 +4,4 @@ __all__ = ['XenticaException', ]
 
 
 class XenticaException(Exception):
-    """Basic Xentica framework exception."""
+    """The basic Xentica framework exception."""
