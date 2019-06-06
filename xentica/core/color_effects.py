@@ -1,13 +1,14 @@
 """
-The collection of decorators for ``color()`` method, each CA model should have.
+The collection of decorators for the ``color()`` method, each CA model
+should have.
 
 The method should be decorated by one of the classes below, otherwise
-the correct model behavior is not guaranteed.
+the correct model behavior will not be guaranteed.
 
 All decorators are get the ``(red, green, blue)`` tuple from
 ``color()`` method, then process it to create some color effect.
 
-The minimal example::
+A minimal example::
 
     from xentica import core
     from xentica.core import color_effects
@@ -34,18 +35,18 @@ __all__ = ['ColorEffect', 'MovingAverage', ]
 
 class ColorEffect(BscaDetectorMixin):
     """
-    Base class for other color effects.
+    The base class for other color effects.
 
-    You may also use it as standalone color effect decorator, it just
-    doing nothing, storing calculated RGB value directly.
+    You may also use it as a standalone color effect decorator, it just
+    doing nothing, storing the calculated RGB value directly.
 
     To create your own class inherited from :class:`ColorEffect`, you
-    should override ``__call__`` method, and place a code of color
-    processing into ``self.effect``. The code should process a values
+    should override ``__call__`` method, and place a code of the color
+    processing into ``self.effect``. The code should process values
     of ``new_r``, ``new_g``, ``new_b`` variables and store the result
     back to them.
 
-    The example::
+    An example::
 
         class MyEffect(ColorEffect):
 
