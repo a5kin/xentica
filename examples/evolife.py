@@ -202,5 +202,43 @@ class BigBangExperiment(RegularExperiment):
     seed = seed_rng + seed_bang
 
 
+class EvoLife6D(EvoLife):
+    """EvoLife variant in 6D"""
+
+    class Topology(EvoLife.Topology):
+        """Same topology as 6D Life."""
+        dimensions = 6
+        neighborhood = core.VonNeumannNeighborhood()
+
+
+class EvoLife6DExperiment(RegularExperiment):
+    """Generic experiment for 6D EvoLife: 2 spatial, 4 micro-dimensions."""
+
+    word = "SP1RALS 1N HYPERSP@CE"
+    size = (640, 360, 3, 3, 3, 3)
+    pos = [0, 0, 0, 0, 0, 0]
+    death_speed = 25
+    max_genes = 13
+    mutation_prob = 0.0001
+    fade_in = 63
+    fade_out = 18
+    mask_random = RandInt(0, 2 ** 26 - 1, constant=True)
+    seed_bang = seeds.patterns.BigBang(
+        pos=(0, 0, 0, 0, 0, 0),
+        size=(100, 100, 3, 3, 3, 3),
+        vals={
+            "energy": RandInt(0, 1) * 255,
+            "rule": RandInt(0, 2 ** 26 - 1) & mask_random,
+            "rng": RandInt(0, 2 ** 16 - 1)
+        }
+    )
+    seed_rng = seeds.patterns.PrimordialSoup(
+        vals={
+            "rng": RandInt(0, 2 ** 16 - 1)
+        }
+    )
+    seed = seed_rng + seed_bang
+
+
 if __name__ == "__main__":
     run_simulation(EvoLife, CrossbreedingExperiment2)
