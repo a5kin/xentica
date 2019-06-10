@@ -151,9 +151,6 @@ class BSCA(type):
         new_class.neighbors = None
         mcs._prepare_properties(new_class, bases, attrs)
 
-        new_class.dtype = new_class.main.dtype
-        new_class.ctype = new_class.main.ctype
-
         new_class.constants = {}
 
         # set default renderer as needed
@@ -468,7 +465,7 @@ class Translator:
             String with C code for ``emit()`` kernel.
 
         """
-        args = [(self.ctype, "*fld"), ]
+        args = [(self.main.ctype, "*fld"), ]
         body = self._translate_code(self.emit)
         self._emit_params = [param for param in self._params.values()]
         args += [(param.ctype, param.name) for param in self._emit_params]
@@ -482,7 +479,7 @@ class Translator:
             String with C code for ``absorb()`` kernel.
 
         """
-        args = [(self.ctype, "*fld"), ("int3", "*col")]
+        args = [(self.main.ctype, "*fld"), ("int3", "*col")]
         body = self._translate_code(self.absorb, self.color)
         self._absorb_params = [param for param in self._params.values()]
         args += [(param.ctype, param.name) for param in self._absorb_params]
@@ -635,6 +632,10 @@ class CellularAutomaton(Translator, metaclass=BSCA):
         # visuals
         self.frame_buf = np.zeros((3, ), dtype=np.uint8)
         self.width, self.height = 0, 0
+        # set up random stream
+        self.random = LocalRandom(experiment_class.word)
+        experiment_class.seed.random = self.random
+        experiment_class.random = self.random
         # populate attributes from Experiment class
         for attr_name in dir(experiment_class):
             attr = getattr(experiment_class, attr_name)
@@ -656,9 +657,7 @@ class CellularAutomaton(Translator, metaclass=BSCA):
         # build seed
         init_colors = np.zeros((self.cells_num * 3, ), dtype=np.int32)
         cells_total = self.cells_num * (len(self.buffers) + 1) + 1
-        self.random = LocalRandom(experiment_class.word)
-        experiment_class.seed.random = self.random
-        init_cells = np.zeros((cells_total, ), dtype=self.dtype)
+        init_cells = np.zeros((cells_total, ), dtype=self.main.dtype)
         experiment_class.seed.generate(init_cells, self)
         # initialize GPU stuff
         self.gpu = GPU(self.cuda_source, init_cells, init_colors)
