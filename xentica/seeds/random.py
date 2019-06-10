@@ -64,14 +64,16 @@ class RandInt(PatternExpression):
 
     :param min_val: Lower bound for random value.
     :param max_val: Upper bound for random value.
+    :param constant: Is the value constant different for every cell.
 
     """
 
-    def __init__(self, min_val, max_val):
+    def __init__(self, min_val, max_val, constant=False):
         """Initialize the random sequence."""
         super(RandInt, self).__init__()
         self.min_val = min_val
         self.max_val = max_val
+        self._constant = constant
 
     def __get__(self, instance, owner):
         """
@@ -82,9 +84,10 @@ class RandInt(PatternExpression):
         at the stage of constructing the initial board state.
 
         """
-        if hasattr(instance, "size"):
+        if hasattr(instance, "size") and not self._constant:
             num_values = functools.reduce(operator.mul, instance.size)
             return instance.random.numpy.randint(self.min_val,
                                                  self.max_val + 1,
                                                  num_values)
+        instance = instance or owner
         return instance.random.standard.randint(self.min_val, self.max_val)
