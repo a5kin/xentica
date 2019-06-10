@@ -7,7 +7,7 @@ from xentica.core.properties import (
     TotalisticRuleProperty,
 )
 from xentica.core.exceptions import XenticaException
-from examples.game_of_life import GameOfLife
+from examples.game_of_life import GameOfLife, GOLExperiment
 from examples.noisetv import NoiseTV, NoiseTVExperiment
 
 
@@ -82,11 +82,13 @@ class TestProperty(unittest.TestCase):
 
     def test_outer_totalistic(self):
         """Test outer totalistic rule behavior."""
-        prop = TotalisticRuleProperty(outer=True)
-        prop.var_name = "rule"
-        correct_exp = "(((rule & 261120) >> 17) & 1)"
-        self.assertEqual(str(prop.is_sustained(8)), correct_exp)
-        correct_exp = "(((rule & 510) >> 8) & 1)"
-        self.assertEqual(str(prop.is_born(8)), correct_exp)
-        correct_exp = "((rule >> 12) & 1)"
-        self.assertEqual(str(prop.next_val(1, 3)), correct_exp)
+        class GolTest(GameOfLife):
+            """Game of Life with outer totalistic rule."""
+            rule = TotalisticRuleProperty(outer=True)
+        model = GolTest(GOLExperiment)
+        correct_exp = "(((_cell_rule & 261120) >> 17) & 1)"
+        self.assertEqual(str(model.main.rule.is_sustained(8)), correct_exp)
+        correct_exp = "(((_cell_rule & 510) >> 8) & 1)"
+        self.assertEqual(str(model.main.rule.is_born(8)), correct_exp)
+        correct_exp = "((_cell_rule >> 12) & 1)"
+        self.assertEqual(str(model.main.rule.next_val(1, 3)), correct_exp)
