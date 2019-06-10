@@ -119,6 +119,11 @@ class Property(DeferredExpression, BscaDetectorMixin):
         """
         return 'unsigned ' + self.best_type[2]
 
+    @property
+    def _num_neighbors(self):
+        """Get number of neighbors for a cell in the current model."""
+        return len(self.bsca.buffers)
+
     @cached_property
     def bit_width(self):
         """
@@ -491,13 +496,17 @@ class TotalisticRuleProperty(Property):
     def __init__(self, outer=False):
         """Initialize the rule."""
         self._buf_num = 0
-        self._max_neighbors = 8  # Just Moore's case for now
         self._outer = outer
         super(TotalisticRuleProperty, self).__init__()
 
+    @property
+    def _genome_mask(self):
+        """Get the sanity mask for foolproof genome operations."""
+        return 2 ** (self._num_neighbors + 1) - 2
+
     def calc_bit_width(self):
         """Calculate bit width, based on number of neighbors."""
-        return (self._max_neighbors + 1) * 2
+        return (self._num_neighbors + 1) * 2
 
     def is_sustained(self, num_neighbors):
         """
@@ -511,8 +520,8 @@ class TotalisticRuleProperty(Property):
         if not self._outer:
             msg = "Can not get sustained flag from pure totalistic rule."
             raise XenticaException(msg)
-        mask = (0b111111110 << 9)
-        return ((self & mask) >> (num_neighbors + self._max_neighbors + 1)) & 1
+        mask = (self._genome_mask << (self._num_neighbors + 1))
+        return ((self & mask) >> (num_neighbors + self._num_neighbors + 1)) & 1
 
     def is_born(self, num_neighbors):
         """
@@ -526,7 +535,7 @@ class TotalisticRuleProperty(Property):
         if not self._outer:
             msg = "Can not get born flag from pure totalistic rule."
             raise XenticaException(msg)
-        return ((self & 0b111111110) >> num_neighbors) & 1
+        return ((self & self._genome_mask) >> num_neighbors) & 1
 
     def __get__(self, obj, objtype):
         """Declare and return self when get as class descriptor."""
@@ -545,7 +554,7 @@ class TotalisticRuleProperty(Property):
         """
         if not self._outer:
             return (self >> (num_neighbors + cur_val)) & 1
-        alive_shift = cur_val * (self._max_neighbors + 1)
+        alive_shift = cur_val * (self._num_neighbors + 1)
         return (self >> (num_neighbors + alive_shift)) & 1
 
 
