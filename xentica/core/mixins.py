@@ -15,7 +15,7 @@ __all__ = ['BscaDetectorMixin', 'DimensionsMixin', ]
 
 class BscaDetectorMixin:
     """
-    Add a functionlality to detect BSCA class instances holding current class.
+    Add a functionality to detect BSCA class instances holding current class.
 
     All methods are for private use only.
 
@@ -26,7 +26,8 @@ class BscaDetectorMixin:
         """
         Get a BSCA instance holding current class.
 
-        Objects tree is scanned up to top and first instance found is returned.
+        The objects tree is scanned up to the top and the first
+        instance found is returned.
 
         """
         frame = inspect.currentframe()
@@ -42,9 +43,10 @@ class BscaDetectorMixin:
     @property
     def _holder_frame(self):
         """
-        Get a frame of class instance holding current class.
+        Get a frame of the class instance holding the current class.
 
-        Objects tree is scanned up to top and first instance found is returned.
+        The objects tree is scanned up to the top and the first
+        instance found is returned.
 
         """
         # As an option, we can detect base class by scanning inheritance tree:
@@ -64,7 +66,7 @@ class DimensionsMixin:
 
     """
 
-    #: A list of integers, containing supported dimensionality.
+    #: A list of integers, containing a supported dimensionality.
     #: You must set it manually for every class using :class:`DimensionsMixin`.
     supported_dimensions = []
 
@@ -74,10 +76,10 @@ class DimensionsMixin:
 
     def allowed_dimension(self, num_dim):
         """
-        Test if particular dimensionality is allowed.
+        Test if a particular dimensionality is allowed.
 
         :param num_dim:
-            Numbers of dimensions to test
+            The number of dimensions to test
 
         :returns:
             Boolean value, either dimensionality is allowed or not.
