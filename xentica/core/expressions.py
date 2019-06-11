@@ -1,4 +1,4 @@
-"""Module holding base ``DeferredExpression`` class."""
+"""The module holding base expressions classes."""
 import operator
 
 from xentica.core.exceptions import XenticaException
@@ -8,13 +8,13 @@ __all__ = ['DeferredExpression', ]
 
 class DeferredExpression:
     """
-    Base class for other classes intended to be used in mixed expressions.
+    The base class for other classes intended to be used in mixed expressions.
 
     In particular, it is used in base
     :class:`Variable <xentica.core.variables.Variable>` and :class:`Property
     <xentica.core.properties.Property>` classes.
 
-    Most of the magic methods dealing with binary and unary operators,
+    Most of the magic methods dealing with binary and unary operators
     as well as augmented assigns are automatically overridden for this
     class. As a result, you can use its subclasses in mixed
     expressions with ordinary Python values. See the example in
@@ -122,7 +122,7 @@ class DeferredExpression:
 
 class PatternExpression:
     """
-    Base class for mixed expressions in the process of seed generation.
+    The base class for mixed expressions in the process of seed generation.
 
     In particular, it is used in
     :class:`RandInt <xentica.seeds.random.Randint> class.
