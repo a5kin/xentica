@@ -15,16 +15,15 @@ __all__ = ['BscaDetectorMixin', 'DimensionsMixin', ]
 
 class BscaDetectorMixin:
     """
-    Add a functionality to detect BSCA class instances holding current class.
-
-    All methods are for private use only.
+    Add a functionality to detect :class:`CellularAutomaton` class
+    instances holding current class.
 
     """
 
     @property
     def bsca(self):
         """
-        Get a BSCA instance holding current class.
+        Get a :class:`CellularAutomaton` instance holding current class.
 
         The objects tree is scanned up to the top and the first
         instance found is returned.
@@ -79,7 +78,7 @@ class DimensionsMixin:
         Test if a particular dimensionality is allowed.
 
         :param num_dim:
-            The number of dimensions to test
+            The number of dimensions to test.
 
         :returns:
             Boolean value, either dimensionality is allowed or not.
