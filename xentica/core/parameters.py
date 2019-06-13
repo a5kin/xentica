@@ -1,9 +1,9 @@
 """
-A collection of classes to describe model's meta-parameters.
+The collection of classes to describe the model's meta-parameters.
 
-Parameter is the value that influence the whole model's behavior in
-some way. Each parameter has a default value, then you could
-customize them per each experiment, or change interactively using
+The *parameter* is the value that influences the whole model's behavior
+in some way. Each parameter has a default value. Then you could
+customize them per each experiment or change interactively using
 ``Bridge``.
 
 There are two types of parameters in Xentica:
@@ -12,7 +12,7 @@ Non-interactive
     are constant during a single experiment run. The change of this
     parameter is impossible without a whole model's source code being
     rebuilt. The engine makes sure those params are correctly defined
-    globally with ``#define`` directive. So actually, even if you'll
+    globally with the ``#define`` directive. So actually, even if you'll
     change their values at runtime, it doesn't affect the model in any
     way.
 
@@ -24,7 +24,7 @@ Interactive
     parameter declared as interactive, will degrade the model's
     performance further.
 
-The example of parameters usage::
+The example of parameters' usage::
 
     from xentica import core
     from xentica.tools.rules import LifeLike
@@ -66,12 +66,12 @@ class Parameter(BscaDetectorMixin):
     The implementation of Xentica meta-parameter.
 
     :param default:
-        Default value for the parameter to use when it's omitted in
+        The default value for the parameter to use when it's omitted in
         the experiment class.
 
     :param interactive:
-        ``True`` if parameter could be safely changed at runtime
-        (more details above in module description).
+        ``True`` if the parameter could be safely changed at runtime
+        (more details above in the module description).
 
     """
 
@@ -94,37 +94,37 @@ class Parameter(BscaDetectorMixin):
 
     @property
     def value(self):
-        """Get parameter's value directly."""
+        """Get the parameter's value directly."""
         return self._value
 
     @property
     def name(self):
-        """Get parameter's name."""
+        """Get the parameter's name."""
         return self._name
 
     @name.setter
     def name(self, val):
-        """Set parameter's name."""
+        """Set the parameter's name."""
         self._name = val
 
     @property
     def ctype(self):
-        """Get parameter's C type."""
+        """Get the parameter's C type."""
         return self._ctypes.get(type(self._value), 'int32')
 
     @property
     def dtype(self):
-        """Get parameter's NumPy type."""
+        """Get the parameter's NumPy type."""
         return self._dtypes.get(type(self._value), np.int32)
 
     def _declare_interactive(self):
-        """Do necessary stuff to declare interactive parameter."""
+        """Declare an interactive parameter."""
         if self.bsca.is_parameter(self.name):
             return
         self.bsca.define_parameter(self)
 
     def _declare_once(self):
-        """Do necessary stuff to declare parameter when it's mentioned."""
+        """Declare the parameter when it's mentioned."""
         if self._interactive:
             self._declare_interactive()
             return
