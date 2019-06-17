@@ -9,7 +9,7 @@ organize CA state into complex structures.
 
 Each :class:`CellularAutomaton <xentica.core.base.CellularAutomaton>`
 instance should have at least one property declared. The property name
-is up to you. If your model has just one value for state (like in most
+is up to you. If your model has just one value as a state (like in most
 classic CA), the best practice is to call it ``state`` as follows::
 
     from xentica import core
@@ -61,8 +61,8 @@ class Property(DeferredExpression, BscaDetectorMixin):
     """
     Base class for all properties.
 
-    Has a vast set of default functionality already
-    implemented. Though, you are free to re-define it all to implement
+    It has a vast set of default functionality already in
+    places. Though, you are free to re-define it all to implement
     really custom behavior.
 
     """
@@ -82,7 +82,7 @@ class Property(DeferredExpression, BscaDetectorMixin):
     @cached_property
     def best_type(self):
         """
-        Get type that suits best to store a property.
+        Get the type that suits best to store a property.
 
         :returns:
             tuple representing best type:
@@ -100,7 +100,7 @@ class Property(DeferredExpression, BscaDetectorMixin):
     @cached_property
     def dtype(self):
         """
-        Get NumPy dtype, based on result of :meth:`best_type`.
+        Get the NumPy dtype, based on the result of :meth:`best_type`.
 
         :returns:
             NumPy dtype that suits best to store a property.
@@ -111,7 +111,7 @@ class Property(DeferredExpression, BscaDetectorMixin):
     @cached_property
     def ctype(self):
         """
-        Get C type, based on result of :meth:`best_type`.
+        Get the C type, based on the result of :meth:`best_type`.
 
         :returns:
             C type that suits best to store a property.
@@ -121,7 +121,7 @@ class Property(DeferredExpression, BscaDetectorMixin):
 
     @property
     def _num_neighbors(self):
-        """Get number of neighbors for a cell in the current model."""
+        """Get the number of neighbors for a cell in the current model."""
         return len(self.bsca.buffers)
 
     @cached_property
@@ -159,40 +159,40 @@ class Property(DeferredExpression, BscaDetectorMixin):
         be called from :meth:`bit_width`.
 
         :returns:
-            Positive integer, calculated property's width in bits.
+            Positive integer, the calculated property's width in bits.
 
         """
         return 1  # default, just for consistency
 
     @property
     def buf_num(self):
-        """Get buffer's index, associated to property."""
+        """Get a buffer's index, associated to a property."""
         return self._buf_num
 
     @buf_num.setter
     def buf_num(self, val):
-        """Set buffer's index, associated to property."""
+        """Set a buffer's index, associated to a property."""
         self._buf_num = val
 
     @property
     def nbr_num(self):
-        """Get neighbor's index, associated to property."""
+        """Get a neighbor's index, associated to a property."""
         return self._nbr_num
 
     @nbr_num.setter
     def nbr_num(self, val):
-        """Set neighbor's index, associated to property."""
+        """Set a neighbor's index, associated to a property."""
         self._nbr_num = val
 
     def __getattribute__(self, attr):
-        """Implement custom logic when property is get as class attribute."""
+        """Implement custom logic when property is get as a class attribute."""
         obj = object.__getattribute__(self, attr)
         if hasattr(obj, '__get__') and attr != "__class__":
             return obj.__get__(self, type(self))
         return obj
 
     def __setattr__(self, attr, val):
-        """Implement custom logic when property is set as class attribute."""
+        """Implement custom logic when property is set as a class attribute."""
         try:
             obj = object.__getattribute__(self, attr)
         except AttributeError:
@@ -204,12 +204,12 @@ class Property(DeferredExpression, BscaDetectorMixin):
                 object.__setattr__(self, attr, val)
 
     def __get__(self, obj, objtype):
-        """Implement custom logic when property is get as class descriptor."""
+        """Get the property as a class descriptor."""
         self.declare_once()
         return self
 
     def __set__(self, obj, value):
-        """Implement custom logic when property is set as class descriptor."""
+        """Set the property as a class descriptor."""
         self.declare_once()
         code = "%s = %s;\n" % (self, value)
         self.bsca.append_code(code)
@@ -217,10 +217,10 @@ class Property(DeferredExpression, BscaDetectorMixin):
     @cached_property
     def _mem_cell(self):
         """
-        Generate C expression to get cell's state from RAM.
+        Generate C expression to get cell's state from the RAM.
 
         :returns:
-            String with C expression getting the state from memory.
+            String with the C expression getting the state from the memory.
 
         """
         if self._nbr_num >= 0:
@@ -244,9 +244,9 @@ class Property(DeferredExpression, BscaDetectorMixin):
 
     def declare_once(self):
         """
-        Generate C code to declare a variable holding cell's state.
+        Generate the C code to declare a variable holding a cell's state.
 
-        You must push the generated code to BSCA via
+        You must push the generated code to the BSCA via
         ``self.bsca.append_code()``, then declare necessary stuff via
         ``self.bsca.declare()``.
 
@@ -269,7 +269,7 @@ class IntegerProperty(Property):
     """
     Most generic property for you to use.
 
-    It is just a positive integer with upper limit of ``max_val``.
+    It is just a positive integer with the upper limit of ``max_val``.
 
     """
 
@@ -280,7 +280,7 @@ class IntegerProperty(Property):
         super(IntegerProperty, self).__init__()
 
     def calc_bit_width(self):
-        """Calculate bit width, based on ``max_val``."""
+        """Calculate the bit width, based on ``max_val``."""
         return int(math.log2(self.max_val)) + 1
 
 
@@ -317,45 +317,45 @@ class ContainerProperty(Property):
 
     @property
     def unpacked(self):
-        """Test if inner properties are unpacked from memory."""
+        """Test if inner properties are unpacked from the memory."""
         return self.bsca.is_unpacked(self)
 
     def __getitem__(self, key):
-        """Get property by key, emulating ``dict`` functionality."""
+        """Get a property by key, emulating ``dict`` functionality."""
         return self._properties[key]
 
     def __setitem__(self, key, val):
-        """Set property by key, emulating ``dict`` functionality."""
+        """Set a property by key, emulating ``dict`` functionality."""
         self._properties[key] = val
         object.__setattr__(self, key, val)
 
     def calc_bit_width(self):
-        """Calculate bit width as sum of inner properties' bit widths."""
+        """Calculate the bit width as a sum of inner properties' bit widths."""
         return sum([p.bit_width for p in self._properties.values()])
 
     @Property.buf_num.setter
     def buf_num(self, val):
-        """Set buffer's index, and propagade to inner properties."""
+        """Set the buffer's index, and propagade it to inner properties."""
         self._buf_num = val
         for key in self._properties.keys():
             self[key].buf_num = val
 
     @Property.nbr_num.setter
     def nbr_num(self, val):
-        """Set neighbor's index, and propagade to inner properties."""
+        """Set the neighbor's index, and propagade it to inner properties."""
         self._nbr_num = val
         for key in self._properties.keys():
             self[key].nbr_num = val
 
     def __get__(self, obj, objtype):
-        """Return self reference when getting as class descriptor."""
+        """Return a self reference when getting as a class descriptor."""
         return self
 
     def __set__(self, obj, value):
-        """Do nothing when setting as class descriptor."""
+        """Do nothing when setting as a class descriptor."""
 
     def __getattribute__(self, attr):
-        """Get value from VRAM and unpack it to variables."""
+        """Get a value from the VRAM and unpack it to variables."""
         obj = object.__getattribute__(self, attr)
         if isinstance(obj, Property):
             self.init_val = self._mem_cell
@@ -365,7 +365,7 @@ class ContainerProperty(Property):
         return obj
 
     def __setattr__(self, attr, val):
-        """Declare resulting variable and defer the write memory access."""
+        """Declare the resulting variable and defer the write memory access."""
         try:
             obj = object.__getattribute__(self, attr)
         except AttributeError:
@@ -384,10 +384,10 @@ class ContainerProperty(Property):
         """
         Do all necessary declarations for inner properties.
 
-        Also, implements the case of off-board neighbor access.
+        Also, implements the case of the off-board neighbor access.
 
         :param init_val:
-             Default value for the property.
+             The default value for the property.
 
         """
         if self.declared:
@@ -446,7 +446,7 @@ class ContainerProperty(Property):
         self.bsca.declare(self)
 
     def _unpack_state(self):
-        """Unpack inner properties values from in-memory representation."""
+        """Unpack inner properties values from the in-memory representation."""
         if self.unpacked:
             return
         code = ""
@@ -465,9 +465,10 @@ class ContainerProperty(Property):
 
     def deferred_write(self):
         """
-        Pack state and write its value to VRAM.
+        Pack the state and write its value to the VRAM.
 
-        This method is called from ``BSCA`` at the end of kernel processing.
+        ``CellularAutomaton`` calls this method at the end of the
+        kernel processing.
 
         """
         shift = 0
@@ -491,7 +492,17 @@ class ContainerProperty(Property):
 
 
 class TotalisticRuleProperty(Property):
-    """A specific property implementing totalistic rule."""
+    """
+    A helper property for the totalistic rule.
+
+    This property is useful when you need to hold a variable rule per
+    each cell, i.e., in evolutionary models.
+
+    It decides automatically how much bits are necessary to store a
+    value, depending on the number of neighbors. Also, it has methods
+    for quick calculation of the cell's next state.
+
+    """
 
     def __init__(self, outer=False):
         """Initialize the rule."""
@@ -505,49 +516,49 @@ class TotalisticRuleProperty(Property):
         return 2 ** (self._num_neighbors + 1) - 2
 
     def calc_bit_width(self):
-        """Calculate bit width, based on number of neighbors."""
+        """Calculate the bit width, based on the number of neighbors."""
         return (self._num_neighbors + 1) * 2
 
     def is_sustained(self, num_neighbors):
         """
-        Determine if cell is living or intended to death.
+        Determine if a cell is living or intended to death.
 
-        :param num_neighbors: Number of neighbors to test over.
+        :param num_neighbors: The number of neighbors to test over.
 
         :returns: ``DeferredExpression`` to calculate the bool value.
 
         """
         if not self._outer:
-            msg = "Can not get sustained flag from pure totalistic rule."
+            msg = "Can not get a sustained flag from the pure totalistic rule."
             raise XenticaException(msg)
         mask = (self._genome_mask << (self._num_neighbors + 1))
         return ((self & mask) >> (num_neighbors + self._num_neighbors + 1)) & 1
 
     def is_born(self, num_neighbors):
         """
-        Determine if cell could be born.
+        Determine if a cell could be born.
 
-        :param num_neighbors: Number of neighbors to test over.
+        :param num_neighbors: The number of neighbors to test over.
 
         :returns: ``DeferredExpression`` to calculate the bool value.
 
         """
         if not self._outer:
-            msg = "Can not get born flag from pure totalistic rule."
+            msg = "Can not get a born flag from the pure totalistic rule."
             raise XenticaException(msg)
         return ((self & self._genome_mask) >> num_neighbors) & 1
 
     def __get__(self, obj, objtype):
-        """Declare and return self when get as class descriptor."""
+        """Declare and return ``self`` when get as a class descriptor."""
         self.declare_once()
         return self
 
     def next_val(self, cur_val, num_neighbors):
         """
-        Calculate cell's value at the next step.
+        Calculate the cell's value at the next step.
 
         :param cur_val: Current cell's value.
-        :param num_neighbors: Number of neighbors to test over.
+        :param num_neighbors: The number of neighbors to test over.
 
         :returns: ``DeferredExpression`` to calculate the bool value.
 
@@ -559,24 +570,33 @@ class TotalisticRuleProperty(Property):
 
 
 class RandomProperty(Property):
-    """A property yielding random value each time."""
+    """
+    A property that yields a random value each time.
+
+    It utilizes a really dirty 16-bit PRNG algorithm with a small
+    period. Yet, when the local dynamics is rich, this is enough to
+    get a truly random behavior of the whole system. If not, you may
+    consider combining neighbors' random values into the new random
+    value for a cell. Then the period will be much larger.
+
+    """
 
     def __init__(self):
         self._buf_num = 0
         super(RandomProperty, self).__init__()
 
     def __get__(self, obj, objtype):
-        """Implement custom logic when property is get as class descriptor."""
+        """Get the property as a class descriptor."""
         self.declare_once()
         self._get_next()
         return self
 
     def calc_bit_width(self):
-        """Really dirty 16-bit PRNG."""
+        """Get the bit width, always 16 for now."""
         return 16
 
     def _get_next(self):
-        """Generate and return next value for RNG stream."""
+        """Generate and return the next RNG value."""
         val_int = xmath.int(DeferredExpression(self.var_name))
         val = ((val_int * 58321 + 11113)) % 65535
         self.__set__(self, val)
@@ -585,5 +605,5 @@ class RandomProperty(Property):
 
     @property
     def uniform(self):
-        """Get random value from uniform distribution."""
+        """Get a random value from the uniform distribution."""
         return xmath.float(DeferredExpression(self.var_name)) / 65535
