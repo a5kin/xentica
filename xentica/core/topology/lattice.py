@@ -1,7 +1,7 @@
 """
 The collection of classes describing different lattice topologies.
 
-All classes there are intended to be used inside ``Topology`` for
+All classes there are intended for use inside ``Topology`` for
 ``lattice`` class variable definition. They are also available via
 :mod:`xentica.core` shortcut. The example::
 
@@ -25,7 +25,7 @@ __all__ = ['Lattice', 'OrthogonalLattice', ]
 
 class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
     """
-    Base class for all lattices.
+    The base class for all lattices.
 
     For correct behavior, lattice classes should be inherited from
     this class. You should also implement the following functions:
@@ -46,7 +46,7 @@ class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
     width_prefix = "_w"
 
     def _define_constants_once(self):
-        """Define field size conctants in C code."""
+        """Define field size constants in the C code."""
         num_dimensions = self.bsca.topology.dimensions
         for i in range(num_dimensions):
             if not hasattr(self.bsca, "size") or i >= len(self.bsca.size):
@@ -60,35 +60,36 @@ class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def index_to_coord_code(self, index_name, coord_prefix):
         """
-        Generate C code to obtain coordinates by cell's index.
+        Generate C code to obtain coordinates by the cell's index.
 
         This is an abstract method, you must implement it in :class:`Lattice`
         subclasses.
 
         :param index_name:
-            The name of variable containing cell's index.
+            The name of a variable containing the cell's index.
         :param coord_prefix:
             The prefix for resulting variables, containing coordinates.
 
         :returns:
-            A string with C code, doing all necessary to process
-            index variable and store coordinates to variables with
-            given prefix.
+            A string with the C code, doing all necessary to process
+            the index variable and store coordinates to variables with
+            the given prefix.
 
         """
 
     @abc.abstractmethod
     def index_to_coord(self, idx, bsca):
-        """Obtain cell's coordinates by its index, in pure Python.
+        """
+        Obtain the cell's coordinates by its index, in pure Python.
 
         This is an abstract method, you must implement it in :class:`Lattice`
         subclasses.
 
         :param idx:
-            Cell's index, a positive integer, or NumPy array of indices.
+            Cell's index, a positive integer, or a NumPy array of indices.
         :param bsca:
             :class:`xentica.core.CellularAutomaton` instance, to access
-            field size and number of dimensions.
+            the field's size and number of dimensions.
 
         :returns:
             Tuple of integer coordinates, or NumPy arrays of coords
@@ -99,7 +100,7 @@ class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def coord_to_index_code(self, coord_prefix):
         """
-        Generate C code for obtaining cell's index by coordinates.
+        Generate C code for obtaining the cell's index by coordinates.
 
         This is an abstract method, you must implement it in :class:`Lattice`
         subclasses.
@@ -108,7 +109,7 @@ class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
             The prefix for variables, containing coordinates.
 
         :returns:
-            A string with C code calculating cell's index. No
+            A string with the C code calculating cell's index. No
             assignment, only a valid expression needed.
 
         """
@@ -125,7 +126,7 @@ class Lattice(DimensionsMixin, BscaDetectorMixin, metaclass=abc.ABCMeta):
             The prefix for variables, containing coordinates.
 
         :returns:
-            A string with C code testing coordinate variables. No
+            A string with the C code testing coordinates' variables. No
             assignment, only a valid expression with boolean result needed.
 
         """
@@ -144,7 +145,7 @@ class OrthogonalLattice(Lattice):
 
     def index_to_coord_code(self, index_name, coord_prefix):
         """
-        Implement coordinates obtaining by cell's index in C.
+        Generate C code for obtaining the cell's index by coordinates.
 
         See :meth:`Lattice.index_to_coord_code` for details.
 
@@ -170,7 +171,7 @@ class OrthogonalLattice(Lattice):
 
     def index_to_coord(self, idx, bsca):
         """
-        Implement coordinates obtaining by cell's index in Python.
+        Obtain the cell's coordinates by its index, in pure Python.
 
         See :meth:`Lattice.index_to_coord` for details.
 
@@ -187,7 +188,7 @@ class OrthogonalLattice(Lattice):
 
     def coord_to_index_code(self, coord_prefix):
         """
-        Implement cell's index obtaining by coordinates in C.
+        Generate C code for obtaining the cell's index by coordinates.
 
         See :meth:`Lattice.coord_to_index_code` for details.
 
@@ -204,7 +205,7 @@ class OrthogonalLattice(Lattice):
 
     def is_off_board_code(self, coord_prefix):
         """
-        Implement off board cell obtaining in C.
+        Generate C code to test if the cell's coordinates are off board.
 
         See :meth:`Lattice.is_off_board_code` for details.
 

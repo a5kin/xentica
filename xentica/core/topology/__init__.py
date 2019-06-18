@@ -1,4 +1,5 @@
-"""This package helps you build the topology for CA models.
+"""
+This package helps you build the topology for CA models.
 
 All :class:`xentica.core.CellularAutomaton` subclasses **must** have
 ``Topology`` class declared inside. This class describes:
@@ -16,8 +17,8 @@ All :class:`xentica.core.CellularAutomaton` subclasses **must** have
   cells. Built-in border types are available in
   :mod:`xentica.core.topology.border` module.
 
-In example, you can declare the topology for a 2-dimensional
-orthogonal lattice with Moore neighborhood, wrapped to a 3-torus, as
+For example, you can declare the topology for a 2-dimensional
+orthogonal lattice with Moore neighborhood wrapped to a 3-torus, as
 follows::
 
     class Topology:

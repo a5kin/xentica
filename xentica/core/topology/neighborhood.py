@@ -1,7 +1,7 @@
 """
 The collection of classes describing different neighborhood topologies.
 
-All classes there are intended to be used inside ``Topology`` for
+All classes there are intended for use inside ``Topology`` for
 ``neighborhood`` class variable definition. They are also available via
 :mod:`xentica.core` shortcut. The example::
 
@@ -27,7 +27,7 @@ __all__ = [
 
 class Neighborhood(DimensionsMixin):
     """
-    Base class for all neighborhood topologies.
+    The base class for all neighborhood topologies.
 
     For correct behavior, neighborhood classes should be inherited from
     this class. You should also implement the following functions:
@@ -52,19 +52,19 @@ class Neighborhood(DimensionsMixin):
         super(Neighborhood, self).__init__()
 
     def __len__(self):
-        """Return number of neighbors for a single cell."""
+        """Return the number of neighbors for a single cell."""
         return self.num_neighbors or 0
 
     @abc.abstractmethod
     def neighbor_coords(self, index, coord_prefix, neighbor_prefix):
         """
-        Generate C code to obtain neighbor coordinates by its index.
+        Generate the C code to obtain neighbor coordinates by its index.
 
         This is an abstract method, you must implement it in
         :class:`Neighborhood` subclasses.
 
         :param index:
-            Neighbor index, a non-negative integer less than number of
+            Neighbor's index, a non-negative integer less than the number of
             neighbors.
         :param coord_prefix:
             The prefix for variables containing main cell's coordinates.
@@ -72,8 +72,8 @@ class Neighborhood(DimensionsMixin):
             The prefix for resulting variables containing neighbor coordinates.
 
         :returns:
-            A string with C code doing all necessary to get neighbor
-            state from RAM. No assignment, only a valid expression
+            A string with the C code doing all necessary to get neighbor's
+            state from the RAM. No assignment, only a valid expression
             needed.
 
         """
@@ -81,23 +81,23 @@ class Neighborhood(DimensionsMixin):
     @abc.abstractmethod
     def neighbor_state(self, neighbor_index, state_index, coord_prefix):
         """
-        Generate C code to obtain neighbor state by its index.
+        Generate the C code to obtain a neighbor's state by its index.
 
         This is an abstract method, you must implement it in
         :class:`Neighborhood` subclasses.
 
         :param neighbor_index:
-            Neighbor index, a non-negative integer less than number of
+            Neighbor's index, a non-negative integer less than the number of
             neighbors.
         :param state_index:
-            State index, a non-negative integer less than number of
+            State's index, a non-negative integer less than the number of
             neighbors for buffered states or -1 for main state.
         :param coord_prefix:
             The prefix for variables containing neighbor coordinates.
 
         :returns:
-            A string with C code doing all necessary to process
-            neighbors's coordinates and store them to neighbor
+            A string with the C code doing all necessary to process
+            neighbor's coordinates and store them to neighbor's
             coordinates variables.
 
         """
@@ -105,7 +105,7 @@ class Neighborhood(DimensionsMixin):
 
 class OrthogonalNeighborhood(Neighborhood):
     """
-    Base class for neighborhoods on orthogonal lattice.
+    The base class for neighborhoods on an orthogonal lattice.
 
     It is implementing all necessary :class:`Neighborhood` abstract
     methods, the only thing you should override is :meth:`dimensions`
@@ -120,7 +120,7 @@ class OrthogonalNeighborhood(Neighborhood):
 
     def neighbor_coords(self, index, coord_prefix, neighbor_prefix):
         """
-        Implement neighbor coordinates obtaining by its index, in C.
+        Generate the C code to obtain neighbor coordinates by its index.
 
         See :meth:`Neighborhood.neighbor_coords` for details.
 
@@ -136,7 +136,7 @@ class OrthogonalNeighborhood(Neighborhood):
 
     def neighbor_state(self, neighbor_index, state_index, coord_prefix):
         """
-        Implement state obtaining by neighbor/state index, in C.
+        Generate the C code to obtain a neighbor's state by its index.
 
         See :meth:`Neighborhood.neighbor_coords` for details.
 
@@ -157,7 +157,7 @@ class MooreNeighborhood(OrthogonalNeighborhood):
 
     @OrthogonalNeighborhood.dimensions.setter
     def dimensions(self, num_dim):
-        """Set number of neighbors and their relative coordinates."""
+        """Set the number of neighbors and their relative coordinates."""
         super_class = super(MooreNeighborhood, MooreNeighborhood)
         super_class.dimensions.fset(self, num_dim)
         self.num_neighbors = 3 ** num_dim - 1
@@ -175,7 +175,7 @@ class VonNeumannNeighborhood(OrthogonalNeighborhood):
 
     @OrthogonalNeighborhood.dimensions.setter
     def dimensions(self, num_dim):
-        """Set number of neighbors and their relative coordinates."""
+        """Set the number of neighbors and their relative coordinates."""
         super_class = super(VonNeumannNeighborhood, VonNeumannNeighborhood)
         super_class.dimensions.fset(self, num_dim)
         self.num_neighbors = 2 * num_dim

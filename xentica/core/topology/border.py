@@ -1,7 +1,7 @@
 """
-The collection of classes describing different types of field borders.
+The collection of classes describing different types of field's borders.
 
-All classes there are intended to be used inside ``Topology`` for
+All classes there are intended for use inside ``Topology`` for
 ``border`` class variable definition. They are also available via
 :mod:`xentica.core` shortcut. The example::
 
@@ -26,11 +26,11 @@ __all__ = [
 
 class Border(DimensionsMixin):
     """
-    Base class for all types of borders.
+    The base class for all types of borders.
 
     You should not inherit your borders directly from this class, use
     either :class:`WrappedBorder` or :class:`GeneratedBorder` base
-    subclasses for this.
+    subclasses instead.
 
     """
 
@@ -42,7 +42,7 @@ class Border(DimensionsMixin):
 
 class WrappedBorder(Border):
     """
-    Base class for borders wrapping the field into different manifolds.
+    The base class for borders that wraps the field into different manifolds.
 
     For correct behavior, you should implement :meth:`wrap_coords` method.
 
@@ -59,14 +59,14 @@ class WrappedBorder(Border):
         :class:`WrappedBorder` subclasses.
 
         :param coord_prefix:
-            The prefix for variables containing cell's coordinates.
+            The prefix for variables containing the cell's coordinates.
 
         """
 
 
 class GeneratedBorder(Border):
     """
-    Base class for borders generating states of the off-board cells.
+    The base class for borders that generates states of the off-board cells.
 
     For correct behavior, you should implement :meth:`off_board_state` method.
 
@@ -83,7 +83,7 @@ class GeneratedBorder(Border):
         :class:`GeneratedBorder` subclasses.
 
         :param coord_prefix:
-            The prefix for variables containing cell's coordinates.
+            The prefix for variables containing the cell's coordinates.
 
         """
 
@@ -103,7 +103,7 @@ class TorusBorder(WrappedBorder):
 
     def wrap_coords(self, coord_prefix):
         """
-        Impement coordinates wrapping to torus.
+        Implement coordinates wrapping to torus.
 
         See :meth:`WrappedBorder.wrap_coords` for details.
 
