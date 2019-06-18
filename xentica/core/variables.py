@@ -13,7 +13,7 @@ from this module in the following way::
         def emit(self):
             myvar = core.IntegerVariable()
 
-Then you can use them in mixed expressions, like::
+Then you can use them in mixed expressions, like this::
 
     myvar += self.neighbors[i].buffer.state
     self.main.state = myvar & 1
@@ -36,19 +36,21 @@ __all__ = [
 
 
 class Constant(BscaDetectorMixin):
-    """The class for defining constants and ``#define`` patterns.
+    """
+    The class for defining constants and ``#define`` patterns.
 
     Once you instantiate :class:`Constant`, you must feed it to
-    ``BSCA.define_constant()`` in order to generate correct C code::
+    ``CellularAutomaton.define_constant()`` in order to generate
+    the correct C code::
 
-        const = Constant("C_NAME", "bsca_var")
+        const = Constant("C_NAME", "some_value")
         self.bsca.define_constant(const)
 
     :param name:
-        Name to use in ``#define``.
+        The name to use in ``#define``.
     :param value:
-        A value for the define, it will be converted to string with
-        ``str()``.
+        A value for the define, it will be converted to a string
+        with ``str()``.
 
     """
 
@@ -65,22 +67,22 @@ class Constant(BscaDetectorMixin):
 
     @property
     def name(self):
-        """Get the name of constant."""
+        """Get the name of the constant."""
         return self._name
 
 
 class Variable(DeferredExpression, BscaDetectorMixin):
     """
-    Base class for all variables.
+    The base class for all variables.
 
-    Most of the functionality for variables are already implemented in
+    Most of the functionality for variables is already implemented in
     it. Though, you are free to re-define it all to implement really
     custom behavior.
 
     :param val:
-         Initial value for the variable.
+         The initial value for the variable.
     :param name:
-         Fallback name to declare variable with.
+         Fallback name to declare the variable with.
 
     """
 
@@ -90,12 +92,12 @@ class Variable(DeferredExpression, BscaDetectorMixin):
         self.fallback_name = name
         self.base_class = Variable
         if val is None:
-            raise XenticaException("Variable should have initial value.")
+            raise XenticaException("Variable should have an initial value.")
         self._init_val = DeferredExpression(str(val))
 
     @cached_property
     def var_name(self):
-        """Get variable name."""
+        """Get the variable name."""
         all_vars = self._holder_frame.f_locals.items()
         model = None
         bad_names = ("self_var", "obj", "cls")
@@ -113,7 +115,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
         return self.fallback_name
 
     def declare_once(self):
-        """Declare variable and assign initial value to it."""
+        """Declare the variable and assign the initial value to it."""
         if not self.bsca.is_declared(self):
             code = "%s %s = %s;\n" % (
                 self.var_type, self.var_name, self._init_val
@@ -123,11 +125,11 @@ class Variable(DeferredExpression, BscaDetectorMixin):
             setattr(self.bsca, self.var_name, self)
 
     def __str__(self):
-        """Return a variable name to use in mixed expressions."""
+        """Return the variable name to use in mixed expressions."""
         return self.var_name
 
     def __get__(self, obj, objtype):
-        """Declare a variable on first use."""
+        """Declare the variable on first use."""
         self.declare_once()
         return self
 
@@ -141,12 +143,12 @@ class Variable(DeferredExpression, BscaDetectorMixin):
 
     @property
     def code(self):
-        """Get the variable name as code."""
+        """Get the variable name as a C code."""
         return self.var_name
 
     @code.setter
     def code(self, val):
-        """Prevent the change of code."""
+        """Prevent the change of the code."""
 
 
 class IntegerVariable(Variable):
@@ -156,7 +158,7 @@ class IntegerVariable(Variable):
     var_type = "unsigned int"
 
     def __init__(self, val="0", **kwargs):
-        """Initialize variable with default value."""
+        """Initialize a variable with the default value."""
         super(IntegerVariable, self).__init__(val, **kwargs)
 
 
@@ -167,5 +169,5 @@ class FloatVariable(Variable):
     var_type = "float"
 
     def __init__(self, val="0.0f", **kwargs):
-        """Initialize variable with default value."""
+        """Initialize a variable with the default value."""
         super(FloatVariable, self).__init__(val, **kwargs)
