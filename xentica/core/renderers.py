@@ -3,7 +3,7 @@ The collection of classes implementing render logic.
 
 The renderer takes the array of cells' colors and renders the screen
 frame from it. Also, it is possible to expand a list of user actions,
-adding ones specific to the renderer, like zoom, scroll etc.
+adding ones specific to the renderer, like zoom, scroll, etc.
 
 The default renderer is :class:`RendererPlain`. Though there are no
 other renderers yet, you may try to implement your own and apply it to
@@ -60,7 +60,7 @@ class Renderer(BscaDetectorMixin):
     @staticmethod
     def get_args_vals(bsca):
         """
-        Get a list of kernel arguments values.
+        Get a list of kernel arguments' values.
 
         The order should correspond to ``self.args``, with the values
         themselves as either PyCUDA ``GpuArray`` or correct NumPy
@@ -79,10 +79,10 @@ class Renderer(BscaDetectorMixin):
         """
         Generate C code for rendering.
 
-        At minimum, it should process cells colors stored in ``col``
+        At a minimum, it should process cells colors stored in ``col``
         GPU-array, and store the resulting pixel's value into ``img``
-        GPU-array. It can additionally use other custom arguments, if
-        any set up.
+        GPU-array. It can additionally use other custom arguments if
+        any of them set up.
 
         """
         return ""
@@ -155,7 +155,7 @@ class RendererPlain(Renderer):
         return args_vals
 
     def setup_actions(self, bridge):
-        """Extend bridge with scroll and zoom user actions."""
+        """Extend the bridge with the scroll and zoom user actions."""
         bridge.key_actions.update({
             "up": self.move(0, 1),
             "down": self.move(0, -1),
@@ -168,7 +168,7 @@ class RendererPlain(Renderer):
     @staticmethod
     def move(delta_x, delta_y):
         """
-        Move over game field by some delta.
+        Move over a game field by some delta.
 
         :param dx: Delta by x-axis.
         :param dy: Delta by y-axis.
@@ -182,7 +182,7 @@ class RendererPlain(Renderer):
     @staticmethod
     def zoom(dzoom):
         """
-        Zoom game field by some delta.
+        Zoom a game field by some delta.
 
         :param dzoom: Delta by which field is zoomed.
 
@@ -195,7 +195,7 @@ class RendererPlain(Renderer):
     @staticmethod
     def apply_move(bsca, *args):
         """
-        Apply field move action to CA class.
+        Apply a move action to CA class.
 
         :param bsca:
             :class:`xentica.core.CellularAutomaton` instance.
@@ -208,18 +208,18 @@ class RendererPlain(Renderer):
     @staticmethod
     def apply_zoom(bsca, dval):
         """
-        Apply field zoom action to CA class.
+        Apply a zoom action to CA class.
 
         :param bsca:
             :class:`xentica.core.CellularAutomaton` instance.
         :param dval:
-            Delta by which field is zoomed.
+            Delta by which the field is zoomed.
 
         """
         bsca.zoom = max(1, (bsca.zoom + dval))
 
     def render_code(self):
-        """Implement the code for render kernel."""
+        """Implement the code for the render kernel."""
         # calculate projection plain coordinates
         code = """
             int {x} = (int) (((float) (i % width)) / (float) zoom) + dx;
