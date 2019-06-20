@@ -215,9 +215,9 @@ class EvoLife6DExperiment(RegularExperiment):
     """Generic experiment for 6D EvoLife: 2 spatial, 4 micro-dimensions."""
 
     word = "SP1RALS 1N HYPERSP@CE"
-    size = (640, 360, 3, 3, 3, 3)
-    pos = [0, 0, 0, 0, 0, 0]
-    death_speed = 25
+    size = (640, 380, 7, 5, 3, 3)
+    pos = [50, 50, 0, 0, 0, 0]
+    death_speed = 64
     max_genes = 13
     mutation_prob = 0.0001
     fade_in = 63
@@ -225,7 +225,7 @@ class EvoLife6DExperiment(RegularExperiment):
     mask_random = RandInt(0, 2 ** 26 - 1, constant=True)
     seed_bang = seeds.patterns.BigBang(
         pos=(0, 0, 0, 0, 0, 0),
-        size=(100, 100, 3, 3, 3, 3),
+        size=(100, 100, 1, 1, 1, 1),
         vals={
             "energy": RandInt(0, 1) * 255,
             "rule": RandInt(0, 2 ** 26 - 1) & mask_random,
@@ -241,4 +241,5 @@ class EvoLife6DExperiment(RegularExperiment):
 
 
 if __name__ == "__main__":
-    run_simulation(EvoLife, CrossbreedingExperiment2)
+    run_simulation(EvoLife6D, EvoLife6DExperiment)
+    # run_simulation(EvoLife, CrossbreedingExperiment2)

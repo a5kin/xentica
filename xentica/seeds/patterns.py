@@ -1,10 +1,10 @@
 """
-Module containing different patterns for CA seed initialization.
+The module containing different patterns for CA seed initialization.
 
-Each pattern class having one mandatory method ``generate()`` which is
+Each pattern class have one mandatory method ``generate()`` which is
 called automatically at the initialization stage.
 
-Patterns are intended to use in
+Patterns are intended for use in
 :class:`Experiment <xentica.core.experiments.Experiment>` classes.
 See the example of general usage above.
 
@@ -22,21 +22,21 @@ __all__ = ['RandomPattern', 'BigBang', 'PrimordialSoup', 'ValDict', ]
 
 
 class ValDictMeta(type):
-    """Placeholder for :class:`ValDict` metaclass."""
+    """A placeholder for :class:`ValDict` metaclass."""
 
 
 class ValDict(metaclass=ValDictMeta):
     """
-    Wrapper over Python dictionary.
+    A wrapper over the Python dictionary.
 
-    It can keep descriptor classes along with regular values. Then, on
-    the item getting, the necessary value is automatically obtaining
+    It can keep descriptor classes along with regular values. When you
+    get the item, the necessary value is automatically obtaining
     either directly or via descriptor logic.
 
-    Readonly, you should set all dictionary values at the class
+    Read-only, you should set all dictionary values at the class
     initialization.
 
-    Example of usage::
+    The example of usage::
 
         >>> from xentica.seeds.random import RandInt
         >>> from xentica.seeds.patterns import ValDict
@@ -52,12 +52,12 @@ class ValDict(metaclass=ValDictMeta):
     :param d:
         Dictionary with mixed values. May contain descriptor classes.
     :param parent:
-        A reference to class holding the dictionary. Optional.
+        A reference to the class holding the dictionary. Optional.
 
     """
 
     def __init__(self, d, parent=None):
-        """Initialize class."""
+        """Initialize the class."""
         self._d = d
         self.parent = parent
         if parent is None:
@@ -90,7 +90,7 @@ class ValDict(metaclass=ValDictMeta):
 
 class RandomPattern:
     """
-    Base class for random patterns.
+    The base class for random patterns.
 
     :param vals:
         Dictionary with mixed values. May contain descriptor classes.
@@ -98,18 +98,18 @@ class RandomPattern:
     """
 
     def __init__(self, vals):
-        """Initialize class."""
+        """Initialize the class."""
         self._random = LocalRandom()
         self.vals = ValDict(vals, self)
 
     @property
     def random(self):
-        """Get random stream."""
+        """Get the random stream."""
         return self._random
 
     @random.setter
     def random(self, val):
-        """Set random stream."""
+        """Set the random stream."""
         self._random = val
 
     def __add__(self, other):
@@ -127,14 +127,9 @@ class RandomPattern:
         :param cells:
             NumPy array with cells' states as items. The seed will be
             generated over this array.
-        :param cells_num:
-            Total number of cells in ``cells`` array.
-        :param field_size:
-            Tuple with field sizes per each dimension.
-        :param index_to_coord:
-            Function translating cell's index to coordinate.
-        :param pack_state:
-            Function packing state into single integer.
+        :param bsca:
+            :class:`xentica.core.CellularAutomaton` instance, to access
+            the field's size and other attributes.
 
         """
 
@@ -149,7 +144,7 @@ class ChainedPattern(RandomPattern):
 
     @RandomPattern.random.setter
     def random(self, val):
-        """Set random stream."""
+        """Set the random stream."""
         self._pattern1.random = val
         self._pattern2.random = val
 
@@ -175,16 +170,15 @@ class BigBang(RandomPattern):
         has either zero or minimum possible amount of energy. This is a
         good test for the ability of energy to spread in empty space."*
 
-    The current implementation allows to generate a value for every
-    cell inside specified N-cube area. Cells outside the area have
-    zero values.
+    The current implementation generates a value for every cell inside a
+    specified N-cube area. Cells outside the area remain unchanged.
 
     :param vals:
         Dictionary with mixed values. May contain descriptor classes.
     :param pos:
         A tuple with the coordinates of the lowest corner of the Bang area.
     :param size:
-        A tuple with the size of Bang area per each dimension.
+        A tuple with the size of the Bang area per each dimension.
 
     """
 
@@ -251,8 +245,8 @@ class PrimordialSoup(RandomPattern):
         for the ability of energy to self-organize in clusters from
         the completely uniform distribution."*
 
-    The current implementation allows to populate the entire board
-    with generated values.
+    The current implementation populates the entire board with
+    generated values.
 
     :param vals:
         Dictionary with mixed values. May contain descriptor classes.

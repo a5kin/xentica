@@ -1,10 +1,10 @@
 """
-The package helping you to construct initial CA state (seed).
+The package for the initial CA state (seed) generation.
 
 Classes from modules below are intended for use in
 :class:`Experiment <xentica.core.experiments.Experiment>` classes.
 
-For example to initialize the whole board with random values::
+For example, to initialize the whole board with random values::
 
     from xentica import core, seeds
 
