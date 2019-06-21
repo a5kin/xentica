@@ -3,14 +3,14 @@
 
 def sizeof_fmt(num, suffix=''):
     """
-    Format the number with the humanized order of magnitude.
+    Format the number to a humanized order of magnitude.
 
-    In example, ``11234`` become ``11.23K``.
+    For example, ``11234`` become ``11.23K``.
 
     :param num:
         The positive integer.
     :param suffix:
-        Additional suffix to add to formatted string.
+        Additional suffix added to the resulting string.
 
     :returns:
         Formatted number as a string.
