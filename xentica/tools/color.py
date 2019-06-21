@@ -1,4 +1,4 @@
-"""A collection of color conversion helpers."""
+"""The collection of color conversion helpers."""
 
 from xentica import core
 from xentica.core.expressions import DeferredExpression
@@ -61,21 +61,21 @@ def hsv2rgb(hue, saturation, value):
 
 
 class GenomeColor:
-    """Several static methods to render genome's color."""
+    """Different approaches for rendering the genome's color."""
 
     @staticmethod
     def positional(genome, num_genes):
         """
-        Convert genome bit value to RGB color using ones positions.
+        Convert genome bit value to RGB color using ones' positions.
 
         This algorithm treats positions of '1' in binary genome
-        representation as hue with maximum saturation/value (as in HSV
+        representation as a hue with maximum saturation/value (as in HSV
         model), then blends them together to produce the final RGB
         color. Genome length (second argument) is essential to
-        calculate genes positions in [0, 1] range.
+        calculate genes' positions in [0, 1] range.
 
         As a result, two genomes will look similar visually if they
-        have a little difference in genes. That could help in quick
+        have a little difference in genes. That could help in the quick
         detection of genome groups by eye.
 
         :param genome:
@@ -117,7 +117,7 @@ class GenomeColor:
         :param genome:
             Genome as integer (bit) sequence.
         :param divider:
-            Divider for modular division.
+            Divider for the modular division.
 
         :returns: tuple (red, green, blue)
 

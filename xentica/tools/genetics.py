@@ -1,4 +1,4 @@
-"""A collection of functions allowing genetics manipulations."""
+"""The collection of functions for genetics manipulations."""
 
 from xentica import core
 from xentica.tools import xmath
@@ -12,13 +12,13 @@ def genome_crossover(state, num_genes, *genomes, max_genes=None,
     :param state:
         A container holding model's properties.
     :param num_genes:
-        Genome length, assuming all genomes has same number of genes.
+        Genome length, assuming all genomes has the same number of genes.
     :param genomes:
         A list of genomes (integers) to crossover
     :param max_genes:
-        Upper limit for '1' genes in resulting genome.
+        Upper limit for '1' genes in the resulting genome.
     :param mutation_prob:
-        Probability of single gene mutation.
+        Probability of a single gene's mutation.
     :param rng_name:
         Name of ``RandomProperty``.
 

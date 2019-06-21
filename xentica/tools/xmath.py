@@ -1,4 +1,4 @@
-"""Module with bindings to CUDA math functions."""
+"""The module with bindings to CUDA math functions."""
 
 from xentica.core.expressions import DeferredExpression
 
@@ -24,15 +24,15 @@ class Xmath:
 
     @staticmethod
     def float(val):
-        """Cast value to float."""
+        """Cast a value to float."""
         return DeferredExpression("((float) (%s))" % val)
 
     @staticmethod
     def int(val):
-        """Cast value to int."""
+        """Cast a value to int."""
         return DeferredExpression("((unsigned int) (%s))" % val)
 
     @staticmethod
     def popc(val):
-        """Count the number of bits that are set to 1 in a 32 bit integer."""
+        """Count the number of bits that are set to '1' in a 32 bit integer."""
         return DeferredExpression("(__popc(%s))" % val)
