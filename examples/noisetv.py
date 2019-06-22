@@ -11,7 +11,7 @@ from examples.base import run_simulation
 
 
 class NoiseTV(RegularCA):
-    """Just pseudorandom noise, tickling your eyes."""
+    """Just a pseudorandom noise, tickling your eyes."""
     rng = core.RandomProperty()
 
     def emit(self):
@@ -29,7 +29,7 @@ class NoiseTV(RegularCA):
 
 
 class NoiseTVExperiment(RegularExperiment):
-    """Default experiment for legacy EvoLife."""
+    """Default experiment filling the whole board with a noise."""
 
     word = "PSHSHSHSH!"
     seed = seeds.patterns.PrimordialSoup(

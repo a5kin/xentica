@@ -208,9 +208,9 @@ class GOLExperiment(core.Experiment):
     Here, we define constants and initial conditions from which the
     world's seed will be generated.
 
-    The ``word`` is RNG seed string. The ``size``, ``zoom`` and
+    The ``word`` is an RNG seed string. The ``size``, ``zoom`` and
     ``pos`` are board contstants. The ``seed`` is a pattern used in
-    initial board state generation.
+    the initial board state generation.
 
     ``BigBang`` is a pattern when small area initialized with a
     high-density random values.
@@ -252,13 +252,13 @@ class GOLExperiment2(GOLExperiment):
 
 class GOLExperimentColor(GOLExperiment):
     """
-    Experiment for GameOfLifeColor.
+    The experiment for ``GameOfLifeColor``.
 
     Here, we introduce ``fade_out`` constant, which is used in
-    rendering causing cells slowly fade out.
+    rendering and slowly fading out the color of cells.
 
-    Note, it is only aestetic effect, and does not affect real cell
-    state.
+    Note, it is only an aestetic effect, and does not affect the real
+    cell state.
 
     """
 
@@ -280,7 +280,7 @@ class GOLExperiment6D(GOLExperiment2):
     Special experiment for 6D Life.
 
     Here, we define the world with 2 spatial and 4 looped
-    micro-dimensions, 3 cells length each.
+    micro-dimensions, 3 cells per micro-dimension.
 
     As a result, we get large quasi-stable oscillators, looping over
     micro-dimensions. Strangely formed, but nothing interesting,
@@ -292,7 +292,7 @@ class GOLExperiment6D(GOLExperiment2):
 
 
 class DiamoebaExperiment(GOLExperiment):
-    """Experiment with interactive rule."""
+    """Experiment with the interactive rule."""
     rule = LifeLike.golly2int("B35678/S5678")
 
 

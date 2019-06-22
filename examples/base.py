@@ -1,4 +1,4 @@
-"""Collection of base classes and helpers commonly used in examples."""
+"""Base classes and helpers commonly used in examples."""
 
 import abc
 
@@ -35,7 +35,7 @@ class RegularCA(core.CellularAutomaton):
 
 
 class RegularExperiment(core.Experiment):
-    """Experiment with most common field size, zoom and pos."""
+    """Experiment with the most common field size, zoom and pos."""
 
     word = "I AM MUNDANE"
     size = (640, 360, )

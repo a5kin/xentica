@@ -34,9 +34,6 @@ class EvoLife(RegularCA):
       we choose one with larger N;
     - Newly born cell's ruleset calculated as crossover between
       'parent' cells rulesets;
-    - If cell is involved in breeding as a 'parent', it's loosing
-      BIRTH_COST units of energy per each non-zero gene passed;
-        - This doesn't apply in re-occupation case;
     - Every turn, cell is loosing DEATH_SPEED units of energy;
     - Cell with zero energy is dying;
     - Cell cannot have more than MAX_GENES non-zero genes in ruleset.
@@ -212,7 +209,12 @@ class EvoLife6D(EvoLife):
 
 
 class EvoLife6DExperiment(RegularExperiment):
-    """Generic experiment for 6D EvoLife: 2 spatial, 4 micro-dimensions."""
+    """
+    Generic experiment for 6D EvoLife: 2 spatial, 4 micro-dimensions.
+
+    WARNING: to run this model you need at least 9GB GPU RAM free.
+
+    """
 
     word = "SP1RALS 1N HYPERSP@CE"
     size = (640, 380, 7, 5, 3, 3)
@@ -241,5 +243,4 @@ class EvoLife6DExperiment(RegularExperiment):
 
 
 if __name__ == "__main__":
-    run_simulation(EvoLife6D, EvoLife6DExperiment)
-    # run_simulation(EvoLife, CrossbreedingExperiment2)
+    run_simulation(EvoLife, CrossbreedingExperiment2)
