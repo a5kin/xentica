@@ -44,7 +44,7 @@ Variables (xentica\.core\.variables)
     :show-inheritance:
 
 Expressions (xentica\.core\.expressions)
-------------------------------------
+----------------------------------------
 
 .. automodule:: xentica.core.expressions
     :members:
