@@ -1,18 +1,19 @@
 Installation Instructions
 =========================
 
-**Xentica** is planned to run with several GPU backends in future,
+**Xentica** is planned to run with several GPU backends in the future,
 like *CUDA*, *OpenCL* and *GLSL*. However, right now, only *CUDA* is
 supported.
 
 .. warning::
    If your GPU is not CUDA-enabled, this guide is **not** for
-   you. Framework will just not run, no matter how hard you try. You
-   may check the `list of CUDA-enabled cards`_, if you have any doubts.
+   you. The framework will just not run, no matter how hard you try.
+   You may check the `list of CUDA-enabled cards`_ if you have any
+   doubts.
 
 .. note::
-   This page currently containing instructions only for Debian-like
-   systems. If you are on other system, you still can use links to
+   This page is currently containing instructions only for Debian-like
+   systems. If you are on another system, you still can use links to
    pre-requisites in order to install them. If so, please contact us
    by `opening an issue`_ on GitHub. We could help you if you'll meet
    some troubles during installation, and also your experience could
@@ -22,16 +23,16 @@ Core Prerequisites
 ------------------
 
 In order to run CA models without any visualization, you have to
-correctly install following software.
+correctly install the following software.
 
 - `NVIDIA CUDA Toolkit`_
   
-  Generally, you can install it just from your distrubution's repository::
+  Generally, you can install it just from your distribution's repository::
     
     sudo apt-get install nvidia-cuda-toolkit
 
-  Although, default packages are often out of date, so in case you
-  have one of those latest cool GPU, you may want to upgrade to the
+  Nevertheless, default packages are often out of date, so in case you
+  have one of those latest cool GPUs, you may want to upgrade to the
   latest CUDA version from `official NVIDIA source`_. We'll hint you
   with a `good article`_ explaining how to do it. But you are really
   on your own with this stuff.
@@ -84,8 +85,8 @@ Then, to install stable Kivy::
 
   pip3 install Cython==0.25 Kivy==1.10.0
 
-On latest Debian distributions you can meet conflicts with
-``libsdl-mixer``. Then, try to install latest developer version,
+On the latest Debian distributions you can meet conflicts with
+``libsdl-mixer``. Then, try to install the latest developer version,
 like::
 
   pip3 install Cython==0.27.3 git\+https://github.com/kivy/kivy.git
@@ -100,13 +101,13 @@ Xentica package could be installed with::
 
   pip3 install xentica
 
-Note, it does not depends on pre-requisites described above, but you
+Note, it does not depend on pre-requisites described above, but you
 still need to install them properly, or Xentica will not run.
 
 Run Xentica examples
 --------------------
 
-In order to run Game of Life model built with Xentica::
+In order to run the Game of Life model built with Xentica::
 
   pip3 install moire
   wget https://raw.githubusercontent.com/a5kin/xentica/master/examples/game_of_life.py
