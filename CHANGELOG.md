@@ -5,29 +5,59 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ### Changed
 
+- Core.
+  - Disable ``nvcc`` compiler warnings.
 - Exceptions.
   - Raise exception when assigning to ``DeferredExpression``.
   - Raise exception if ``Variable`` has no initial value.
 - QA.
   - Disable faulty ``pylint`` issues.
-  - Disable stdout capture by ``pytest``.
+  - Raise max locals limit for ``pylint``.
+  - Remove PyPy3 from supported versions.
 - Refactoring.
   - Change ``Constant`` API to rid of eval.
+  - Move ``DeferredExpression`` to separate module.
+  - Move code generation to ``CellularAutomaton.__init__``
+  - Change ``Constant`` defining mechanism.
 
 ### Added
 
-- Properties.
+- Core.
   - Add ``TotalisticRuleProperty``.
   - Add ``RandomProperty``.
+  - Add ``FloatVariable``.
+  - Add ``long int`` to supported types.
+  - Add ``BscaDetectorMixin`` to ``Property``.
+  - Add ``Parameter`` class.
+  - Integrate parameters to core engine.
+  - Add meta-params population from ``Experiment`` class.
+  - Implement interactive parameters.
+  - Add validation for field's dimensionality.
+- Seeds.
+  - Add ``ChainedPattern`` functionality.
+  - Add support for ``RandInt`` in mixed expressions.
+  - Add option to ``RandInt`` making it constant.
 - Tools.
   - Add ``xentica.tools`` package.
-  - Add color conversion helpers module (``tools.color``)
+  - Add color conversion helpers module (``tools.color``).
+    - Basic HSV to RGB conversion.
+	- Genome coloring: positional and modular methods.
   - Add math functions wrappers (``tools.xmath``)
-  - Add genenome manipulation helpers (``tools.genetics``)
+    - ``Min`` / ``max`` functions over a number of arguments.
+	- ``Float`` / ``int`` type casting.
+	- Counting a number of non-zero bits in integer (``popc``).
+  - Add CA rules helpers (``tools.rules``).
+    - Convert Golly nonation to integer.
+	- Convert integer to Golly notation.
+  - Add gennome manipulation helpers (``tools.genetics``).
+    - Crossover several genomes in stochastic way.
+	- Mutation during genomes' crossover.
 - Examples.
   - Add ``EvoLife`` example model.
+  - Add ``NoiseTV`` example model.
 - Tests.
   - Implement full test suite with ``tox``.
   - Add test for broad bit width.
@@ -36,12 +66,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Add test for ``Variable`` without init value.
 - Documentation.
   - Add separate section for testing.
+  - Add core.expressions to docs.
+- Miscellaneous.
+  - Add ``NoiseTV`` and ``EvoLife`` to benchmark.
 
 ### Fixed
+- Major fixes.
+  - Fix augmented assigns to properties and variables.
+  - Fix direct assignments to variables.
+  - Fix variables names in declarations.
+  - Fix variable's fallback name.
+  - Fix ``BscaDetectorMixin``.
+  - Fix ``ColorEffect``.
+  - Fix ``dtype``/``ctype`` usage in ``CellularAutomaton`` class.
 - Minor fixes.
   - Remove unnecessary conditions.
   - Fix default field size.
   - Fix minor codestyle issues.
+  - Fix typos and grammar in docs.
+  - Fix imports in examples.
 
 ## [0.1.1] - 2018-07-24
 ### Changed
