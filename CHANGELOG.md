@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.0] - 2019-06-29
 ### Changed
 
 - Core.
@@ -52,7 +53,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Add CA rules helpers (``tools.rules``).
     - Convert Golly nonation to integer.
 	- Convert integer to Golly notation.
-  - Add gennome manipulation helpers (``tools.genetics``).
+  - Add genome manipulation helpers (``tools.genetics``).
     - Crossover several genomes in stochastic way.
 	- Mutation during genomes' crossover.
 - Examples.
@@ -64,6 +65,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Add test for ``RendererPlain`` class.
   - Add test for illegal assign to ``DeferredExpression``.
   - Add test for ``Variable`` without init value.
+  - Add tests for Lifelike rules helpers.
+  - Add test for code property.
+  - Add tests for ``core.variables`` coverage.
+  - Add tests for ``tools.xmath`` module.
 - Documentation.
   - Add separate section for testing.
   - Add core.expressions to docs.
@@ -174,5 +179,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Code of Conduct
   - Changelog.
 
-[Unreleased]: https://github.com/a5kin/xentica/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/a5kin/xentica/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/a5kin/xentica/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/a5kin/xentica/compare/v0.1.0...v0.1.1
