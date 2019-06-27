@@ -21,7 +21,7 @@ def get_long_description():
 
 setup(
     name='xentica',
-    version='0.1.1',
+    version='0.2.0',
     description='GPU-accelerated engine for multi-dimensional '
                 'cellular automata',
     long_description=get_long_description(),
@@ -30,7 +30,7 @@ setup(
     author_email='a5kin@github.com',
     license='MIT',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
