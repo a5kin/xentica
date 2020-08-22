@@ -36,3 +36,8 @@ class Xmath:
     def popc(val):
         """Count the number of bits that are set to '1' in a 32 bit integer."""
         return DeferredExpression("(__popc(%s))" % val)
+
+    @staticmethod
+    def exp(val):
+        """Calculate exponent."""
+        return DeferredExpression("(exp(%s))" % val)
