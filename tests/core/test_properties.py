@@ -57,7 +57,7 @@ class TestProperty(unittest.TestCase):
     def test_container_values(self):
         """Test iteration over CA properties."""
         model = GameOfLife
-        props = [v for v in model.main.values()]
+        props = list(model.main.values())
         self.assertEqual(len(props), 1, "Wrong number of properties")
 
     def test_random_property(self):

@@ -77,7 +77,7 @@ class Property(DeferredExpression, BscaDetectorMixin):
             (64, np.uint64, 'long'),
         )
         self._buf_num, self._nbr_num = 1, 1
-        super(Property, self).__init__()
+        super().__init__()
 
     @cached_property
     def best_type(self):
@@ -277,7 +277,7 @@ class IntegerProperty(Property):
         """Initialize class specific attributes."""
         self.max_val = max_val
         self._buf_num = 0
-        super(IntegerProperty, self).__init__()
+        super().__init__()
 
     def calc_bit_width(self):
         """Calculate the bit width, based on ``max_val``."""
@@ -301,7 +301,7 @@ class ContainerProperty(Property):
 
     def __init__(self):
         """Initialize ``OrderedDict`` to hold other properties."""
-        super(ContainerProperty, self).__init__()
+        super().__init__()
         self._properties = OrderedDict()
         self.init_val = None
 
@@ -508,7 +508,7 @@ class TotalisticRuleProperty(Property):
         """Initialize the rule."""
         self._buf_num = 0
         self._outer = outer
-        super(TotalisticRuleProperty, self).__init__()
+        super().__init__()
 
     @property
     def _genome_mask(self):
@@ -583,7 +583,7 @@ class RandomProperty(Property):
 
     def __init__(self):
         self._buf_num = 0
-        super(RandomProperty, self).__init__()
+        super().__init__()
 
     def __get__(self, obj, objtype):
         """Get the property as a class descriptor."""

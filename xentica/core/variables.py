@@ -88,7 +88,7 @@ class Variable(DeferredExpression, BscaDetectorMixin):
 
     def __init__(self, val=None, name="var"):
         """Initialize base class features."""
-        super(Variable, self).__init__()
+        super().__init__()
         self.fallback_name = name
         self.base_class = Variable
         if val is None:
@@ -159,7 +159,7 @@ class IntegerVariable(Variable):
 
     def __init__(self, val="0", **kwargs):
         """Initialize a variable with the default value."""
-        super(IntegerVariable, self).__init__(val, **kwargs)
+        super().__init__(val, **kwargs)
 
 
 class FloatVariable(Variable):
@@ -170,4 +170,4 @@ class FloatVariable(Variable):
 
     def __init__(self, val="0.0f", **kwargs):
         """Initialize a variable with the default value."""
-        super(FloatVariable, self).__init__(val, **kwargs)
+        super().__init__(val, **kwargs)

@@ -4,6 +4,8 @@ A collection of models derived from Conway's Game Of Life.
 Experiment classes included.
 
 """
+import importlib
+
 from xentica import core
 from xentica import seeds
 from xentica.core import color_effects
@@ -198,7 +200,7 @@ class LifelikeCA(GameOfLife):
         """Change the rule interactively after some time passed."""
         if self.timestep == 23:
             self.rule = LifeLike.golly2int("B3/S23")
-        super(LifelikeCA, self).step()
+        super().step()
 
 
 class GOLExperiment(core.Experiment):
@@ -298,7 +300,7 @@ class DiamoebaExperiment(GOLExperiment):
 
 def main():
     """Run model/experiment interactively."""
-    import moire
+    moire = importlib.import_module("moire")
     model = GameOfLifeColor(GOLExperimentColor)
     gui = moire.GUI(runnable=model)
     gui.run()

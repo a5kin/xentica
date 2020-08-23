@@ -73,7 +73,7 @@ class RandInt(PatternExpression):
 
     def __init__(self, min_val, max_val, constant=False):
         """Initialize the random sequence."""
-        super(RandInt, self).__init__()
+        super().__init__()
         self.min_val = min_val
         self.max_val = max_val
         self._constant = constant

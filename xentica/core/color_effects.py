@@ -54,7 +54,7 @@ class ColorEffect(BscaDetectorMixin):
                 self.effect = "new_r += 20;"
                 self.effect += "new_g += 15;"
                 self.effect += "new_b += 10;"
-                return super(MyEffect, self).__call__(*args)
+                return super().__call__(*args)
 
     """
 
@@ -127,4 +127,4 @@ class MovingAverage(ColorEffect):
             new_b = max(min(new_b, old_col.z + FADE_IN),
                         old_col.z - FADE_OUT);
         """
-        return super(MovingAverage, self).__call__()
+        return super().__call__()

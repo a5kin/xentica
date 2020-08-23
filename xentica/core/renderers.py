@@ -132,7 +132,7 @@ class RendererPlain(Renderer):
             will be used.
 
         """
-        super(RendererPlain, self).__init__()
+        super().__init__()
         self.args += [
             ("int", "zoom"),
             ("int", "dx"),
@@ -145,7 +145,7 @@ class RendererPlain(Renderer):
 
     def get_args_vals(self, bsca):
         """Extend kernel arguments values."""
-        args_vals = super(RendererPlain, self).get_args_vals(bsca)
+        args_vals = super().get_args_vals(bsca)
         args_vals += [
             np.int32(bsca.zoom),
             np.int32(bsca.pos[0]),

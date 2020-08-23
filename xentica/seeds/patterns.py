@@ -140,7 +140,7 @@ class ChainedPattern(RandomPattern):
     def __init__(self, pattern1, pattern2):
         self._pattern1 = pattern1
         self._pattern2 = pattern2
-        super(ChainedPattern, self).__init__({})
+        super().__init__({})
 
     @RandomPattern.random.setter
     def random(self, val):
@@ -186,7 +186,7 @@ class BigBang(RandomPattern):
         """Initialize class."""
         self.pos = np.asarray(pos) if pos else None
         self.size = np.asarray(size) if size else None
-        super(BigBang, self).__init__(vals)
+        super().__init__(vals)
 
     def _prepare_area(self, bsca_size):
         """
@@ -256,7 +256,7 @@ class PrimordialSoup(RandomPattern):
     def __init__(self, vals):
         """Initialize class."""
         self.size = None
-        super(PrimordialSoup, self).__init__(vals)
+        super().__init__(vals)
 
     def generate(self, cells, bsca):
         """

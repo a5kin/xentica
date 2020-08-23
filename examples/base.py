@@ -1,6 +1,7 @@
 """Base classes and helpers commonly used in examples."""
 
 import abc
+import importlib
 
 from xentica import core
 
@@ -45,7 +46,7 @@ class RegularExperiment(core.Experiment):
 
 def run_simulation(model, experiment):
     """Run model/experiment interactively."""
-    import moire
+    moire = importlib.import_module("moire")
     mod = model(experiment)
     gui = moire.GUI(runnable=mod)
     gui.run()

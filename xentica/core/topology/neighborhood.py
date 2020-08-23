@@ -49,7 +49,7 @@ class Neighborhood(DimensionsMixin):
         self.topology = None
         self._delta2str = {-1: " - 1", 0: "", 1: " + 1"}
         self._neighbor_deltas = []
-        super(Neighborhood, self).__init__()
+        super().__init__()
 
     def __len__(self):
         """Return the number of neighbors for a single cell."""

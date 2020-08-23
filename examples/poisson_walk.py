@@ -2,6 +2,8 @@
 Rough experiment with per cell poisson process.
 
 """
+import importlib
+
 from xentica import core
 from xentica import seeds
 from xentica.core import color_effects
@@ -151,7 +153,7 @@ class GlyphExperiment(core.Experiment):
 
 def run():
     """Run model/experiment interactively."""
-    import moire
+    moire = importlib.import_module("moire")
     model = PoissonWalk(GlyphExperiment)
     model.speed = 200
     gui = moire.GUI(runnable=model)
@@ -160,29 +162,29 @@ def run():
 
 def render():
     """Render a video."""
-    from moviepy.editor import VideoClip
+    mp_editor = importlib.import_module("moviepy.editor")
 
     def make_frame(_):
         timestep = make_frame.model.timestep
         num_iters = 5000 if timestep < 1200000 else 1000
         if timestep > 1200000 + 120000:
             num_iters = 15000
-        for i in range(num_iters):
+        for _ in range(num_iters):
             make_frame.model.step()
-        w, h = GlyphExperiment.size
-        zoom = GlyphExperiment.zoom
-        frame = make_frame.model.render().reshape((h * zoom, w * zoom, 3))
+        width, height = make_frame.model.width, make_frame.model.height
+        frame = make_frame.model.render().reshape((height, width, 3))
         return frame
 
-    w, h = GlyphExperiment.size
+    width, height = GlyphExperiment.size
     zoom = GlyphExperiment.zoom
+    width, height = width * zoom, height * zoom
     make_frame.model = PoissonWalk(GlyphExperiment)
-    make_frame.model.set_viewport((w * zoom, h * zoom))
+    make_frame.model.set_viewport((width, height))
 
     default_energy = make_frame.model.default_denergy
-    animation = VideoClip(make_frame, duration=23)
+    animation = mp_editor.VideoClip(make_frame, duration=23)
     animation.write_videofile("poisson_walk_p%d.mp4" % default_energy, fps=24)
 
 
 if __name__ == "__main__":
-    run()
+    render()

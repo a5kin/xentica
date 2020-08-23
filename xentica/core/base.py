@@ -467,7 +467,7 @@ class Translator:
         """
         args = [(self.main.ctype, "*fld"), ]
         body = self._translate_code(self.emit)
-        self._emit_params = [param for param in self._params.values()]
+        self._emit_params = list(self._params.values())
         args += [(param.ctype, param.name) for param in self._emit_params]
         return self._elementwise_kernel("emit", args, body)
 
@@ -481,7 +481,7 @@ class Translator:
         """
         args = [(self.main.ctype, "*fld"), ("int3", "*col")]
         body = self._translate_code(self.absorb, self.color)
-        self._absorb_params = [param for param in self._params.values()]
+        self._absorb_params = list(self._params.values())
         args += [(param.ctype, param.name) for param in self._absorb_params]
         return self._elementwise_kernel("absorb", args, body)
 
