@@ -12,6 +12,7 @@ recursive-include docs *.py
 recursive-include docs *.rst
 recursive-include docs Makefile
 recursive-include requirements *.txt
+recursive-include tests *.py
 
 recursive-exclude docs/_build *
 
