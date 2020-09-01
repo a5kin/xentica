@@ -49,6 +49,7 @@ class Neighborhood(DimensionsMixin):
         self.topology = None
         self._delta2str = {-1: " - 1", 0: "", 1: " + 1"}
         self._neighbor_deltas = []
+        self.rev_index_map = []
         super().__init__()
 
     def __len__(self):
@@ -163,6 +164,7 @@ class MooreNeighborhood(OrthogonalNeighborhood):
         self.num_neighbors = 3 ** num_dim - 1
         deltas = itertools.product([-1, 0, 1], repeat=num_dim)
         self._neighbor_deltas = [d for d in deltas if d != (0, 0)]
+        self.rev_index_map = list(range(self.num_neighbors))[::-1]
 
 
 class VonNeumannNeighborhood(OrthogonalNeighborhood):
@@ -185,3 +187,4 @@ class VonNeumannNeighborhood(OrthogonalNeighborhood):
             self._neighbor_deltas.append(delta)
             delta = tuple((-1 if i == j else 0 for j in range(num_dim)))
             self._neighbor_deltas.append(delta)
+            self.rev_index_map += [i * 2 + 1, i * 2]

@@ -224,7 +224,8 @@ class BSCA(type):
         cls.main.nbr_num = -1
         cls.main.var_name = "_cell"
         for i in range(num_neighbors):
-            cls.buffers[i].buf_num = i + 1
+            rev_i = cls.topology.neighborhood.rev_index_map[i]
+            cls.buffers[i].buf_num = rev_i + 1
             cls.buffers[i].nbr_num = -1
             cls.buffers[i].var_name = "_bcell%i" % i
             cls.neighbors[i].main.buf_num = 0
