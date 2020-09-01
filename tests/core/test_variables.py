@@ -90,7 +90,7 @@ unsigned char _bcell_state0;
 _bcell_state0 = intvar;
 unsigned char _bcell0;
 _bcell0 = ((unsigned char) _bcell_state0 & 1);
-fld[i + n * 1] = _bcell0;
+fld[i + n * 8] = _bcell0;
 """
         correct_absorb = """
 unsigned char _bcell_state0;

@@ -186,7 +186,7 @@ class TestCellularAutomaton(unittest.TestCase):
             model.step()
         cells = model.gpu.arrays.cells.get()[:model.cells_num]
         checksum = binascii.crc32(cells)
-        self.assertEqual(1117367015, checksum, "Wrong field checksum.")
+        self.assertEqual(1639048270, checksum, "Wrong field checksum.")
 
     def test_unset_viewport(self):
         """Test correct exception is raised when viewport is not set."""
