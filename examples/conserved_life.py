@@ -108,10 +108,10 @@ class ConservedLife(RegularCA):
             energy_passed += denergy
 
         # spread the energy in chosen direction
-        for i in range(len(self.buffers)):
+        for i, buf in enumerate(self.buffers):
             gate_fit = i == gate_final
-            self.buffers[i].energy = energy_passed * gate_fit
-            self.buffers[i].rule = self.main.rule * gate_fit
+            buf.energy = energy_passed * gate_fit
+            buf.rule = self.main.rule * gate_fit
 
         self.main.new_energy -= energy_passed
 

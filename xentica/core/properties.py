@@ -331,7 +331,7 @@ class ContainerProperty(Property):
 
     def calc_bit_width(self):
         """Calculate the bit width as a sum of inner properties' bit widths."""
-        return sum([p.bit_width for p in self._properties.values()])
+        return sum(p.bit_width for p in self._properties.values())
 
     @Property.buf_num.setter
     def buf_num(self, val):
@@ -599,7 +599,8 @@ class RandomProperty(Property):
         """Generate and return the next RNG value."""
         val_int = xmath.int(DeferredExpression(self.var_name))
         val = ((val_int * 58321 + 11113)) % 65535
-        self.__set__(self, val)
+        # hack to correctly declare a variable
+        self.__set__(self, val)  # pylint: disable=unnecessary-dunder-call
         container = inspect.currentframe().f_back.f_locals['obj']
         self.bsca.deferred_write(container)
 

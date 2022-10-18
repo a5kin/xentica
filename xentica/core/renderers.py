@@ -57,8 +57,7 @@ class Renderer(BscaDetectorMixin):
             ("int", "*img"),
         ]
 
-    @staticmethod
-    def get_args_vals(bsca):
+    def get_args_vals(self, bsca):
         """
         Get a list of kernel arguments' values.
 

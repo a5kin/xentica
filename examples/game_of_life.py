@@ -49,8 +49,8 @@ class GameOfLife(core.CellularAutomaton):
         Here, we just copy main state to surrounding buffers.
 
         """
-        for i in range(len(self.buffers)):
-            self.buffers[i].state = self.main.state
+        for buf in self.buffers:
+            buf.state = self.main.state
 
     def absorb(self):
         """
@@ -124,11 +124,11 @@ class GameOfLifeColor(GameOfLife):
 
     def emit(self):
         """Copy all properties to surrounding buffers."""
-        for i in range(len(self.buffers)):
-            self.buffers[i].state = self.main.state
-            self.buffers[i].red = self.main.red
-            self.buffers[i].green = self.main.green
-            self.buffers[i].blue = self.main.blue
+        for buf in self.buffers:
+            buf.state = self.main.state
+            buf.red = self.main.red
+            buf.green = self.main.green
+            buf.blue = self.main.blue
 
     def absorb(self):
         """

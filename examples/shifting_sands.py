@@ -25,11 +25,11 @@ class ShiftingSands(RegularCA):
     def emit(self):
         """Emit the whole value to a constant direction."""
         direction = 0
-        for i in range(len(self.buffers)):
+        for i, buf in enumerate(self.buffers):
             if i == direction:
-                self.buffers[i].state = self.main.state
+                buf.state = self.main.state
             else:
-                self.buffers[i].state = 0
+                buf.state = 0
 
     def absorb(self):
         """Absorb surrounding values by summing them."""

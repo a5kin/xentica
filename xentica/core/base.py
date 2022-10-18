@@ -93,7 +93,7 @@ import numpy as np
 
 from pycuda.autoinit import context
 from pycuda.compiler import SourceModule
-import pycuda.gpuarray as gpuarray
+from pycuda import gpuarray
 
 from xentica.bridge import MoireBridge
 from xentica.seeds.random import LocalRandom
@@ -127,11 +127,11 @@ class BSCA(type):
     )
 
     @classmethod
-    def __prepare__(mcs, _name, _bases):
+    def __prepare__(cls, _name, _bases):
         """Preserve the order of class variables."""
         return collections.OrderedDict()
 
-    def __new__(mcs, name, bases, attrs):
+    def __new__(cls, name, bases, attrs):
         """Build new :class:`CellularAutomaton` class."""
         # prepare class itself
         keys = []
@@ -139,17 +139,17 @@ class BSCA(type):
             if key not in ('__module__', '__qualname__'):
                 keys.append(key)
         attrs['__ordered__'] = keys
-        new_class = super().__new__(mcs, name, bases, attrs)
-        mcs._parents = [b for b in bases if isinstance(b, BSCA)]
-        if not mcs._parents:
+        new_class = super().__new__(cls, name, bases, attrs)
+        cls._parents = [b for b in bases if isinstance(b, BSCA)]
+        if not cls._parents:
             return new_class
 
-        mcs._prepare_topology(new_class, attrs)
+        cls._prepare_topology(new_class, attrs)
 
         new_class.main = None
         new_class.buffers = None
         new_class.neighbors = None
-        mcs._prepare_properties(new_class, bases, attrs)
+        cls._prepare_properties(new_class, bases, attrs)
 
         new_class.constants = {}
 
@@ -190,7 +190,7 @@ class BSCA(type):
         cls.main = ContainerProperty()
         cls.buffers = []
         cls.neighbors = []
-        cls.meta = type('MetaParams', (object,), dict())
+        cls.meta = type('MetaParams', (object,), {})
         num_neighbors = len(cls.topology.neighborhood)
         for i in range(num_neighbors):
             cls.buffers.append(ContainerProperty())

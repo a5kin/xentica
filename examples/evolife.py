@@ -53,9 +53,9 @@ class EvoLife(RegularCA):
 
     def emit(self):
         """Broadcast the state to all neighbors."""
-        for i in range(len(self.buffers)):
-            self.buffers[i].energy = self.main.energy
-            self.buffers[i].rule = self.main.rule
+        for buf in self.buffers:
+            buf.energy = self.main.energy
+            buf.rule = self.main.rule
 
     def absorb(self):
         """Apply EvoLife dynamics."""

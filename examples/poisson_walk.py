@@ -66,7 +66,7 @@ class PoissonWalk(core.CellularAutomaton):
         mutated += xmath.int(self.main.rng.uniform < 0.0001)
         denergy = denergy - 1 * (denergy > 0) * mutated
         energy_passed = core.IntegerVariable()
-        for i in range(len(self.buffers)):
+        for i, buf in enumerate(self.buffers):
             valency1 = self.neighbors[i].main.energy % 8
             valency2 = self.main.energy % 8
             gate_fit = (i == gate)
@@ -74,8 +74,8 @@ class PoissonWalk(core.CellularAutomaton):
             potent_transition = valency2 * (valency1 == 0)
             denergy_fin = full_transition + potent_transition
             energy_passed += denergy_fin * fired * gate_fit
-            self.buffers[i].energy = energy_passed * fired * gate_fit
-            self.buffers[i].gate = (self.main.gate + 7) * fired * gate_fit
+            buf.energy = energy_passed * fired * gate_fit
+            buf.gate = (self.main.gate + 7) * fired * gate_fit
 
         self.main.interval = (self.main.interval + 1) * (energy_passed == 0)
         self.main.energy -= energy_passed * (energy_passed > 0)

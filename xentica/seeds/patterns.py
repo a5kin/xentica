@@ -49,16 +49,16 @@ class ValDict(metaclass=ValDictMeta):
         >>> vd['d']
         3.3
 
-    :param d:
+    :param dct:
         Dictionary with mixed values. May contain descriptor classes.
     :param parent:
         A reference to the class holding the dictionary. Optional.
 
     """
 
-    def __init__(self, d, parent=None):
+    def __init__(self, dct, parent=None):
         """Initialize the class."""
-        self._d = d
+        self._d = dct
         self.parent = parent
         if parent is None:
             self.parent = self
@@ -203,8 +203,8 @@ class BigBang(RandomPattern):
         if self.pos is None:
             rnd_vec = [randint(0, bsca_size[i]) for i in dims]
             self.pos = np.asarray(rnd_vec)
-        for i in range(len(self.pos)):
-            coord, width, side = self.pos[i], self.size[i], bsca_size[i]
+        for i, coord in enumerate(self.pos):
+            width, side = self.size[i], bsca_size[i]
             if coord + width >= side:
                 self.pos[i] = side - width
             self.pos[i] = max(0, self.pos[i])
@@ -220,7 +220,8 @@ class BigBang(RandomPattern):
         indices = np.arange(0, bsca.cells_num)
         coords = bsca.index_to_coord(indices)
         area = None
-        for i in range(len(bsca.size)):
+        dims = range(len(bsca.size))
+        for i in dims:
             condition = (coords[i] >= self.pos[i])
             condition &= (coords[i] < self.pos[i] + self.size[i])
             if area is None:
