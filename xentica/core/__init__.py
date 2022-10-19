@@ -53,6 +53,7 @@ core features like new lattices, borders, etc.
 from xentica.core.base import CellularAutomaton
 from xentica.core.properties import (
     IntegerProperty,
+    FloatProperty,
     TotalisticRuleProperty,
     RandomProperty,
 )

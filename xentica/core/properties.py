@@ -320,8 +320,8 @@ class FloatProperty(Property):
 
     @cached_property
     def ctype(self):
-        """Get property's C type, currently always ``float32``."""
-        return "float32"
+        """Get property's C type, currently always ``float``."""
+        return "float"
 
     def unpack_cast(self, expr):
         """Cast integer bits representation to corresponding float."""
@@ -497,7 +497,8 @@ class ContainerProperty(Property):
         """Unpack inner properties values from the in-memory representation."""
         if self.unpacked:
             return
-        code = ""
+        tmp_var = f"tmp_{self.var_name}"
+        code = f"int {tmp_var};\n"
         shift = 0
         for prop in self._properties.values():
             prop.declare_once()
@@ -505,8 +506,8 @@ class ContainerProperty(Property):
             if shift > 0:
                 val += " >> %d" % shift
             mask = 2 ** prop.bit_width - 1
-            val = "({val}) & {mask}".format(val=val, mask=mask)
-            val = prop.unpack_cast(val)
+            code += f"{tmp_var} = ({val}) & {mask};\n"
+            val = prop.unpack_cast(tmp_var)
             code += "{var} = {val};\n".format(var=prop.var_name, val=val)
             shift += prop.bit_width
         self.bsca.append_code(code)
