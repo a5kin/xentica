@@ -11,3 +11,8 @@ class TestXmath(unittest.TestCase):
         """Test popc function."""
         expr = xmath.popc("x")
         self.assertEqual(expr, "(__popc(x))")
+
+    def test_exp(self):
+        """Test exp function."""
+        expr = xmath.exp("x")
+        self.assertEqual(expr, "(exp(x))")
