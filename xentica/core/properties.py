@@ -232,6 +232,28 @@ class Property(DeferredExpression, BscaDetectorMixin):
             offset = " + n * %d" % self._buf_num
         return "fld[i%s]" % offset
 
+    def unpack_cast(self, expr):
+        """
+        Fix given expression for safe use with unpacking.
+
+        :param expr: Any C expression.
+
+        :returns: Fixed, correctly casted expression.
+
+        """
+        return expr
+
+    def pack_cast(self, expr):
+        """
+        Fix given expression for safe use with packing.
+
+        :param expr: Any C expression.
+
+        :returns: Fixed, correctly casted expression.
+
+        """
+        return expr
+
     @property
     def declared(self):
         """Test if the state variable is declared."""
@@ -282,6 +304,32 @@ class IntegerProperty(Property):
     def calc_bit_width(self):
         """Calculate the bit width, based on ``max_val``."""
         return int(math.log2(self.max_val)) + 1
+
+
+class FloatProperty(Property):
+    """Floating point property."""
+
+    def __init__(self):
+        """Initialize class specific attributes."""
+        self._buf_num = 0
+        super().__init__()
+
+    def calc_bit_width(self):
+        """Calculate the bit width, currently always 32 bits."""
+        return 32
+
+    @cached_property
+    def ctype(self):
+        """Get property's C type, currently always ``float32``."""
+        return "float32"
+
+    def unpack_cast(self, expr):
+        """Cast integer bits representation to corresponding float."""
+        return f"(* reinterpret_cast<float*>(&({expr})))"
+
+    def pack_cast(self, expr):
+        """Cast float to integer bits representation."""
+        return f"(* reinterpret_cast<int*>(&({expr})))"
 
 
 class ContainerProperty(Property):
@@ -458,6 +506,7 @@ class ContainerProperty(Property):
                 val += " >> %d" % shift
             mask = 2 ** prop.bit_width - 1
             val = "({val}) & {mask}".format(val=val, mask=mask)
+            val = prop.unpack_cast(val)
             code += "{var} = {val};\n".format(var=prop.var_name, val=val)
             shift += prop.bit_width
         self.bsca.append_code(code)
@@ -478,7 +527,7 @@ class ContainerProperty(Property):
             mask = 2 ** prop.bit_width - 1
             val = "(({ctype}) {val} & {mask})".format(
                 ctype=self.ctype,
-                val=prop.var_name,
+                val=prop.pack_cast(prop.var_name),
                 mask=mask
             )
             if shift > 0:
