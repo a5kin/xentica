@@ -27,37 +27,47 @@ class GraviCowboys(RegularCA):
     gradient.
 
     """
-    energy = core.IntegerProperty(max_val=1)
+    energy = core.IntegerProperty(max_val=2 ** 12 - 1)
+    new_energy = core.IntegerProperty(max_val=2 ** 12 - 1)
     gravity = core.FloatProperty()
 
     def emit(self):
         """Emit the energy to field's gradient direction."""
-        direction = -1  # TODO: find greatest field value
+        self.main.new_energy = 1 * self.main.energy
+        max_gravity = core.FloatVariable()
+        max_gravity += xmath.min(*[nbr.main.gravity for nbr in self.neighbors])
+        energy_passed = core.IntegerVariable()
+        energy_passed *= 0
+        denergy = core.IntegerVariable()
         for i, buf in enumerate(self.buffers):
+            fit_dir = max_gravity == self.neighbors[i].main.gravity
+            has_energy = (self.main.energy - energy_passed) > 0
+            denergy *= 0
+            denergy += fit_dir * has_energy * 1
+            energy_passed += denergy
+            buf.energy = denergy
             buf.gravity = self.main.gravity + self.main.energy
-            if i == direction:
-                buf.energy = self.main.energy
-            else:
-                buf.energy = 0
+        # energy_passed = 0
+        self.main.new_energy -= energy_passed
 
     def absorb(self):
         """Absorb incoming masses and spread gravity."""
+        energy_passed = core.IntegerVariable()
+        for i in range(len(self.buffers)):
+            energy_passed += self.neighbors[i].buffer.energy
+        self.main.energy = self.main.new_energy + energy_passed
+
         new_gravity = core.FloatVariable()
         for i in range(len(self.buffers)):
             new_gravity += self.neighbors[i].buffer.gravity
-        self.main.gravity = new_gravity / (len(self.buffers) * 1)
-        new_energy = core.IntegerVariable()
-        # for i in range(len(self.buffers)):
-        #     new_energy += self.neighbors[i].buffer.energy
-        new_energy += 0 + self.main.energy
-        self.main.energy = new_energy
+        self.main.gravity = new_gravity / (len(self.buffers) * 1.001)
 
     @color_effects.MovingAverage
     def color(self):
         """Render mass as yellow, gravity as blue."""
         red = self.main.energy * 255
-        green = xmath.int(self.main.gravity * 255)
-        blue = xmath.int(self.main.gravity * 255)
+        green = xmath.int(self.main.gravity * 108)
+        blue = xmath.int(self.main.gravity * 108)
         return (red, green, blue)
 
 
@@ -67,9 +77,25 @@ class GraviCowboysExperiment(RegularExperiment):
     word = "LET IT GROOVE"
     seed = seeds.patterns.BigBang(
         pos=(320, 180),
-        size=(100, 100),
+        size=(10, 10),
         vals={
-            "energy": seeds.random.RandInt(0, 1),
+            "energy": seeds.random.RandInt(0, 1) * 1,
+            "gravity": 0,
+        }
+    )
+    seed += seeds.patterns.BigBang(
+        pos=(20, 80),
+        size=(10, 10),
+        vals={
+            "energy": seeds.random.RandInt(0, 1) * 1,
+            "gravity": 0,
+        }
+    )
+    seed += seeds.patterns.BigBang(
+        pos=(400, 80),
+        size=(10, 10),
+        vals={
+            "energy": seeds.random.RandInt(0, 1) * 1,
             "gravity": 0,
         }
     )
