@@ -30,6 +30,8 @@ classes of the framework.
 - **Properties**
    - ``core.IntegerProperty`` →
      :class:`xentica.core.properties.IntegerProperty`
+   - ``core.FloatProperty`` →
+     :class:`xentica.core.properties.FloatProperty`
    - ``core.TotalisticRuleProperty`` →
      :class:`xentica.core.properties.TotalisticRuleProperty`
    - ``core.RandomProperty`` →
@@ -77,6 +79,7 @@ from xentica.core.experiment import Experiment
 __all__ = [
     'CellularAutomaton',
     'IntegerProperty',
+    'FloatProperty',
     'TotalisticRuleProperty',
     'RandomProperty',
     'Parameter',
