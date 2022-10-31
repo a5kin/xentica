@@ -8,6 +8,7 @@ from xentica.core.properties import (
 )
 from xentica.core.exceptions import XenticaException
 from examples.game_of_life import GameOfLife, GOLExperiment
+from examples.gravicowboys import GraviCowboys, GraviCowboysExperiment
 from examples.noisetv import NoiseTV, NoiseTVExperiment
 
 
@@ -92,3 +93,12 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(str(model.main.rule.is_born(8)), correct_exp)
         correct_exp = "((_cell_rule >> 12) & 1)"
         self.assertEqual(str(model.main.rule.next_val(1, 3)), correct_exp)
+
+    def test_float(self):
+        """Test ``FloatProperty`` behavior."""
+        model = GraviCowboys(GraviCowboysExperiment)
+        for _ in range(100):
+            model.step()
+        cells = model.gpu.arrays.cells.get()[:model.cells_num]
+        checksum = binascii.crc32(cells)
+        self.assertEqual(1068195512, checksum, "Wrong field checksum.")
