@@ -83,7 +83,9 @@ class TestVariable(unittest.TestCase):
         model = InvertCA(InvertExperiment)
         correct_emit = """
 unsigned char _cell_state;
-_cell_state = (_cell) & 1;
+int tmp__cell;
+tmp__cell = (_cell) & 1;
+_cell_state = tmp__cell;
 unsigned int intvar = 0;
 intvar = _cell_state;
 unsigned char _bcell_state0;
@@ -94,7 +96,9 @@ fld[i + n * 8] = _bcell0;
 """
         correct_absorb = """
 unsigned char _bcell_state0;
-_bcell_state0 = (_bcell0) & 1;
+int tmp__bcell0;
+tmp__bcell0 = (_bcell0) & 1;
+_bcell_state0 = tmp__bcell0;
 unsigned int intvar = 0;
 intvar = _bcell_state0;
 unsigned char _cell_state;
